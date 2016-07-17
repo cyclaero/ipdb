@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# FreeBSD rc-script for auto-starting/stopping the geod daemon
+#
+# Created by Dr. Rolf Jansen on 2016-07-15.
+# Copyright (c) 2016 projectstore.net. All rights reserved.
+#
+# PROVIDE: geod
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf to enable the geod daemon:
+#    geod_enable="YES"
+#
+# Don't forget to specify the country codes that are allowed '-a ...' XOR denied '-d ...'
+#    geod_flags="-a DE:BR:US"
+#
+# If the consolidated IPv4 ranges are not in /usr/local/etc/ipdb/IPRanges/ipcc.bst
+# then specify the that file by the '-r bstfile' option in geod_flags
+#
+# Don't use spaces in the following path argumment:
+#    geod_pidfile="/var/run/geod.pid"
+
+. /etc/rc.subr
+
+name=geod
+rcvar=geod_enable
+
+load_rc_config $name
+
+: ${geod_enable:="NO"}
+: ${geod_pidfile:="/var/run/geod.pid"}
+
+pidfile="${geod_pidfile}"
+if [ "$pidfile" != "/var/run/geod.pid" ]; then
+   geod_flags="${geod_flags} -p $pidfile"
+fi
+
+command="/usr/local/bin/geod"
+command_args=""
+
+run_rc_command "$1"
