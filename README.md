@@ -1,6 +1,6 @@
-    IPv4 Geo-Location database tools and ipfw divert filter daemon for FreeBSD
+**IPv4 Geo-Location database tools and ipfw divert filter daemon for FreeBSD**
 
-    This project provide all the tools for IPv4-Geo-Blocking at the firewall level with ipfw on FreeBSD.
+    This project provides all the tools for IPv4-Geo-Blocking at the firewall level with ipfw on FreeBSD.
 
     Quick Start
 
