@@ -12,7 +12,7 @@
        $ make
 
 
-    3. as user root, install the tools and the ipfw divert filter daemon
+    3. as user root, install the tools and the ipfw divert filter daemon:
        $ sudo make install clean
 
     or # make install clean
