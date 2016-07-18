@@ -17,7 +17,7 @@
 
     or # make install clean
 
-       the following tools and files will be created and installed into /usr/local/bin or /usr/local/etc/rc.d
+       the following tools and files will be created and/or installed into /usr/local/bin or /usr/local/etc/rc.d
        - ipdb-update.sh    # a shell script file for updateing the geoip database by
                            # downloading the latest delegation statistics files of the 5 RIR's.
       
