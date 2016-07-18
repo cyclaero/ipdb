@@ -2,20 +2,17 @@
 
     This project provides all the tools for IPv4-Geo-Blocking at the firewall level with ipfw on FreeBSD.
 
-    Quick Start
+    Quick start
 
-    1. Download the ipdb project directory from GitHub.
-
-
-    2. cd into the directory
+    1. Download the ipdb project directory from GitHub, and cd into the directory
        $ cd ~/install/ipdb
 
 
-    3. run make
+    2. run make
        $ make
 
 
-    4. as user root, install the tools and the ipfw divert filter daemon
+    3. as user root, install the tools and the ipfw divert filter daemon
        $ sudo make install clean
 
     or # make install clean
@@ -35,7 +32,7 @@
        - geod.rc           # the rc script of geod, will be copied to /usr/local/etc/rc.d/geod
 
 
-    5. First download the delegation statistic files of the 5 Regional Internet Registries (RIR's), i.e.:
+    4. First download the delegation statistic files of the 5 Regional Internet Registries (RIR's), i.e.:
        AFRINIC, APNIC, ARIN, LACNIC, RIPENCC. In theory all the RIR's should mirror the files of each other,
        in practice only the mirrors of the Asia Pacific, the Latin America and the European RIR's are useful.
        
@@ -53,9 +50,11 @@
       /usr/local/etc/ipdb/IPRanges/. Said directory will becreated if it does not exit. If the
       downloads went smooth, the script will start the ipdb tool in order to generate right in 
       the same go the binary file with the consolidated IPv4 ranges.
+      
+      Later, you may want to put above command into a weekly cron job.
 
 
-    6. Check whether the database is ready by looking up some IPv4 addresses using the geoip tool.
+    5. Check whether the database is ready by looking up some IPv4 addresses using the geoip tool.
 
        $ geoip 62.175.157.33
        62.175.157.33 in 62.174.0.0-62.175.255.255 in ES
@@ -70,22 +69,22 @@
        192.168.1.1 not found
        
 
-    7. If not already done activate ipfw
+    6. If not already done, activate ipfw.
 
 
-    8. In addtion to the ipfw modules, the ipdivert kernel module needs to be loaded
+    7. In addtion to the ipfw modules, the ipdivert kernel module needs to be loaded.
        WARNING: Do this only after ipfw is setup and running, otherwise it may happen
-                that you inadvertently lock out yourself by the following.
+                that you inadvertently lock out yourself by the following commands.
 
        # echo 'ipdivert_load="YES"' >> /boot/loader.conf
        # kldload ipdivert.ko
 
 
-    9. Add the lines for starting the geo-blocking ipfw divert filter daemon to /etc/rc.conf
+    8. Add the lines for starting the geo-blocking ipfw divert filter daemon to /etc/rc.conf
 
        # echo 'geod_load="YES"'
        
-       Configuration examples (use either the -a or the -d flag into one _flags line in /etc/rc.conf):
+       Configuration examples (use either the -a or the -d flag into one geod_flags line in /etc/rc.conf):
        
        - Allow all diverted packets from Germany, Brazil and the US, and deny everything else:
        # echo 'geod_flags="-a DE:BR:US"'
@@ -95,10 +94,11 @@
        
        - You may add any number of capital letter ISO country codes separated by colons.
 
-      # service geod start
+       Start geod:
+       # service geod start
 
 
-    10. Add the geod divert rule to your ipfw rule set:
+    9. Add the geod divert rule to your ipfw rule set:
 
     Examples:
 
