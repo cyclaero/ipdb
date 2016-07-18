@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Shell Script for updateing the geoip database by downloading
+# Shell Script for updating the geoip database by downloading
 # the latest delegation statistics files of the 5 RIR's.
 #
 # Created by Dr. Rolf Jansen on 2016-07-15.
