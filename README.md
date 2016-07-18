@@ -4,7 +4,7 @@
 
     Quick Start
 
-    1. Download and the ipdb project directory from GitHub.
+    1. Download the ipdb project directory from GitHub.
 
 
     2. cd into the directory
