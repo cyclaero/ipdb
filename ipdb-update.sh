@@ -62,7 +62,7 @@ rm -f "$IPRanges/afrinic.md5"
 /usr/bin/fetch -o "$IPRanges/afrinic.md5" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest.md5" && \
 /usr/bin/fetch -o "$IPRanges/afrinic.dat" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest"
 if [ -f "$IPRanges/afrinic.md5" ] && [ -f "$IPRanges/afrinic.dat" ]; then
-   stored_md5=`/usr/bin/cut -w -f4 "$IPRanges/afrinic.md5"`
+   stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/afrinic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/afrinic.dat"`
    if [ "$stored_md5" != "$actual_md5" ]; then
       exit 1
@@ -76,7 +76,7 @@ rm -f "$IPRanges/apnic.md5"
 /usr/bin/fetch -o "$IPRanges/apnic.md5" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest.md5" && \
 /usr/bin/fetch -o "$IPRanges/apnic.dat" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest"
 if [ -f "$IPRanges/apnic.md5" ] && [ -f "$IPRanges/apnic.dat" ]; then
-   stored_md5=`/usr/bin/cut -w -f4 "$IPRanges/apnic.md5"`
+   stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/apnic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/apnic.dat"`
    if [ "$stored_md5" != "$actual_md5" ]; then
       exit 1
@@ -90,7 +90,7 @@ rm -f "$IPRanges/arin.md5"
 /usr/bin/fetch -o "$IPRanges/arin.md5" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest.md5" && \
 /usr/bin/fetch -o "$IPRanges/arin.dat" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest"
 if [ -f "$IPRanges/arin.md5" ] && [ -f "$IPRanges/arin.dat" ]; then
-   stored_md5=`/usr/bin/cut -w -f1 "$IPRanges/arin.md5"`
+   stored_md5=`/usr/bin/cut -d " " -f1 "$IPRanges/arin.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/arin.dat"`
    if [ "$stored_md5" != "$actual_md5" ]; then
       exit 1
@@ -104,7 +104,7 @@ rm -f "$IPRanges/lacnic.md5"
 /usr/bin/fetch -o "$IPRanges/lacnic.md5" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest.md5" && \
 /usr/bin/fetch -o "$IPRanges/lacnic.dat" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest"
 if [ -f "$IPRanges/lacnic.md5" ] && [ -f "$IPRanges/lacnic.dat" ]; then
-   stored_md5=`/usr/bin/cut -w -f4 "$IPRanges/lacnic.md5"`
+   stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/lacnic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/lacnic.dat"`
    if [ "$stored_md5" != "$actual_md5" ]; then
       exit 1
@@ -118,7 +118,7 @@ rm -f "$IPRanges/ripencc.md5"
 /usr/bin/fetch -o "$IPRanges/ripencc.md5" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest.md5" && \
 /usr/bin/fetch -o "$IPRanges/ripencc.dat" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest"
 if [ -f "$IPRanges/ripencc.md5" ] && [ -f "$IPRanges/ripencc.dat" ]; then
-   stored_md5=`/usr/bin/cut -w -f4 "$IPRanges/ripencc.md5"`
+   stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/ripencc.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/ripencc.dat"`
    if [ "$stored_md5" != "$actual_md5" ]; then
       exit 1
