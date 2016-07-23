@@ -51,7 +51,10 @@
       downloads went smooth, the script will start the ipdb tool in order to generate right in 
       the same go the binary file with the consolidated IPv4 ranges.
       
-      Later, you may want to put above command into a weekly cron job.
+      Later, you may want to put above command into a weekly cron job, for example:
+      
+      # weekly update of the IPv4 geo-location database
+      5    3    *    *    7    root    /usr/local/bin/ipdb-update.sh ftp.apnic.net > /dev/null 2>&1 && /usr/sbin/service geod restart > /dev/null
 
 
     5. Check whether the database is ready by looking up some IPv4 addresses using the geoip tool.
@@ -67,7 +70,7 @@
        
        $ geoip 192.168.1.1
        192.168.1.1 not found
-       
+
 
     6. If not already done, activate ipfw.
 
