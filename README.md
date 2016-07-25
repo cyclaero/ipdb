@@ -73,6 +73,7 @@
 
 
     6. If not already done, activate ipfw.
+       # kldload ipfw && ipfw add 65534 allow ip from any to any
 
 
     7. In addtion to the ipfw modules, the ipdivert kernel module needs to be loaded.
@@ -80,14 +81,14 @@
                 that you inadvertently lock out yourself by the following commands.
 
        # echo 'ipdivert_load="YES"' >> /boot/loader.conf
-       # kldload ipdivert.ko
+       # kldload ipdivert
 
 
     8. Add the lines for starting the geo-blocking ipfw divert filter daemon to /etc/rc.conf
 
        # echo 'geod_load="YES"'
        
-       Configuration examples (use either the -a or the -d flag into one geod_flags line in /etc/rc.conf):
+       Configuration examples (use either the -a or the -d flag in one geod_flags line in /etc/rc.conf):
        
        - Allow all diverted packets from Germany, Brazil and the US, and deny everything else:
        # echo 'geod_flags="-a DE:BR:US"'
