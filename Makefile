@@ -42,6 +42,7 @@ REVNUM != cut -d= -f2 svnrev.xcconfig
 
 CC        = clang
 CFLAGS    = $(CDEFS) -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -mssse3 -Wno-parentheses -Wno-empty-body
+LDFLAGS   = -lm
 
 HEADER    = store.h
 SOURCES   = store.c ipdb.c geoip.c geod.c
