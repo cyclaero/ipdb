@@ -43,6 +43,7 @@ REVNUM != cut -d= -f2 svnrev.xcconfig
 CC        = clang
 CFLAGS    = $(CDEFS) -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -mssse3 -Wno-parentheses -Wno-empty-body
 LDFLAGS   = -lm
+PREFIX   ?= /usr/local
 
 HEADER    = store.h
 SOURCES   = store.c ipdb.c geoip.c geod.c
@@ -71,9 +72,8 @@ clean:
 update: clean all
 
 install: ipdb geoip geod
-	strip -x -o /usr/local/bin/ipdb ipdb
-	strip -x -o /usr/local/bin/geoip geoip
-	strip -x -o /usr/local/bin/geod geod
-	cp geod.rc /usr/local/etc/rc.d/geod
-	chmod 555 /usr/local/etc/rc.d/geod
-	cp ipdb-update.sh /usr/local/bin/ipdb-update.sh
+	install -m 555 -s ipdb ${PREFIX}/bin/ipdb
+	install -m 555 -s geoip ${PREFIX}/bin/geoip
+	install -m 555 -s geod ${PREFIX}/bin/geod
+	install -m 555 geod.rc ${PREFIX}/etc/rc.d/geod
+	install -m 555 ipdb-update.sh ${PREFIX}/bin/ipdb-update.sh
