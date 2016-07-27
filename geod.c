@@ -54,9 +54,9 @@ void usage(const char *executable)
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
    printf("%s v1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n", r);
-   printf("usage: [-a AA:BB|..] [-d DD:EE|..] [-r bstfile] [-p pidfile] [-f] [-n] [-h]\n");
+   printf("Usage:  %s [-a AA:BB:..] [-d DD:EE:..] [-r bstfile] [-p pidfile] [-f] [-n] [-h]\n", r);
    printf(" -a AA:BB:.. allow IPv4 source addresses from the listed countries,\n");
-   printf("             i.e, 2 letter capital country codes separated colons.\n");
+   printf("             i.e, 2 letter capital country codes, separated by colon.\n");
    printf(" -d DD:EE:.. deny IPv4 source addresses from the listed countries.\n");
    printf("             NOTE: the -a and the -d option are mutually exclusive.\n");
    printf(" -r bstfile  the path to the binary file with the consolidated IP ranges that has been.\n");
