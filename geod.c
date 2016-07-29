@@ -33,7 +33,6 @@
 #include <signal.h>
 #include <string.h>
 #include <syslog.h>
-#include <tmmintrin.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -187,20 +186,20 @@ void daemonize(DaemonKind kind)
 }
 
 
-bool allowMatch = true;
+bool  allowMatch = true;
 
-CCNode *CCStore = NULL;
-IPNode *IPStore = NULL;
+CCNode **CCTable = NULL;
+IPNode  *IPStore = NULL;
 
-void releaseTrees(void)
+void releaseStores(void)
 {
    releaseIPTree(IPStore);
-   releaseCCTree(CCStore);
+   releaseCCTable(CCTable);
 }
 
 int main(int argc, char *argv[])
 {
-   int   ch;
+   int   ch, rc     = 0;
    char *cmd        = argv[0];
    char *allowList  = NULL,
         *denyList   = NULL,
@@ -244,30 +243,42 @@ int main(int argc, char *argv[])
             dKind = launchdDaemon;
             break;
 
-         case 'h':
-         default:
          arg_err:
+            printf("Incorrect argument:\n -%c %s, ...\n\n", ch, optarg);
+         default:
+            rc = 1;
+         case 'h':
             usage(cmd);
-            exit(0);
-            break;
+            return rc;
       }
    }
 
    argc -= optind;
    argv += optind;
 
+   if (argc != 0)
+   {
+      printf("Wrong number of arguments:\n %s, ...\n\n", argv[0]);
+      usage(cmd);
+      return 1;
+   }
+
    daemonize(dKind);
 
    char *cc = (allowList) ?: denyList;
    if (cc)
+   {
+      CCTable = createCCTable();
+
       while (*cc)
       {
          int tl = taglen(cc);
          if (cc[tl] == ':')
             cc[tl++] = '\0';
-         addCCNode(*(uint16_t *)uppercase(cc, 2), &CCStore);
+         storeCC(CCTable, *(uint16_t *)uppercase(cc, 2));
          cc += tl;
       }
+   }
 
    struct stat st;
    FILE *in;
@@ -278,7 +289,7 @@ int main(int argc, char *argv[])
          IPStore = sortedIPSetsToTree(sortedIPSets, 0, (int)(st.st_size/sizeof(uint32_t))/3 - 1);
       deallocate(VPR(sortedIPSets), false);
       fclose(in);
-      atexit(releaseTrees);
+      atexit(releaseStores);
 
       int divertSock;
 
@@ -297,14 +308,15 @@ int main(int argc, char *argv[])
          exit(EXIT_FAILURE);
       }
 
+      uint8_t buffer[IP_MAXPACKET];
+      struct ip *ip = (struct ip*)buffer;
+      struct sockaddr_in addr;
+      socklen_t addrlen = sizeof(addr);
+      ssize_t recvlen, sendlen;
+      IPNode *node;
+
       for (;;)
       {
-         uint8_t buffer[IP_MAXPACKET];
-         struct ip *ip = (struct ip*)buffer;
-         struct sockaddr_in addr;
-         socklen_t addrlen = sizeof(addr);
-         ssize_t recvlen, sendlen;
-
          if ((recvlen = recvfrom(divertSock, buffer, IP_MAXPACKET, 0, (struct sockaddr *)&addr, &addrlen)) < 0)
          {
             syslog(LOG_ERR, "Error receiving raw data from the divert socket: %d", errno);
@@ -312,11 +324,10 @@ int main(int argc, char *argv[])
          }
 
          // don't filter if no CC list was given or if the source IP cannot be found in the ranges database
-         IPNode *node;
-         if (CCStore && (node = findIPNode(htonl(ip->ip_src.s_addr), IPStore)))
+         if (CCTable && (node = findIPNode(htonl(ip->ip_src.s_addr), IPStore)))
          {
-            bool doesMatch = findCCNode(node->cc, CCStore) != NULL;
-            if (!doesMatch && allowMatch || doesMatch && !allowMatch)
+            bool doesMatch = findCC(CCTable, node->cc) != NULL;
+            if (allowMatch && !doesMatch || !allowMatch && doesMatch)
                continue;
          }
 

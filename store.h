@@ -26,7 +26,30 @@
 
 #define noerr 0
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+
+   #define b32_0 0
+   #define b32_1 1
+   #define b32_2 2
+   #define b32_3 3
+
+   #define b64_0 0
+
+#else
+
+   #define b32_0 3
+   #define b32_1 2
+   #define b32_2 1
+   #define b32_3 0
+
+   #define b64_0 7
+
+#endif
+
+
 #if defined(__x86_64__)
+
+   #include <tmmintrin.h>
 
    static const __m128i nul16 = {0x0000000000000000ULL, 0x0000000000000000ULL};  // 16 bytes with nul
    static const __m128i lfd16 = {0x0A0A0A0A0A0A0A0AULL, 0x0A0A0A0A0A0A0A0AULL};  // 16 bytes with line feed
@@ -132,6 +155,59 @@
             return len + __builtin_ctz(bmask);
    }
 
+
+   // String copying from src to dst.
+   // m: Max. capacity of dst, including the final nul.
+   //    A value of 0 would indicate that the capacity of dst matches the size of src (including nul)
+   // l: On entry, src length or 0, on exit, the length of src, maybe NULL
+   // Returns the length of the resulting string in dst.
+   static inline int strmlcpy(char *dst, const char *src, int m, int *l)
+   {
+      int k, n;
+
+      if (l)
+      {
+         if (!*l)
+            *l = strvlen(src);
+         k = *l;
+      }
+      else
+         k = strvlen(src);
+
+      if (!m)
+         n = k;
+      else
+         n = (k < m) ? k : m-1;
+
+      switch (n)
+      {
+         default:
+            if ((intptr_t)dst&0xF || (intptr_t)src&0xF)
+               for (k = 0; k  < n>>4<<1; k += 2)
+                  ((uint64_t *)dst)[k] = ((uint64_t *)src)[k], ((uint64_t *)dst)[k+1] = ((uint64_t *)src)[k+1];
+            else
+               for (k = 0; k  < n>>4; k++)
+                  _mm_store_si128(&((__m128i *)dst)[k], _mm_load_si128(&((__m128i *)src)[k]));
+         case 8 ... 15:
+            if ((k = n>>4<<1) < n>>3)
+               ((uint64_t *)dst)[k] = ((uint64_t *)src)[k];
+         case 4 ... 7:
+            if ((k = n>>3<<1) < n>>2)
+               ((uint32_t *)dst)[k] = ((uint32_t *)src)[k];
+         case 2 ... 3:
+            if ((k = n>>2<<1) < n>>1)
+               ((uint16_t *)dst)[k] = ((uint16_t *)src)[k];
+         case 1:
+            if ((k = n>>1<<1) < n)
+               dst[k] = src[k];
+         case 0:
+            ;
+      }
+
+      dst[n] = '\0';
+      return n;
+   }
+
 #else
 
    #define strvlen(s) strlen(s)
@@ -191,59 +267,36 @@
       return l;
    }
 
+
+   // String copying from src to dst.
+   // m: Max. capacity of dst, including the final nul.
+   //    A value of 0 would indicate that the capacity of dst matches the size of src (including nul)
+   // l: On entry, src length or 0, on exit, the length of src, maybe NULL
+   // Returns the length of the resulting string in dst.
+   static inline int strmlcpy(char *dst, const char *src, int m, int *l)
+   {
+      int k, n;
+
+      if (l)
+      {
+         if (!*l)
+            *l = (int)strvlen(src);
+         k = *l;
+      }
+      else
+         k = (int)strvlen(src);
+
+      if (!m)
+         n = k;
+      else
+         n = (k < m) ? k : m-1;
+
+      strlcpy(dst, src, m);
+      return n;
+   }
+
 #endif
 
-// String copying from src to dst.
-// m: Max. capacity of dst, including the final nul.
-//    A value of 0 would indicate that the capacity of dst matches the size of src (including nul)
-// l: On entry, src length or 0, on exit, the length of src, maybe NULL
-// Returns the length of the resulting string in dst.
-static inline int strmlcpy(char *dst, const char *src, int m, int *l)
-{
-   int k, n;
-
-   if (l)
-   {
-      if (!*l)
-         *l = strvlen(src);
-      k = *l;
-   }
-   else
-      k = strvlen(src);
-
-   if (!m)
-      n = k;
-   else
-      n = (k < m) ? k : m-1;
-
-   switch (n)
-   {
-      default:
-         if ((intptr_t)dst&0xF || (intptr_t)src&0xF)
-            for (k = 0; k  < n>>4<<1; k += 2)
-               ((uint64_t *)dst)[k] = ((uint64_t *)src)[k], ((uint64_t *)dst)[k+1] = ((uint64_t *)src)[k+1];
-         else
-            for (k = 0; k  < n>>4; k++)
-               _mm_store_si128(&((__m128i *)dst)[k], _mm_load_si128(&((__m128i *)src)[k]));
-      case 8 ... 15:
-         if ((k = n>>4<<1) < n>>3)
-            ((uint64_t *)dst)[k] = ((uint64_t *)src)[k];
-      case 4 ... 7:
-         if ((k = n>>3<<1) < n>>2)
-            ((uint32_t *)dst)[k] = ((uint32_t *)src)[k];
-      case 2 ... 3:
-         if ((k = n>>2<<1) < n>>1)
-            ((uint16_t *)dst)[k] = ((uint16_t *)src)[k];
-      case 1:
-         if ((k = n>>1<<1) < n)
-            dst[k] = src[k];
-      case 0:
-         ;
-   }
-
-   dst[n] = '\0';
-   return n;
-}
 
 static inline char *skip(char *s)
 {
@@ -403,6 +456,7 @@ IPNode  *findNetNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode  *node);
 int        addIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node);
 void    importIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node);
 int     removeIPNode(uint32_t ip, IPNode **node);
+
 void serializeIPTree(FILE *out, IPNode *node);
 void   releaseIPTree(IPNode *node);
 int treeHeight(IPNode *node);
@@ -422,4 +476,14 @@ typedef struct CCNode
 
 CCNode *findCCNode(uint32_t cc, CCNode  *node);
 int      addCCNode(uint32_t cc, CCNode **node);
+int   removeCCNode(uint32_t cc, CCNode **node);
 void releaseCCTree(CCNode *node);
+
+#pragma mark ••• Pseudo Hash Table of Country Codes •••
+
+CCNode **createCCTable(void);
+void    releaseCCTable(CCNode *table[]);
+
+CCNode *findCC(CCNode *table[], uint32_t cc);
+void   storeCC(CCNode *table[], uint32_t cc);
+void  removeCC(CCNode *table[], uint32_t cc);

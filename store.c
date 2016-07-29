@@ -239,14 +239,14 @@ static int balanceIPNode(IPNode **node)
 }
 
 
-static int pickPrevNode(IPNode **node, IPNode **exch)
-{                                       // *exch on entry = parent node
-   IPNode *o = *node;                     // *exch on exit  = picked previous value node
+static int pickPrevIPNode(IPNode **node, IPNode **exch)
+{                                             // *exch on entry = parent node
+   IPNode *o = *node;                         // *exch on exit  = picked previous value node
 
    if (o->R)
    {
       *exch = o;
-      int change = -pickPrevNode(&o->R, exch);
+      int change = -pickPrevIPNode(&o->R, exch);
       if (change)
          if (abs(o->B += change) > 1)
             return balanceIPNode(node);
@@ -274,14 +274,14 @@ static int pickPrevNode(IPNode **node, IPNode **exch)
 }
 
 
-static int pickNextNode(IPNode **node, IPNode **exch)
-{                                       // *exch on entry = parent node
-   IPNode *o = *node;                     // *exch on exit  = picked next value node
+static int pickNextIPNode(IPNode **node, IPNode **exch)
+{                                             // *exch on entry = parent node
+   IPNode *o = *node;                         // *exch on exit  = picked next value node
 
    if (o->L)
    {
       *exch = o;
-      int change = +pickNextNode(&o->L, exch);
+      int change = +pickNextIPNode(&o->L, exch);
       if (change)
          if (abs(o->B += change) > 1)
             return balanceIPNode(node);
@@ -454,7 +454,7 @@ int removeIPNode(uint32_t ip, IPNode **node)
                }
                else
                {
-                  change = +pickPrevNode(&p, &o);
+                  change = +pickPrevIPNode(&p, &o);
                   o->L   =  p;
                   o->R   =  q;
                }
@@ -470,7 +470,7 @@ int removeIPNode(uint32_t ip, IPNode **node)
                }
                else
                {
-                  change = -pickNextNode(&q, &o);
+                  change = -pickNextIPNode(&q, &o);
                   o->L   =  p;
                   o->R   =  q;
                }
@@ -652,6 +652,76 @@ static int balanceCCNode(CCNode **node)
 }
 
 
+static int pickPrevCCNode(CCNode **node, CCNode **exch)
+{                                             // *exch on entry = parent node
+   CCNode *o = *node;                         // *exch on exit  = picked previous value node
+
+   if (o->R)
+   {
+      *exch = o;
+      int change = -pickPrevCCNode(&o->R, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceCCNode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->L)
+   {
+      CCNode *p = o->L;
+      o->L = NULL;
+      (*exch)->R = p;
+      *exch = o;
+      return p->B == 0;
+   }
+
+   else
+   {
+      (*exch)->R = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
+static int pickNextCCNode(CCNode **node, CCNode **exch)
+{                                             // *exch on entry = parent node
+   CCNode *o = *node;                         // *exch on exit  = picked next value node
+
+   if (o->L)
+   {
+      *exch = o;
+      int change = +pickNextCCNode(&o->L, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceCCNode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->R)
+   {
+      CCNode *q = o->R;
+      o->R = NULL;
+      (*exch)->L = q;
+      *exch = o;
+      return q->B == 0;
+   }
+
+   else
+   {
+      (*exch)->L = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
 CCNode *findCCNode(uint32_t cc, CCNode *node)
 {
    if (node)
@@ -710,6 +780,87 @@ int addCCNode(uint32_t cc, CCNode **node)
 }
 
 
+int removeCCNode(uint32_t cc, CCNode **node)
+{
+   CCNode *o = *node;
+
+   if (o != NULL)
+   {
+      int change;
+
+      if (cc < o->cc)
+         change = +removeCCNode(cc, &o->L);
+
+      else if (cc > o->cc)
+         change = -removeCCNode(cc, &o->R);
+
+      else // (cc == o->cc)
+      {
+         int     b = o->B;
+         CCNode *p = o->L;
+         CCNode *q = o->R;
+
+         if (!p || !q)
+         {
+            deallocate(VPR(*node), false);
+            *node = (p > q) ? p : q;
+            return 1;                     // remove the weight of 1 leaf from the balance
+         }
+
+         else
+         {
+            if (b == -1)
+            {
+               if (!p->R)
+               {
+                  change = +1;
+                  o      =  p;
+                  o->R   =  q;
+               }
+               else
+               {
+                  change = +pickPrevCCNode(&p, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            else
+            {
+               if (!q->L)
+               {
+                  change = -1;
+                  o      =  q;
+                  o->L   =  p;
+               }
+               else
+               {
+                  change = -pickNextCCNode(&q, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            o->B = b;
+            deallocate(VPR(*node), false);
+            *node = o;
+         }
+      }
+
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceCCNode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else // (o == NULL)
+      return 0;                           // not found -> recursively do nothing
+}
+
+
 void releaseCCTree(CCNode *node)
 {
    if (node)
@@ -722,4 +873,62 @@ void releaseCCTree(CCNode *node)
 
       deallocate(VPR(node), false);
    }
+}
+
+
+#pragma mark ••• Pseudo Hash Table of Country Codes •••
+
+#define ccTableSize 4096
+#define cc0Offset     16
+#define cc1Offset    -64
+
+typedef union
+{
+   uint8_t  byte[2];
+   uint16_t code;
+} CCDesc;
+
+static inline uint32_t cci(uint32_t cc)
+{
+   CCDesc ccd = {.code = (uint16_t)cc};
+   return ((uint32_t)(ccd.byte[b32_0] + cc0Offset)*(uint32_t)(ccd.byte[b32_1] + cc1Offset)) % ccTableSize;
+}
+
+// Table creation and release
+CCNode **createCCTable(void)
+{
+   return allocate(ccTableSize*sizeof(CCNode *), true);
+}
+
+void releaseCCTable(CCNode *table[])
+{
+   if (table)
+   {
+      for (uint32_t i = 0; i < ccTableSize; i++)
+         releaseCCTree(table[i]);
+      deallocate(VPR(table), false);
+   }
+}
+
+
+// finding/storing/removing country codes
+CCNode *findCC(CCNode *table[], uint32_t cc)
+{
+   return findCCNode(cc, table[cci(cc)]);
+}
+
+void storeCC(CCNode *table[], uint32_t cc)
+{
+   addCCNode(cc, &table[cci(cc)]);
+}
+
+void removeCC(CCNode *table[], uint32_t cc)
+{
+   CCNode *node;
+   uint32_t idx = cci(cc);
+   if (node = table[idx])
+      if (!node->L && !node->R)
+         deallocate(VPR(table[idx]), false);
+      else
+         removeCCNode(cc, &table[idx]);
 }

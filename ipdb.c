@@ -29,7 +29,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <tmmintrin.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -85,9 +84,9 @@ int readRIPEDataBaseFormat(FILE *in, size_t totalsize)
                  ip++;
                char *ipstr_hi = ip;
 
-               sscanf(ipstr_lo, "%hhu.%hhu.%hhu.%hhu", &ipdsc_lo.nibble[3], &ipdsc_lo.nibble[2], &ipdsc_lo.nibble[1], &ipdsc_lo.nibble[0]);
+               sscanf(ipstr_lo, "%hhu.%hhu.%hhu.%hhu", &ipdsc_lo.nibble[b32_3], &ipdsc_lo.nibble[b32_2], &ipdsc_lo.nibble[b32_1], &ipdsc_lo.nibble[b32_0]);
                if (*ipstr_hi)
-                  sscanf(ipstr_hi, "%hhu.%hhu.%hhu.%hhu", &ipdsc_hi.nibble[3], &ipdsc_hi.nibble[2], &ipdsc_hi.nibble[1], &ipdsc_hi.nibble[0]);
+                  sscanf(ipstr_hi, "%hhu.%hhu.%hhu.%hhu", &ipdsc_hi.nibble[b32_3], &ipdsc_hi.nibble[b32_2], &ipdsc_hi.nibble[b32_1], &ipdsc_hi.nibble[b32_0]);
                else
                   ipdsc_hi.number = 0;
             }
@@ -200,7 +199,7 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
                      ip = iv+fieldlen(iv)+1;
                      fl = fieldlen(ip);
                      ip[fl] = '\0';
-                     sscanf(ip, "%hhu.%hhu.%hhu.%hhu", &ipdsc.nibble[3], &ipdsc.nibble[2], &ipdsc.nibble[1], &ipdsc.nibble[0]);
+                     sscanf(ip, "%hhu.%hhu.%hhu.%hhu", &ipdsc.nibble[b32_3], &ipdsc.nibble[b32_2], &ipdsc.nibble[b32_1], &ipdsc.nibble[b32_0]);
                      iplo = ipdsc.number;
 
                      ct = ip+fl+1;

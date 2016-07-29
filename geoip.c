@@ -32,7 +32,6 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include <tmmintrin.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -62,8 +61,15 @@ void usage(const char *executable)
 }
 
 
-CCNode *CCStore = NULL;
-IPNode *IPStore = NULL;
+CCNode **CCTable = NULL;
+IPNode  *IPStore = NULL;
+
+static inline int32_t intlb(double x)
+{
+   double lb = log2(x);
+   ((uint8_t *)&lb)[b64_0] |= 1;  // bump up the least significant bit, so floor() is guaranteed to do the expected thing
+   return (int)floor(lb);
+}
 
 int main(int argc, char *argv[])
 {
@@ -104,8 +110,9 @@ int main(int argc, char *argv[])
             bstfname = optarg;
             break;
 
-         default:
          arg_err:
+            printf("Incorrect argument:\n -%c %s, ...\n\n", ch, optarg);
+         default:
             rc = 1;
          case 'h':
             usage(cmd);
@@ -118,6 +125,7 @@ int main(int argc, char *argv[])
 
    if (argc != 1 && !ccList)
    {
+      printf("Wrong number of arguments:\n %s, ...\n\n", argv[0]);
       usage(cmd);
       return 1;
    }
@@ -134,7 +142,7 @@ int main(int argc, char *argv[])
          if (ccList == NULL)           // first usage form -- lookup country code for a given IPv4 address
          {
             IPStore = sortedIPSetsToTree(sortedIPSets, 0, (int)(st.st_size/sizeof(uint32_t))/3 - 1);
-            sscanf(argv[0], "%hhu.%hhu.%hhu.%hhu", &ipdsc.nibble[3], &ipdsc.nibble[2], &ipdsc.nibble[1], &ipdsc.nibble[0]);
+            sscanf(argv[0], "%hhu.%hhu.%hhu.%hhu", &ipdsc.nibble[b32_3], &ipdsc.nibble[b32_2], &ipdsc.nibble[b32_1], &ipdsc.nibble[b32_0]);
 
             IPNode *node = findIPNode(ipdsc.number, IPStore);
             if (node)
@@ -142,8 +150,8 @@ int main(int argc, char *argv[])
                ipdsc_lo.number = node->lo;
                ipdsc_hi.number = node->hi;
                printf("%s in %d.%d.%d.%d-%d.%d.%d.%d in %s\n\n", argv[0],
-                                                                 ipdsc_lo.nibble[3], ipdsc_lo.nibble[2], ipdsc_lo.nibble[1], ipdsc_lo.nibble[0],
-                                                                 ipdsc_hi.nibble[3], ipdsc_hi.nibble[2], ipdsc_hi.nibble[1], ipdsc_hi.nibble[0],
+                                                                 ipdsc_lo.nibble[b32_3], ipdsc_lo.nibble[b32_2], ipdsc_lo.nibble[b32_1], ipdsc_lo.nibble[b32_0],
+                                                                 ipdsc_hi.nibble[b32_3], ipdsc_hi.nibble[b32_2], ipdsc_hi.nibble[b32_1], ipdsc_hi.nibble[b32_0],
                                                                  (char *)&node->cc);
             }
             else
@@ -154,6 +162,8 @@ int main(int argc, char *argv[])
 
          else // (ccList != NULL)      // second usage form -- generate ipfw table construction directives
          {
+            CCTable = createCCTable();
+
             int count = 0;
             char *cc = ccList;
             while (*cc)
@@ -161,30 +171,38 @@ int main(int argc, char *argv[])
                int tl = taglen(cc);
                if (cc[tl] == ':')
                   cc[tl++] = '\0';
-               addCCNode(*(uint16_t *)uppercase(cc, 2), &CCStore);
+               storeCC(CCTable, *(uint16_t *)uppercase(cc, 2));
                cc += tl;
             }
 
-            int i, m, n = (int)(st.st_size/sizeof(uint32_t))/3;
+            int i, k, m, n = (int)(st.st_size/sizeof(uint32_t))/3;
             for (i = 0; i < n; i++)
-               if (!*ccList || findCCNode(sortedIPSets[i][2], CCStore))
+            {
+               if (!*ccList || findCC(CCTable, sortedIPSets[i][2]))
                {
                   ipdsc_lo.number = sortedIPSets[i][0];
-                  m = 32 - (int)ceil(log2(sortedIPSets[i][1] - sortedIPSets[i][0] + 1));
-                  if (plainFlag)
-                     printf("%d.%d.%d.%d/%d\n", ipdsc_lo.nibble[3], ipdsc_lo.nibble[2], ipdsc_lo.nibble[1], ipdsc_lo.nibble[0], m);
-                  else if (tval != 0)
-                     printf("table %d add %d.%d.%d.%d/%d %u\n", tnum, ipdsc_lo.nibble[3], ipdsc_lo.nibble[2], ipdsc_lo.nibble[1], ipdsc_lo.nibble[0], m, tval);
-                  else
-                     printf("table %d add %d.%d.%d.%d/%d\n",    tnum, ipdsc_lo.nibble[3], ipdsc_lo.nibble[2], ipdsc_lo.nibble[1], ipdsc_lo.nibble[0], m);
+                  do
+                  {
+                     m = intlb(sortedIPSets[i][1] - ipdsc_lo.number + 1);
+                     while (ipdsc_lo.number % (k = (int)lround(exp2(m)))) m--;
 
-                  count++;
+                     if (plainFlag)
+                        printf("%d.%d.%d.%d/%d\n", ipdsc_lo.nibble[b32_3], ipdsc_lo.nibble[b32_2], ipdsc_lo.nibble[b32_1], ipdsc_lo.nibble[b32_0], 32 - m);
+                     else if (tval != 0)
+                        printf("table %d add %d.%d.%d.%d/%d %u\n", tnum, ipdsc_lo.nibble[b32_3], ipdsc_lo.nibble[b32_2], ipdsc_lo.nibble[b32_1], ipdsc_lo.nibble[b32_0], 32 - m, tval);
+                     else
+                        printf("table %d add %d.%d.%d.%d/%d\n", tnum, ipdsc_lo.nibble[b32_3], ipdsc_lo.nibble[b32_2], ipdsc_lo.nibble[b32_1], ipdsc_lo.nibble[b32_0], 32 - m);
+
+                     count++;
+                  }
+                  while ((ipdsc_lo.number += k) < sortedIPSets[i][1]);
                }
+            }
 
             if (!count)
                printf("\n");
 
-            releaseCCTree(CCStore);
+            releaseCCTable(CCTable);
          }
       }
 
