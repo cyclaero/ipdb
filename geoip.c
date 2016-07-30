@@ -64,7 +64,8 @@ void usage(const char *executable)
 CCNode **CCTable = NULL;
 IPNode  *IPStore = NULL;
 
-static inline int32_t intlb(double x)
+
+static inline int intlb(double x)
 {
    double lb = log2(x);
    ((uint8_t *)&lb)[b64_0] |= 1;  // bump up the least significant bit, so floor() is guaranteed to do the expected thing
