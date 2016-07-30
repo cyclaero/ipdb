@@ -72,6 +72,13 @@ static inline int intlb(double x)
    return (int)floor(lb);
 }
 
+static inline int inteb(int e)
+{
+   static int eb[32] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576,
+                         2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648 };
+   return (0 <= e && e <= 31) ? eb[e] : 0;
+}
+
 int main(int argc, char *argv[])
 {
    bool plainFlag = false;
@@ -185,7 +192,8 @@ int main(int argc, char *argv[])
                   do
                   {
                      m = intlb(sortedIPSets[i][1] - ipdsc_lo.number + 1);
-                     while (ipdsc_lo.number % (k = (int)lround(exp2(m)))) m--;
+                     while (ipdsc_lo.number % (k = inteb(m)))
+                        m--;
 
                      if (plainFlag)
                         printf("%d.%d.%d.%d/%d\n", ipdsc_lo.nibble[b32_3], ipdsc_lo.nibble[b32_2], ipdsc_lo.nibble[b32_1], ipdsc_lo.nibble[b32_0], 32 - m);
