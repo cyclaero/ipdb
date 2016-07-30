@@ -38,7 +38,7 @@
 #include "store.h"
 
 
-ssize_t gAllocationTotal    = 0;
+ssize_t gAllocationTotal = 0;
 
 static inline void countAllocation(ssize_t size)
 {
