@@ -46,8 +46,8 @@
        
          # ipdb-update.sh ftp.apnic.net
        
-      This will download teh statistic files together with the MD5 verification hashes into:
-      /usr/local/etc/ipdb/IPRanges/. Said directory will becreated if it does not exit. If the
+      This will download the statistics files together with the MD5 verification hashes into:
+      /usr/local/etc/ipdb/IPRanges/. Said directory will be created if it does not exist. If the
       downloads went smooth, the script will start the ipdb tool in order to generate right in 
       the same go the binary file with the consolidated IPv4 ranges.
       
@@ -93,8 +93,8 @@
        - Allow all diverted packets from Germany, Brazil and the US, and deny everything else:
        # echo 'geod_flags="-a DE:BR:US"'
        
-       - Deny all diverted packets from North Korea, Turkey and Great Britain, and allow everything else:
-       # echo 'geod_flags="-d KO:TR:GB"'
+       - Deny all diverted packets from Turkey, Saudi Arabia and Great Britain, and allow everything else:
+       # echo 'geod_flags="-d TR:SA:GB"'
        
        - You may add any number of capital letter ISO country codes separated by colons.
 
