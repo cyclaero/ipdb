@@ -65,17 +65,15 @@ CCNode **CCTable = NULL;
 IPNode  *IPStore = NULL;
 
 
-static inline int intlb(double x)
+static inline int32_t intlb(double x)
 {
-   double lb = log2(x);
-   ((uint8_t *)&lb)[b64_0] |= 1;  // bump up the least significant bit, so floor() is guaranteed to do the expected thing
-   return (int)floor(lb);
+   return (int32_t)log2(x);
 }
 
-static inline int inteb(int e)
+static inline uint32_t inteb(int32_t e)
 {
-   static int eb[32] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576,
-                         2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648 };
+   static uint32_t eb[32] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576,
+                              2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648 };
    return (0 <= e && e <= 31) ? eb[e] : 1;
 }
 
@@ -183,15 +181,16 @@ int main(int argc, char *argv[])
                cc += tl;
             }
 
-            int i, k, m, n = (int)(st.st_size/sizeof(uint32_t))/3;
+            int i, n = (int)(st.st_size/sizeof(uint32_t))/3;
             for (i = 0; i < n; i++)
             {
                if (!*ccList || findCC(CCTable, sortedIPSets[i][2]))
                {
+                  uint32_t k;
                   ipdsc_lo.number = sortedIPSets[i][0];
                   do
                   {
-                     m = intlb(sortedIPSets[i][1] - ipdsc_lo.number + 1);
+                     int32_t m = intlb(sortedIPSets[i][1] - ipdsc_lo.number + 1);
                      while (ipdsc_lo.number % (k = inteb(m)))
                         m--;
 
