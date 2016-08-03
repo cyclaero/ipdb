@@ -48,13 +48,13 @@ void usage(const char *executable)
    printf("   %s [-r bstfile] [-h] <IP address>\n", r);
    printf("      <IP address>      an IPv4 or an IPv6 address to be looked-up.\n\n");
    printf("2) generate a sorted list of IP address/masklen pairs per country code, formatted as ipfw table construction directives:\n\n");
-   printf("   %s -t [CC:DD:EE:..] [-n table number] [-v table value] [-r bstfile] [-h]\n\n", r);
+   printf("   %s -t [CC:DD:EE:..] [-n table number] [-v table value] [-x offset] [-4] [-6] [-p] [-r bstfile] [-h]\n\n", r);
    printf("      -t [CC:DD:EE:..]  output all IP address/masklen pairs belonging to the listed countries, given by 2 letter\n");
    printf("                        capital country codes, separated by colon. An empty CC list means any country code.\n");
    printf("      -n table number   the ipfw table number between 0 and 65534 [default: 0].\n");
    printf("      -v table value    the 32-bit unsigned value of the ipfw table entry [default: 0].\n");
    printf("      -x offset         output the decimal encoded country code + offset as the table value:\n");
-   printf("                        val = (C1 - 60)*1000 + C2*10 + offset\n");
+   printf("                        val = (C1 - 60)*1000 + C2*10 + offset -- 0 <= offset < 34735\n");
    printf("      -4                only process IPv4 address ranges.\n");
    printf("      -6                only process IPv6 address ranges.\n");
    printf("      -p                plain IP table generation, i.e. without ipfw construction directives, -n and -v flags are ignored.\n\n");
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
 
    int32_t  ch,
             rc    = 1,
-            tnum  = 0;
-   uint32_t tval  = 0,
+            tnum  = 0,
             toff  = 0;
+   uint32_t tval  = 0;
 
    char *ccList   = NULL,
         *bstfname = "/usr/local/etc/ipdb/IPRanges/ipcc.bst",    // actually 2 files *.v4 and *.v6
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
             break;
 
          case 'x':
-            if (tval || (toff = (uint32_t)strtol(optarg, NULL, 10)) == 0 && errno == EINVAL)
+            if (tval || (toff = (int32_t)strtol(optarg, NULL, 10)) == 0 && errno == EINVAL || toff < 0 || 34735 < toff)
             {
                lastopt = optarg;
                goto arg_err;
