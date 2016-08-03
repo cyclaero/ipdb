@@ -1,6 +1,6 @@
-**IPv4 Geo-Location database tools and ipfw divert filter daemon for FreeBSD**
+**IP Geo-Location database tools and ipfw IPv4 divert filter daemon for FreeBSD**
 
-    This project provides all the tools for IPv4 Geo-blocking at the firewall level with ipfw on FreeBSD.
+    This project provides all the tools for IP Geo-blocking at the firewall level with ipfw on FreeBSD.
 
     Quick start
 
@@ -12,7 +12,7 @@
        $ make
 
 
-    3. as user root, install the tools and the ipfw divert filter daemon:
+    3. as user root, install the tools and the ipfw IPv4 divert filter daemon:
        $ sudo make install clean
 
     or # make install clean
@@ -21,14 +21,16 @@
        - ipdb-update.sh    # a shell script file for updateing the geoip database by
                            # downloading the latest delegation statistics files of the 5 RIR's.
       
-       - ipdb              # a tool for consoliting the IPv4 ranges from statistics file into
-                           # a sorted binary file suitable for direct reading it into a
-                           # completely balanced binary search tree be the lookup tool and
+       - ipdb              # a tool for consolidating the IP ranges from statistics file into
+                           # sorted binary files suitable for direct reading it into a
+                           # completely balanced binary search tree by the lookup tool and
                            # and the ipfw divert filter daemon.
                           
-       - geoip             # a tool for manually looking up an IPv4 address on the command line.
+       - geoip             # a tool for manually looking up an IP address on the command line,
+                           # and for generation of CIDR conforming Ip tables per country code
+                           # that are suitable for IP table based actions by ipfw.
 
-       - geod              # the ipfw divert filter daemon.
+       - geod              # the ipfw IPv4 divert filter daemon.
        - geod.rc           # the rc script of geod, will be copied to /usr/local/etc/rc.d/geod
 
 
@@ -49,28 +51,30 @@
       This will download the statistics files together with the MD5 verification hashes into:
       /usr/local/etc/ipdb/IPRanges/. Said directory will be created if it does not exist. If the
       downloads went smooth, the script will start the ipdb tool in order to generate right in 
-      the same go the binary file with the consolidated IPv4 ranges.
+      the same go the binary file with the consolidated IP ranges.
       
       Later, you may want to put the above command into a weekly cron job, for example:
       
-      # weekly update of the IPv4 geo-location database
+      # weekly update of the IP geo-location databases
       5    3    *    *    7    root    /usr/local/bin/ipdb-update.sh ftp.apnic.net > /dev/null 2>&1 && /usr/sbin/service geod restart > /dev/null
 
 
-    5. Check whether the database is ready by looking up some IPv4 addresses using the geoip tool.
+    5. Check whether the database is ready by looking up some addresses using the geoip tool.
 
        $ geoip 62.175.157.33
-       62.175.157.33 in 62.174.0.0-62.175.255.255 in ES
+       62.175.157.33 in 62.174.0.0 - 62.175.255.255 in ES
        
        $ geoip 141.33.17.2
-       141.33.17.2 in 141.12.0.0-141.80.255.255 in DE
+       141.33.17.2 in 141.12.0.0 - 141.80.255.255 in DE
        
        $ geoip 99.67.80.80
-       99.67.80.80 in 98.160.0.0-99.191.255.255 in US
+       99.67.80.80 in 98.160.0.0 - 99.191.255.255 in US
        
        $ geoip 192.168.1.1
        192.168.1.1 not found
-
+       
+       $ geoip 2001:0618:85a3:08d3:1319:8a2e:0370:7344
+       2001:0618:85a3:08d3:1319:8a2e:0370:7344 in 2001:618:0:0:0:0:0:0 - 2001:618:ffff:ffff:ffff:ffff:ffff:ffff in CH
 
     6. If not already done, activate ipfw.
        # kldload ipfw && ipfw add 65534 allow ip from any to any
@@ -84,7 +88,7 @@
        # kldload ipdivert
 
 
-    8. Add the lines for starting the geo-blocking ipfw divert filter daemon to /etc/rc.conf
+    8. Add the lines for starting the IPv4 geo-blocking ipfw divert filter daemon to /etc/rc.conf
 
        # echo 'geod_load="YES"'
        

@@ -29,6 +29,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include <stdarg.h>
 #include <string.h>
 #include <syslog.h>
@@ -175,11 +176,11 @@ void deallocate_batch(bool cleanout, ...)
 
 #pragma mark ••• AVL Tree of IPv4-Ranges •••
 
-static int balanceIPNode(IPNode **node)
+static int balanceIP4Node(IP4Node **node)
 {
    int   change = 0;
-   IPNode *o = *node;
-   IPNode *p, *q;
+   IP4Node *o = *node;
+   IP4Node *p, *q;
 
    if (o->B == -2)
    {
@@ -239,17 +240,17 @@ static int balanceIPNode(IPNode **node)
 }
 
 
-static int pickPrevIPNode(IPNode **node, IPNode **exch)
+static int pickPrevIP4Node(IP4Node **node, IP4Node **exch)
 {                                             // *exch on entry = parent node
-   IPNode *o = *node;                         // *exch on exit  = picked previous value node
+   IP4Node *o = *node;                        // *exch on exit  = picked previous value node
 
    if (o->R)
    {
       *exch = o;
-      int change = -pickPrevIPNode(&o->R, exch);
+      int change = -pickPrevIP4Node(&o->R, exch);
       if (change)
          if (abs(o->B += change) > 1)
-            return balanceIPNode(node);
+            return balanceIP4Node(node);
          else
             return o->B == 0;
       else
@@ -258,7 +259,7 @@ static int pickPrevIPNode(IPNode **node, IPNode **exch)
 
    else if (o->L)
    {
-      IPNode *p = o->L;
+      IP4Node *p = o->L;
       o->L = NULL;
       (*exch)->R = p;
       *exch = o;
@@ -274,17 +275,17 @@ static int pickPrevIPNode(IPNode **node, IPNode **exch)
 }
 
 
-static int pickNextIPNode(IPNode **node, IPNode **exch)
+static int pickNextIP4Node(IP4Node **node, IP4Node **exch)
 {                                             // *exch on entry = parent node
-   IPNode *o = *node;                         // *exch on exit  = picked next value node
+   IP4Node *o = *node;                        // *exch on exit  = picked next value node
 
    if (o->L)
    {
       *exch = o;
-      int change = +pickNextIPNode(&o->L, exch);
+      int change = +pickNextIP4Node(&o->L, exch);
       if (change)
          if (abs(o->B += change) > 1)
-            return balanceIPNode(node);
+            return balanceIP4Node(node);
          else
             return o->B == 0;
       else
@@ -293,7 +294,7 @@ static int pickNextIPNode(IPNode **node, IPNode **exch)
 
    else if (o->R)
    {
-      IPNode *q = o->R;
+      IP4Node *q = o->R;
       o->R = NULL;
       (*exch)->L = q;
       *exch = o;
@@ -309,7 +310,7 @@ static int pickNextIPNode(IPNode **node, IPNode **exch)
 }
 
 
-IPNode *findIPNode(uint32_t ip, IPNode  *node)
+IP4Node *findIP4Node(uint32_t ip, IP4Node  *node)
 {
    if (node)
    {
@@ -317,17 +318,17 @@ IPNode *findIPNode(uint32_t ip, IPNode  *node)
          return node;
 
       else if (ip < node->lo)
-         return findIPNode(ip, node->L);
+         return findIP4Node(ip, node->L);
 
       else // (ip > node->hi)
-         return findIPNode(ip, node->R);
+         return findIP4Node(ip, node->R);
    }
    else
       return NULL;
 }
 
 
-IPNode *findNetNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode  *node)
+IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node  *node)
 {
    if (node)
    {
@@ -337,45 +338,45 @@ IPNode *findNetNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode  *node)
          return node;
 
       else if (lo < node->lo)
-         return findNetNode(lo, hi, cc, node->L);
+         return findNet4Node(lo, hi, cc, node->L);
 
       else // ([lo|hi] > node->hi)
-         return findNetNode(lo, hi, cc, node->R);
+         return findNet4Node(lo, hi, cc, node->R);
    }
    else
       return NULL;
 }
 
 
-int addIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node)
+int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
 {
-   IPNode *o = *node;
+   IP4Node *o = *node;
 
    if (o != NULL)
    {
       int change;
 
       if (lo < o->lo)
-         change = -addIPNode(lo, hi, cc, &o->L);
+         change = -addIP4Node(lo, hi, cc, &o->L);
 
       else if (lo > o->lo)
-         change = +addIPNode(lo, hi, cc, &o->R);
+         change = +addIP4Node(lo, hi, cc, &o->R);
 
       else // (lo == o->lo)               // this case must not happen !!!
          return 0;
 
       if (change)
          if (abs(o->B += change) > 1)
-            return 1 - balanceIPNode(node);
+            return 1 - balanceIP4Node(node);
          else
             return o->B != 0;
       else
          return 0;
    }
 
-   else // (o == NULL)                    // if the IPNode is not in the tree
+   else // (o == NULL)                    // if the IP4Node is not in the tree
    {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IPNode), true))
+      if (o = allocate(sizeof(IP4Node), true))
       {
          o->lo = lo;
          o->hi = hi;
@@ -389,22 +390,22 @@ int addIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node)
 }
 
 
-void importIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node)
+void importIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
 {
-   IPNode *o = *node;
+   IP4Node *o = *node;
 
    if (o != NULL)
    {
       if (lo < o->lo)
-         importIPNode(lo, hi, cc, &o->L);
+         importIP4Node(lo, hi, cc, &o->L);
 
       else if (lo > o->lo)
-         importIPNode(lo, hi, cc, &o->R);
+         importIP4Node(lo, hi, cc, &o->R);
    }
 
-   else // (o == NULL)                    // if the IPNode is not in the tree
+   else // (o == NULL)                    // if the IP4Node is not in the tree
    {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IPNode), true))
+      if (o = allocate(sizeof(IP4Node), true))
       {
          o->lo = lo;
          o->hi = hi;
@@ -415,25 +416,25 @@ void importIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node)
 }
 
 
-int removeIPNode(uint32_t ip, IPNode **node)
+int removeIP4Node(uint32_t ip, IP4Node **node)
 {
-   IPNode *o = *node;
+   IP4Node *o = *node;
 
    if (o != NULL)
    {
       int change;
 
       if (ip < o->lo)
-         change = +removeIPNode(ip, &o->L);
+         change = +removeIP4Node(ip, &o->L);
 
       else if (ip > o->lo)
-         change = -removeIPNode(ip, &o->R);
+         change = -removeIP4Node(ip, &o->R);
 
       else // (o->lo <= ip && ip <= o->lo)
       {
          int     b = o->B;
-         IPNode *p = o->L;
-         IPNode *q = o->R;
+         IP4Node *p = o->L;
+         IP4Node *q = o->R;
 
          if (!p || !q)
          {
@@ -454,7 +455,7 @@ int removeIPNode(uint32_t ip, IPNode **node)
                }
                else
                {
-                  change = +pickPrevIPNode(&p, &o);
+                  change = +pickPrevIP4Node(&p, &o);
                   o->L   =  p;
                   o->R   =  q;
                }
@@ -470,7 +471,7 @@ int removeIPNode(uint32_t ip, IPNode **node)
                }
                else
                {
-                  change = -pickNextIPNode(&q, &o);
+                  change = -pickNextIP4Node(&q, &o);
                   o->L   =  p;
                   o->R   =  q;
                }
@@ -484,7 +485,7 @@ int removeIPNode(uint32_t ip, IPNode **node)
 
       if (change)
          if (abs(o->B += change) > 1)
-            return balanceIPNode(node);
+            return balanceIP4Node(node);
          else
             return o->B == 0;
       else
@@ -496,66 +497,60 @@ int removeIPNode(uint32_t ip, IPNode **node)
 }
 
 
-void serializeIPTree(FILE *out, IPNode *node)
+void serializeIP4Tree(FILE *out, IP4Node *node)
 {
    if (node)
    {
       if (node->L)
-         serializeIPTree(out, node->L);
+         serializeIP4Tree(out, node->L);
 
-      uint32_t ipset[3] = {node->lo, node->hi, node->cc};
-      fwrite(ipset, sizeof(uint32_t[3]), 1, out);
+      IP4Set set = {node->lo, node->hi, node->cc};
+      fwrite(set, sizeof(IP4Set), 1, out);
 
       if (node->R)
-         serializeIPTree(out, node->R);
+         serializeIP4Tree(out, node->R);
    }
 }
 
 
-void releaseIPTree(IPNode *node)
+void releaseIP4Tree(IP4Node *node)
 {
    if (node)
    {
       if (node->L)
-         releaseIPTree(node->L);
+         releaseIP4Tree(node->L);
 
       if (node->R)
-         releaseIPTree(node->R);
+         releaseIP4Tree(node->R);
 
       deallocate(VPR(node), false);
    }
 }
 
 
-static inline int maxi(int a, int b)
-{
-   return (a > b) ? a : b;
-}
-
-
-int treeHeight(IPNode *node)
+int treeIP4Height(IP4Node *node)
 {
    if (node)
-      return +1 + maxi(treeHeight(node->L), treeHeight(node->R));
+      return +1 + maxi(treeIP4Height(node->L), treeIP4Height(node->R));
    else
       return -1;
 }
 
 
-bool checkBalance(IPNode *node)
+bool checkIP4Balance(IP4Node *node)
 {
    if (node)
    {
       bool c = true;
       if (node->L)
-         c = checkBalance(node->L);
+         c = checkIP4Balance(node->L);
 
       if (c && node->R)
-         c = checkBalance(node->R);
+         c = checkIP4Balance(node->R);
 
       if (c)
       {
-         int d = treeHeight(node->R) - treeHeight(node->L);
+         int d = treeIP4Height(node->R) - treeIP4Height(node->L);
          c = (-1 <= d && d <= 1);
       }
 
@@ -566,18 +561,425 @@ bool checkBalance(IPNode *node)
 }
 
 
-IPNode *sortedIPSetsToTree(IPSet *sortedIPSets, int start, int end)
+IP4Node *sortedIP4SetsToTree(IP4Set *sortedIP4Sets, int start, int end)
 {
-   IPNode *node;
-   if (start <= end && (node = allocate(sizeof(IPNode), true)))
+   IP4Node *node;
+   if (start <= end && (node = allocate(sizeof(IP4Node), true)))
    {
       int mid = (start + end)/2;
-      node->lo = sortedIPSets[mid][0];
-      node->hi = sortedIPSets[mid][1];
-      node->cc = sortedIPSets[mid][2];
+      node->lo = sortedIP4Sets[mid][0];
+      node->hi = sortedIP4Sets[mid][1];
+      node->cc = sortedIP4Sets[mid][2];
 
-      node->L = sortedIPSetsToTree(sortedIPSets, start, mid-1);
-      node->R = sortedIPSetsToTree(sortedIPSets, mid+1, end);
+      node->L = sortedIP4SetsToTree(sortedIP4Sets, start, mid-1);
+      node->R = sortedIP4SetsToTree(sortedIP4Sets, mid+1, end);
+
+      return node;
+   }
+   else
+      return NULL;
+}
+
+
+#pragma mark ••• AVL Tree of IPv6-Ranges •••
+
+static int balanceIP6Node(IP6Node **node)
+{
+   int   change = 0;
+   IP6Node *o = *node;
+   IP6Node *p, *q;
+
+   if (o->B == -2)
+   {
+      if (p = o->L)                    // make the static analyzer happy
+         if (p->B == +1)
+         {
+            change = 1;                // double left-right rotation
+            q      = p->R;             // left rotation
+            p->R   = q->L;
+            q->L   = p;
+            o->L   = q->R;             // right rotation
+            q->R   = o;
+            o->B   = +(q->B < 0);
+            p->B   = -(q->B > 0);
+            q->B   = 0;
+            *node  = q;
+         }
+
+         else
+         {
+            change = p->B;             // single right rotation
+            o->L   = p->R;
+            p->R   = o;
+            o->B   = -(++p->B);
+            *node  = p;
+         }
+   }
+
+   else if (o->B == +2)
+   {
+      if (q = o->R)                    // make the static analyzer happy
+         if (q->B == -1)
+         {
+            change = 1;                // double right-left rotation
+            p      = q->L;             // right rotation
+            q->L   = p->R;
+            p->R   = q;
+            o->R   = p->L;             // left rotation
+            p->L   = o;
+            o->B   = -(p->B > 0);
+            q->B   = +(p->B < 0);
+            p->B   = 0;
+            *node  = p;
+         }
+
+         else
+         {
+            change = q->B;             // single left rotation
+            o->R   = q->L;
+            q->L   = o;
+            o->B   = -(--q->B);
+            *node  = q;
+         }
+   }
+
+   return change != 0;
+}
+
+
+static int pickPrevIP6Node(IP6Node **node, IP6Node **exch)
+{                                             // *exch on entry = parent node
+   IP6Node *o = *node;                        // *exch on exit  = picked previous value node
+
+   if (o->R)
+   {
+      *exch = o;
+      int change = -pickPrevIP6Node(&o->R, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceIP6Node(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->L)
+   {
+      IP6Node *p = o->L;
+      o->L = NULL;
+      (*exch)->R = p;
+      *exch = o;
+      return p->B == 0;
+   }
+
+   else
+   {
+      (*exch)->R = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
+static int pickNextIP6Node(IP6Node **node, IP6Node **exch)
+{                                             // *exch on entry = parent node
+   IP6Node *o = *node;                        // *exch on exit  = picked next value node
+
+   if (o->L)
+   {
+      *exch = o;
+      int change = +pickNextIP6Node(&o->L, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceIP6Node(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->R)
+   {
+      IP6Node *q = o->R;
+      o->R = NULL;
+      (*exch)->L = q;
+      *exch = o;
+      return q->B == 0;
+   }
+
+   else
+   {
+      (*exch)->L = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
+IP6Node *findIP6Node(uint128_t ip, IP6Node  *node)
+{
+   if (node)
+   {
+      if (node->lo <= ip && ip <= node->hi)
+         return node;
+
+      else if (ip < node->lo)
+         return findIP6Node(ip, node->L);
+
+      else // (ip > node->hi)
+         return findIP6Node(ip, node->R);
+   }
+   else
+      return NULL;
+}
+
+
+IP6Node *findNet6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node  *node)
+{
+   if (node)
+   {
+      int ofs = (cc == node->cc);
+
+      if (node->lo <= lo && lo-ofs <= node->hi || node->lo <= hi+ofs && hi <= node->hi || lo <= node->lo && node->hi <= hi)
+         return node;
+
+      else if (lo < node->lo)
+         return findNet6Node(lo, hi, cc, node->L);
+
+      else // ([lo|hi] > node->hi)
+         return findNet6Node(lo, hi, cc, node->R);
+   }
+   else
+      return NULL;
+}
+
+
+int addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
+{
+   IP6Node *o = *node;
+
+   if (o != NULL)
+   {
+      int change;
+
+      if (lo < o->lo)
+         change = -addIP6Node(lo, hi, cc, &o->L);
+
+      else if (lo > o->lo)
+         change = +addIP6Node(lo, hi, cc, &o->R);
+
+      else // (lo == o->lo)               // this case must not happen !!!
+         return 0;
+
+      if (change)
+         if (abs(o->B += change) > 1)
+            return 1 - balanceIP6Node(node);
+         else
+            return o->B != 0;
+      else
+         return 0;
+   }
+
+   else // (o == NULL)                    // if the IP6Node is not in the tree
+   {                                      // then add it into a new leaf
+      if (o = allocate(sizeof(IP6Node), true))
+      {
+         o->lo = lo;
+         o->hi = hi;
+         o->cc = cc;
+         *node = o;                       // report back the new node
+         return 1;                        // add the weight of 1 leaf onto the balance
+      }
+
+      return 0;                           // Out of Memory situation, nothing changed
+   }
+}
+
+
+void importIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
+{
+   IP6Node *o = *node;
+
+   if (o != NULL)
+   {
+      if (lo < o->lo)
+         importIP6Node(lo, hi, cc, &o->L);
+
+      else if (lo > o->lo)
+         importIP6Node(lo, hi, cc, &o->R);
+   }
+
+   else // (o == NULL)                    // if the IP6Node is not in the tree
+   {                                      // then add it into a new leaf
+      if (o = allocate(sizeof(IP6Node), true))
+      {
+         o->lo = lo;
+         o->hi = hi;
+         o->cc = cc;
+         *node = o;                       // report back the new node
+      }
+   }
+}
+
+
+int removeIP6Node(uint128_t ip, IP6Node **node)
+{
+   IP6Node *o = *node;
+
+   if (o != NULL)
+   {
+      int change;
+
+      if (ip < o->lo)
+         change = +removeIP6Node(ip, &o->L);
+
+      else if (ip > o->lo)
+         change = -removeIP6Node(ip, &o->R);
+
+      else // (o->lo <= ip && ip <= o->lo)
+      {
+         int     b = o->B;
+         IP6Node *p = o->L;
+         IP6Node *q = o->R;
+
+         if (!p || !q)
+         {
+            deallocate(VPR(*node), false);
+            *node = (p > q) ? p : q;
+            return 1;                     // remove the weight of 1 leaf from the balance
+         }
+
+         else
+         {
+            if (b == -1)
+            {
+               if (!p->R)
+               {
+                  change = +1;
+                  o      =  p;
+                  o->R   =  q;
+               }
+               else
+               {
+                  change = +pickPrevIP6Node(&p, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            else
+            {
+               if (!q->L)
+               {
+                  change = -1;
+                  o      =  q;
+                  o->L   =  p;
+               }
+               else
+               {
+                  change = -pickNextIP6Node(&q, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            o->B = b;
+            deallocate(VPR(*node), false);
+            *node = o;
+         }
+      }
+
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceIP6Node(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else // (o == NULL)
+      return 0;                           // not found -> recursively do nothing
+}
+
+
+void serializeIP6Tree(FILE *out, IP6Node *node)
+{
+   if (node)
+   {
+      if (node->L)
+         serializeIP6Tree(out, node->L);
+
+      IP6Set set = {node->lo, node->hi, node->cc};
+      fwrite(set, sizeof(IP6Set), 1, out);
+
+      if (node->R)
+         serializeIP6Tree(out, node->R);
+   }
+}
+
+
+void releaseIP6Tree(IP6Node *node)
+{
+   if (node)
+   {
+      if (node->L)
+         releaseIP6Tree(node->L);
+
+      if (node->R)
+         releaseIP6Tree(node->R);
+
+      deallocate(VPR(node), false);
+   }
+}
+
+
+int treeIP6Height(IP6Node *node)
+{
+   if (node)
+      return +1 + maxi(treeIP6Height(node->L), treeIP6Height(node->R));
+   else
+      return -1;
+}
+
+
+bool checkIP6Balance(IP6Node *node)
+{
+   if (node)
+   {
+      bool c = true;
+      if (node->L)
+         c = checkIP6Balance(node->L);
+
+      if (c && node->R)
+         c = checkIP6Balance(node->R);
+
+      if (c)
+      {
+         int d = treeIP6Height(node->R) - treeIP6Height(node->L);
+         c = (-1 <= d && d <= 1);
+      }
+
+      return c;
+   }
+
+   return true;
+}
+
+
+IP6Node *sortedIP6SetsToTree(IP6Set *sortedIP6Sets, int start, int end)
+{
+   IP6Node *node;
+   if (start <= end && (node = allocate(sizeof(IP6Node), true)))
+   {
+      int mid = (start + end)/2;
+      node->lo = sortedIP6Sets[mid][0];
+      node->hi = sortedIP6Sets[mid][1];
+      node->cc = (uint32_t)sortedIP6Sets[mid][2];
+
+      node->L = sortedIP6SetsToTree(sortedIP6Sets, start, mid-1);
+      node->R = sortedIP6SetsToTree(sortedIP6Sets, mid+1, end);
 
       return node;
    }
@@ -891,7 +1293,7 @@ typedef union
 static inline uint32_t cci(uint32_t cc)
 {
    CCDesc ccd = {.code = (uint16_t)cc};
-   return ((uint32_t)(ccd.byte[b32_0] + cc0Offset)*(uint32_t)(ccd.byte[b32_1] + cc1Offset)) % ccTableSize;
+   return ((uint32_t)(ccd.byte[b4_0] + cc0Offset)*(uint32_t)(ccd.byte[b4_1] + cc1Offset)) % ccTableSize;
 }
 
 // Table creation and release

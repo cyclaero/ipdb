@@ -28,21 +28,117 @@
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
-   #define b32_0 0
-   #define b32_1 1
-   #define b32_2 2
-   #define b32_3 3
+   #define b2_0 0
+   #define b2_1 1
 
-   #define b64_0 0
+   #define b4_0 0
+   #define b4_1 1
+   #define b4_2 2
+   #define b4_3 3
+
+   #define b8_0 0
+   #define b8_1 1
+   #define b8_2 2
+   #define b8_3 3
+   #define b8_4 4
+   #define b8_5 5
+   #define b8_6 6
+   #define b8_7 7
+
+   #define swapInt16(x) _swapInt16(x)
+   #define swapInt32(x) _swapInt32(x)
+   #define swapInt64(x) _swapInt64(x)
+
+   #if defined(__i386__) || defined(__x86_64__)
+
+      static inline uint16_t _swapInt16(uint16_t x)
+      {
+         __asm__("rolw $8,%0" : "+q" (x));
+         return x;
+      }
+
+      static inline uint32_t _swapInt32(uint32_t x)
+      {
+         __asm__("bswapl %0" : "+q" (x));
+         return x;
+      }
+
+   #else
+
+      static inline uint16_t _swapInt16(uint16_t x)
+      {
+         uint16_t z;
+         uint8_t *p = (uint8_t *)&x;
+         uint8_t *q = (uint8_t *)&z;
+         q[0] = p[1];
+         q[1] = p[0];
+         return z;
+      }
+
+      static inline uint32_t _swapInt32(uint32_t x)
+      {
+         uint32_t z;
+         uint8_t *p = (uint8_t *)&x;
+         uint8_t *q = (uint8_t *)&z;
+         q[0] = p[3];
+         q[1] = p[2];
+         q[2] = p[1];
+         q[3] = p[0];
+         return z;
+      }
+
+   #endif
+
+   #if defined(__x86_64__)
+
+      static inline uint64_t _swapInt64(uint64_t x)
+      {
+         __asm__("bswapq %0" : "+q" (x));
+         return x;
+      }
+
+   #else
+
+      static inline uint64_t _swapInt64(uint64_t x)
+      {
+         uint64_t z;
+         uint8_t *p = (uint8_t *)&x;
+         uint8_t *q = (uint8_t *)&z;
+         q[0] = p[7];
+         q[1] = p[6];
+         q[2] = p[5];
+         q[3] = p[4];
+         q[4] = p[3];
+         q[5] = p[2];
+         q[6] = p[1];
+         q[7] = p[0];
+         return z;
+      }
+
+   #endif
 
 #else
 
-   #define b32_0 3
-   #define b32_1 2
-   #define b32_2 1
-   #define b32_3 0
+   #define b2_0 1
+   #define b2_1 0
 
-   #define b64_0 7
+   #define b4_0 3
+   #define b4_1 2
+   #define b4_2 1
+   #define b4_3 0
+
+   #define b8_0 7
+   #define b8_1 6
+   #define b8_2 5
+   #define b8_3 4
+   #define b8_4 3
+   #define b8_5 2
+   #define b8_6 1
+   #define b8_7 0
+
+   #define swapInt16(x) (x)
+   #define swapInt32(x) (x)
+   #define swapInt64(x) (x)
 
 #endif
 
@@ -297,80 +393,6 @@
 
 #endif
 
-
-static inline char *skip(char *s)
-{
-   if (s) for (;;)
-      switch (*s)
-      {
-         case '\t':
-         case '\n':
-         case '\r':
-         case ' ':
-            s++;
-            break;
-
-         default:
-            return s;
-      }
-
-   return NULL;
-}
-
-static inline char *bskip(char *s)
-{
-   if (s) for (;;)
-      switch (*--s)
-      {
-         case '\t':
-         case '\n':
-         case '\r':
-         case ' ':
-            break;
-
-         default:
-            return s+1;
-      }
-
-   return NULL;
-}
-
-static inline char *pass(char *s)
-{
-   bool sq = false, dq = false, qu = false;
-
-   if (s) for (;;)
-      switch (*s++)
-      {
-         case '\0':
-            return s-1;
-
-         case '\t':
-         case '\n':
-         case '\r':
-         case ' ':
-            if (!qu)
-               return s-1;
-            else
-               break;
-
-         case '\'':
-            if (!dq)
-               qu = sq = !sq;
-            break;
-
-         case '"':
-            if (!sq)
-               qu = dq = !dq;
-            break;
-
-         default:
-            break;
-      }
-
-   return NULL;
-}
-
 static inline char *lowercase(char *s, int n)
 {
    if (s)
@@ -432,36 +454,70 @@ void deallocate(void **p, bool cleanout);
 void deallocate_batch(bool cleanout, ...);
 
 
+
 #pragma mark ••• AVL Tree of IPv4-Ranges •••
 
 typedef union
 {
    uint8_t   nibble[4];
    uint32_t  number;
-} IPv4Desc;
+} IP4Desc;
 
-typedef uint32_t IPSet[3]; // [0] -> lo, [1] -> hi, [2] -> cc
+typedef uint32_t IP4Set[3];   // [0] -> lo, [1] -> hi, [2] -> cc
 
-typedef struct IPNode
+typedef struct IP4Node
 {
-   uint32_t lo, hi;        // IP number range
-   uint32_t cc;            // country code
+   uint32_t lo, hi;           // IPv4 number range
+   uint32_t cc;               // country code
 
-   int32_t B;              // house holding
-   struct IPNode *L, *R;
-} IPNode;
+   int32_t B;                 // house holding
+   struct IP4Node *L, *R;
+} IP4Node;
 
-IPNode   *findIPNode(uint32_t ip, IPNode  *node);
-IPNode  *findNetNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode  *node);
-int        addIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node);
-void    importIPNode(uint32_t lo, uint32_t hi, uint32_t cc, IPNode **node);
-int     removeIPNode(uint32_t ip, IPNode **node);
+IP4Node  *findIP4Node(uint32_t ip, IP4Node  *node);
+IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node  *node);
+int        addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node);
+void    importIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node);
+int     removeIP4Node(uint32_t ip, IP4Node **node);
+void   releaseIP4Tree(IP4Node *node);
 
-void serializeIPTree(FILE *out, IPNode *node);
-void   releaseIPTree(IPNode *node);
-int treeHeight(IPNode *node);
-bool checkBalance(IPNode *node);
-IPNode *sortedIPSetsToTree(IPSet *sortedIPSets, int start, int end);
+void        serializeIP4Tree(FILE *out, IP4Node *node);
+IP4Node *sortedIP4SetsToTree(IP4Set *sortedIP4Sets, int start, int end);
+
+
+
+#pragma mark ••• AVL Tree of IPv6-Ranges •••
+
+typedef __uint128_t uint128_t;
+
+typedef union
+{
+   uint64_t  chunk[2];
+   uint16_t  nibble[8];
+   uint128_t number;
+} IP6Desc;
+
+typedef uint128_t IP6Set[3];  // [0] -> lo, [1] -> hi, [2] -> cc
+
+typedef struct IP6Node
+{
+   uint128_t lo, hi;          // IPv4 number range
+   uint32_t  cc;              // country code
+
+   int32_t B;                 // house holding
+   struct IP6Node *L, *R;
+} IP6Node;
+
+IP6Node  *findIP6Node(uint128_t ip, IP6Node  *node);
+IP6Node *findNet6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node  *node);
+int        addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node);
+void    importIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node);
+int     removeIP6Node(uint128_t ip, IP6Node **node);
+void   releaseIP6Tree(IP6Node *node);
+
+void        serializeIP6Tree(FILE *out, IP6Node *node);
+IP6Node *sortedIP6SetsToTree(IP6Set *sortedIP6Sets, int start, int end);
+
 
 
 #pragma mark ••• AVL Tree of Country Codes •••
@@ -487,3 +543,126 @@ void    releaseCCTable(CCNode *table[]);
 CCNode *findCC(CCNode *table[], uint32_t cc);
 void   storeCC(CCNode *table[], uint32_t cc);
 void  removeCC(CCNode *table[], uint32_t cc);
+
+
+
+#pragma mark ••• More utility functions •••
+
+static inline int maxi(int a, int b)
+{
+   return (a > b) ? a : b;
+}
+
+static inline int ccEncode(uint16_t cc)
+{
+   uint8_t *ca = (uint8_t *)&cc;
+   return (ca[b2_0]-60)*1000 + ca[b2_1]*10;
+}
+
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+static inline uint32_t ipv4_str2bin(char *str)
+{
+   uint32_t bin;
+   return (inet_pton(AF_INET, str, &bin) > 0)
+          ? swapInt32(bin)
+          : 0;
+}
+
+typedef char IP4Str[16];
+static inline char *ipv4_bin2str(uint32_t bin, char *str)
+{
+   IP4Desc ipdsc = {.number = bin};
+   sprintf(str, "%d.%d.%d.%d", ipdsc.nibble[b4_3], ipdsc.nibble[b4_2], ipdsc.nibble[b4_1], ipdsc.nibble[b4_0]);
+   return str;
+}
+
+static inline uint128_t ipv6_str2bin(char *str)
+{
+   uint64_t bin[2];
+   return (inet_pton(AF_INET6, str, &bin) > 0)
+          ? (IP6Desc){swapInt64(bin[b2_1]), swapInt64(bin[b2_0])}.number
+          : 0;
+}
+
+typedef char IP6Str[40];
+static inline char *ipv6_bin2str(uint128_t bin, char *str)
+{
+   IP6Desc ipdsc = {.number = bin};
+   sprintf(str, "%x:%x:%x:%x:%x:%x:%x:%x", ipdsc.nibble[b8_7], ipdsc.nibble[b8_6], ipdsc.nibble[b8_5], ipdsc.nibble[b8_4],
+                                           ipdsc.nibble[b8_3], ipdsc.nibble[b8_2], ipdsc.nibble[b8_1], ipdsc.nibble[b8_0]);
+   return str;
+}
+
+
+static const uint32_t v4[33] =
+{
+   0x0, 0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF, 0x1FF, 0x3FF, 0x7FF, 0xFFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF,
+   0x1FFFF, 0x3FFFF, 0x7FFFF, 0xFFFFF, 0x1FFFFF, 0x3FFFFF, 0x7FFFFF, 0xFFFFFF, 0x1FFFFFF, 0x3FFFFFF, 0x7FFFFFF,
+   0xFFFFFFF, 0x1FFFFFFF, 0x3FFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF
+};
+
+static inline uint32_t inteb4(int32_t e)
+{
+   return (0 <= e && e <= 31) ? v4[e]+1 : 1;
+}
+
+static inline int32_t intlb4(double v)
+{
+   return (int32_t)log2(v);
+}
+
+
+static const IP6Desc v6[129] =
+{
+   {0x0, 0x0}, {0x1, 0x0}, {0x3, 0x0}, {0x7, 0x0}, {0xF, 0x0}, {0x1F, 0x0}, {0x3F, 0x0}, {0x7F, 0x0}, {0xFF, 0x0},
+   {0x1FF, 0x0}, {0x3FF, 0x0}, {0x7FF, 0x0}, {0xFFF, 0x0}, {0x1FFF, 0x0}, {0x3FFF, 0x0}, {0x7FFF, 0x0}, {0xFFFF, 0x0},
+   {0x1FFFF, 0x0}, {0x3FFFF, 0x0}, {0x7FFFF, 0x0}, {0xFFFFF, 0x0}, {0x1FFFFF, 0x0}, {0x3FFFFF, 0x0}, {0x7FFFFF, 0x0},
+   {0xFFFFFF, 0x0}, {0x1FFFFFF, 0x0}, {0x3FFFFFF, 0x0}, {0x7FFFFFF, 0x0}, {0xFFFFFFF, 0x0}, {0x1FFFFFFF, 0x0}, {0x3FFFFFFF, 0x0},
+   {0x7FFFFFFF, 0x0}, {0xFFFFFFFF, 0x0}, {0x1FFFFFFFF, 0x0}, {0x3FFFFFFFF, 0x0}, {0x7FFFFFFFF, 0x0}, {0xFFFFFFFFF, 0x0},
+   {0x1FFFFFFFFF, 0x0}, {0x3FFFFFFFFF, 0x0}, {0x7FFFFFFFFF, 0x0}, {0xFFFFFFFFFF, 0x0}, {0x1FFFFFFFFFF, 0x0}, {0x3FFFFFFFFFF, 0x0},
+   {0x7FFFFFFFFFF, 0x0}, {0xFFFFFFFFFFF, 0x0}, {0x1FFFFFFFFFFF, 0x0}, {0x3FFFFFFFFFFF, 0x0}, {0x7FFFFFFFFFFF, 0x0},
+   {0xFFFFFFFFFFFF, 0x0}, {0x1FFFFFFFFFFFF, 0x0}, {0x3FFFFFFFFFFFF, 0x0}, {0x7FFFFFFFFFFFF, 0x0}, {0xFFFFFFFFFFFFF, 0x0},
+   {0x1FFFFFFFFFFFFF, 0x0}, {0x3FFFFFFFFFFFFF, 0x0}, {0x7FFFFFFFFFFFFF, 0x0}, {0xFFFFFFFFFFFFFF, 0x0}, {0x1FFFFFFFFFFFFFF, 0x0},
+   {0x3FFFFFFFFFFFFFF, 0x0}, {0x7FFFFFFFFFFFFFF, 0x0}, {0xFFFFFFFFFFFFFFF, 0x0}, {0x1FFFFFFFFFFFFFFF, 0x0}, {0x3FFFFFFFFFFFFFFF, 0x0},
+   {0x7FFFFFFFFFFFFFFF, 0x0}, {0xFFFFFFFFFFFFFFFF, 0x0}, {0xFFFFFFFFFFFFFFFF, 0x1}, {0xFFFFFFFFFFFFFFFF, 0x3},
+   {0xFFFFFFFFFFFFFFFF, 0x7}, {0xFFFFFFFFFFFFFFFF, 0xF}, {0xFFFFFFFFFFFFFFFF, 0x1F}, {0xFFFFFFFFFFFFFFFF, 0x3F},
+   {0xFFFFFFFFFFFFFFFF, 0x7F}, {0xFFFFFFFFFFFFFFFF, 0xFF}, {0xFFFFFFFFFFFFFFFF, 0x1FF}, {0xFFFFFFFFFFFFFFFF, 0x3FF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FF}, {0xFFFFFFFFFFFFFFFF, 0xFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x1FFFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0x3FFFFFFFFFFFFFFF},
+   {0xFFFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF}, {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF}
+};
+
+static inline uint128_t inteb6(int32_t e)
+{
+   return (0 <= e && e <= 127) ? v6[e].number+1 : 1;
+}
+
+static inline int32_t intlb6(uint128_t v)
+{
+   uint128_t u;
+   int o, p, q;
+   for (p = 0, q = 127;;)
+   {
+      o = (p + q) >> 1;
+      if ((u = v6[o].number) < v && v <= v6[o+1].number)
+         return o;
+      else if (v <= u)
+         q = o-1;
+      else // (v > v6[o+1])
+         p = o+1;
+   }
+}

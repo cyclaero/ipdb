@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -35,98 +36,8 @@
 #include "store.h"
 
 
-IPNode *IPStore = NULL;
-
-int readRIPEDataBaseFormat(FILE *in, size_t totalsize)
-{
-   int count = 0;
-   IPNode  *node;
-   IPv4Desc ipdsc_lo, ipdsc_hi;
-
-   size_t chunksize = (totalsize <= 67108864) ? totalsize : 67108864;   // allow max. allocation of 64 MB
-   size_t totalread = 0;
-   size_t bytesread, offset = 0;
-
-   char *data = allocate(chunksize+1, false);
-
-   while (totalread < totalsize && (bytesread = fread(data+offset, 1, chunksize-offset, in)) > 0)
-   {
-      totalread += bytesread;
-      bytesread += offset;
-      data[bytesread] = '\0';
-
-      int   ll;
-      char *line = data;
-      char *nextline, *ip = NULL, *cc = NULL;
-
-      while (line < data + bytesread)
-      {
-         ll = linelen(line);
-         nextline = line + ll;
-
-         if (nextline[0] != '\0' && nextline[1] != '\0')
-            *nextline++ = '\0';
-         else
-         {
-            offset = strmlcpy(data, line, 0, NULL);
-            break;
-         }
-
-         if (*(uint64_t*)line == *(uint64_t*)"inetnum:")
-         {
-            line += 8, ip = line + blanklen(line);
-            if (*ip)
-            {
-               char *ipstr_lo = ip;
-               ip += wordlen(ip);
-               *ip++ = '\0';
-               while (*ip && (*ip == '-' || *ip <= ' '))
-                 ip++;
-               char *ipstr_hi = ip;
-
-               sscanf(ipstr_lo, "%hhu.%hhu.%hhu.%hhu", &ipdsc_lo.nibble[b32_3], &ipdsc_lo.nibble[b32_2], &ipdsc_lo.nibble[b32_1], &ipdsc_lo.nibble[b32_0]);
-               if (*ipstr_hi)
-                  sscanf(ipstr_hi, "%hhu.%hhu.%hhu.%hhu", &ipdsc_hi.nibble[b32_3], &ipdsc_hi.nibble[b32_2], &ipdsc_hi.nibble[b32_1], &ipdsc_hi.nibble[b32_0]);
-               else
-                  ipdsc_hi.number = 0;
-            }
-         }
-
-         if (*(uint64_t*)line == *(uint64_t*)"country:")
-         {
-            line += 8, cc = line + blanklen(line);
-            if (ipdsc_lo.number && ipdsc_hi.number && *cc)
-            {
-               uppercase(cc, 2);
-               if (*(uint16_t*)cc != *(uint16_t*)"EU")
-               {
-                  while (node = findNetNode(ipdsc_lo.number, ipdsc_hi.number, *(uint16_t*)cc, IPStore))
-                  {
-                     if (node->lo < ipdsc_lo.number)
-                        ipdsc_lo.number = node->lo;
-
-                     if (node->hi > ipdsc_hi.number)
-                        ipdsc_hi.number = node->hi;
-
-                     removeIPNode(node->lo, &IPStore); count--;
-                  }
-
-                  addIPNode(ipdsc_lo.number, ipdsc_hi.number, *(uint16_t*)cc, &IPStore); count++;
-               }
-            }
-
-            ipdsc_lo.number = ipdsc_hi.number = 0;
-            cc = NULL;
-         }
-
-         line = nextline;
-      }
-   }
-
-   deallocate(VPR(data), false);
-   return count;
-}
-
+IP4Node *IP4Store = NULL;
+IP6Node *IP6Store = NULL;
 
 int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
 {
@@ -140,9 +51,6 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
    char  ver[4] = {};
    char  reg[8] = {};
 
-   IPNode  *node;
-   IPv4Desc ipdsc;
-
    while (totalread < totalsize && (bytesread = fread(data+offset, 1, chunksize-offset, in)) > 0)
    {
       totalread += bytesread;
@@ -151,8 +59,7 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
 
       int   vl = 0, rl = 0, fl, ll;
       char *line = data;
-      char *nextline, *cc, *iv, *ip, *ct;
-      uint32_t iplo, iphi;
+      char *nextline, *cc, *iv, *ip;
 
       while (line < data + bytesread)
       {
@@ -190,35 +97,72 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
             {
                fl = fieldlen(cc);
                iv = cc+fl+1;                    // the ip version
-               if (fl && *(uint32_t*)iv == *(uint32_t*)"ipv4")
-               {
-                  uppercase(cc, fl);
-                  cc[fl] = '\0';
-                  if (*(uint16_t*)cc != *(uint16_t*)"EU")
+               if (fl)
+                  if (*(uint32_t*)iv == *(uint32_t*)"ipv4")
                   {
-                     ip = iv+fieldlen(iv)+1;
-                     fl = fieldlen(ip);
-                     ip[fl] = '\0';
-                     sscanf(ip, "%hhu.%hhu.%hhu.%hhu", &ipdsc.nibble[b32_3], &ipdsc.nibble[b32_2], &ipdsc.nibble[b32_1], &ipdsc.nibble[b32_0]);
-                     iplo = ipdsc.number;
+                     IP4Node *node;
+                     uint32_t iplo, iphi;
 
-                     ct = ip+fl+1;
-                     iphi = iplo + (uint32_t)strtoul(ct, NULL, 10) - 1;
-
-                     while (node = findNetNode(iplo, iphi, *(uint16_t*)cc, IPStore))
+                     uppercase(cc, fl);
+                     cc[fl] = '\0';
+                     if (*(uint16_t*)cc != *(uint16_t*)"EU")
                      {
-                        if (node->lo < iplo)
-                           iplo = node->lo;
+                        ip = iv+fieldlen(iv)+1;
+                        fl = fieldlen(ip);
+                        ip[fl] = '\0';
+                        if (iplo = ipv4_str2bin(ip))
+                        {
+                           char *ct = ip+fl+1;
+                           iphi = iplo + (uint32_t)strtoul(ct, NULL, 10) - 1;
 
-                        if (node->hi > iphi)
-                           iphi = node->hi;
+                           while (node = findNet4Node(iplo, iphi, *(uint16_t*)cc, IP4Store))
+                           {
+                              if (node->lo < iplo)
+                                 iplo = node->lo;
 
-                        removeIPNode(node->lo, &IPStore); count--;
+                              if (node->hi > iphi)
+                                 iphi = node->hi;
+
+                              removeIP4Node(node->lo, &IP4Store); count--;
+                           }
+
+                           addIP4Node(iplo, iphi, *(uint16_t*)cc, &IP4Store); count++;
+                        }
                      }
-
-                     addIPNode(iplo, iphi, *(uint16_t*)cc, &IPStore); count++;
                   }
-               }
+
+                  else if (*(uint32_t*)iv == *(uint32_t*)"ipv6")
+                  {
+                     IP6Node  *node;
+                     uint128_t iplo, iphi;
+
+                     uppercase(cc, fl);
+                     cc[fl] = '\0';
+                     if (*(uint16_t*)cc != *(uint16_t*)"EU")
+                     {
+                        ip = iv+fieldlen(iv)+1;
+                        fl = fieldlen(ip);
+                        ip[fl] = '\0';
+                        if (iplo = ipv6_str2bin(ip))
+                        {
+                           char *pfx = ip+fl+1;
+                           iphi = iplo + inteb6(128 - (int32_t)strtoul(pfx, NULL, 10)) - 1;
+
+                           while (node = findNet6Node(iplo, iphi, *(uint16_t*)cc, IP6Store))
+                           {
+                              if (node->lo < iplo)
+                                 iplo = node->lo;
+
+                              if (node->hi > iphi)
+                                 iphi = node->hi;
+
+                              removeIP6Node(node->lo, &IP6Store); count--;
+                           }
+
+                           addIP6Node(iplo, iphi, *(uint16_t*)cc, &IP6Store); count++;
+                        }
+                     }
+                  }
             }
          }
 
@@ -236,47 +180,59 @@ int main(int argc, const char *argv[])
 {
    if (argc >= 3)
    {
-      int count = 0;
-      struct stat st;
-      FILE *in, *out;
+      int   namelen = strvlen(argv[1]);
+      char *out4Name = strcpy(alloca(namelen+4), argv[1]); *(uint32_t *)&out4Name[namelen] = *(uint32_t *)".v4";
+      char *out6Name = strcpy(alloca(namelen+4), argv[1]); *(uint32_t *)&out6Name[namelen] = *(uint32_t *)".v6";
+      FILE *out4, *out6;
 
-      if (out = fopen(argv[1], "w"))
-      {
-         printf("ipdb v1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
-         for (int inc = 2; inc < argc; inc++)
+      if (out4 = fopen(out4Name, "w"))
+         if (out6 = fopen(out6Name, "w"))
          {
-            if (stat(argv[inc], &st) == noerr && st.st_size && (in = fopen(argv[inc], "r")))
+            int    count = 0;
+            FILE  *in;
+            struct stat st;
+
+            printf("ipdb v1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
+            for (int inc = 2; inc < argc; inc++)
             {
-               const char *file = strrchr(argv[inc], '/');
-               if (file)
-                  file++;
-               else
-                  file = argv[inc];
-               printf(" %s ", file);
-               fflush(stdout);
-               if (strcmp(file, "ripe.db") != 0)
+               if (stat(argv[inc], &st) == noerr && st.st_size && (in = fopen(argv[inc], "r")))
+               {
+                  const char *file = strrchr(argv[inc], '/');
+                  if (file)
+                     file++;
+                  else
+                     file = argv[inc];
+                  printf(" %s ", file);
+                  fflush(stdout);
+
                   count += readRIRStatisticsFormat_v2(in, st.st_size);
+
+                  fclose(in);
+               }
+
                else
-                  count += readRIPEDataBaseFormat(in, st.st_size);
-
-               fclose(in);
+               {
+                  fclose(out6);
+                  fclose(out4);
+                  printf("\n");
+                  return 1;
+               }
             }
 
-            else
-            {
-               fclose(out);
-               printf("\n");
-               return 1;
-            }
+            serializeIP4Tree(out4, IP4Store);
+            releaseIP4Tree(IP4Store);
+
+            serializeIP6Tree(out6, IP6Store);
+            releaseIP6Tree(IP6Store);
+
+            fclose(out6);
+            fclose(out4);
+
+            printf("\n\nNumber of processed IP-Ranges = %d\n", count);
+            return 0;
          }
-
-         serializeIPTree(out, IPStore);
-         releaseIPTree(IPStore);
-         fclose(out);
-
-         printf("\n\nNumber of processed IPv4-Ranges = %d\n", count);
-         return 0;
-      }
+         else
+            fclose(out4);
    }
 
    return 1;

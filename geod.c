@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -189,11 +190,11 @@ void daemonize(DaemonKind kind)
 bool  allowMatch = true;
 
 CCNode **CCTable = NULL;
-IPNode  *IPStore = NULL;
+IP4Node  *IPStore = NULL;
 
 void releaseStores(void)
 {
-   releaseIPTree(IPStore);
+   releaseIP4Tree(IPStore);
    releaseCCTable(CCTable);
 }
 
@@ -284,10 +285,10 @@ int main(int argc, char *argv[])
    FILE *in;
    if (stat(bstfname, &st) == noerr && st.st_size && (in = fopen(bstfname, "r")))
    {
-      IPSet *sortedIPSets = allocate(st.st_size, false);
-      if (fread(sortedIPSets, st.st_size, 1, in))
-         IPStore = sortedIPSetsToTree(sortedIPSets, 0, (int)(st.st_size/sizeof(uint32_t))/3 - 1);
-      deallocate(VPR(sortedIPSets), false);
+      IP4Set *sortedIP4Sets = allocate(st.st_size, false);
+      if (fread(sortedIP4Sets, st.st_size, 1, in))
+         IPStore = sortedIP4SetsToTree(sortedIP4Sets, 0, (int)(st.st_size/sizeof(uint32_t))/3 - 1);
+      deallocate(VPR(sortedIP4Sets), false);
       fclose(in);
       atexit(releaseStores);
 
@@ -313,7 +314,7 @@ int main(int argc, char *argv[])
       struct sockaddr_in addr;
       socklen_t addrlen = sizeof(addr);
       ssize_t recvlen, sendlen;
-      IPNode *node;
+      IP4Node *node;
 
       for (;;)
       {
@@ -324,7 +325,7 @@ int main(int argc, char *argv[])
          }
 
          // don't filter if no CC list was given or if the source IP cannot be found in the ranges database
-         if (CCTable && (node = findIPNode(htonl(ip->ip_src.s_addr), IPStore)))
+         if (CCTable && (node = findIP4Node(htonl(ip->ip_src.s_addr), IPStore)))
          {
             bool doesMatch = findCC(CCTable, node->cc) != NULL;
             if (allowMatch && !doesMatch || !allowMatch && doesMatch)
