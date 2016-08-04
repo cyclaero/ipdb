@@ -390,32 +390,6 @@ int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
 }
 
 
-void importIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
-{
-   IP4Node *o = *node;
-
-   if (o != NULL)
-   {
-      if (lo < o->lo)
-         importIP4Node(lo, hi, cc, &o->L);
-
-      else if (lo > o->lo)
-         importIP4Node(lo, hi, cc, &o->R);
-   }
-
-   else // (o == NULL)                    // if the IP4Node is not in the tree
-   {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IP4Node), true))
-      {
-         o->lo = lo;
-         o->hi = hi;
-         o->cc = cc;
-         *node = o;                       // report back the new node
-      }
-   }
-}
-
-
 int removeIP4Node(uint32_t ip, IP4Node **node)
 {
    IP4Node *o = *node;
@@ -525,59 +499,6 @@ void releaseIP4Tree(IP4Node *node)
 
       deallocate(VPR(node), false);
    }
-}
-
-
-int treeIP4Height(IP4Node *node)
-{
-   if (node)
-      return +1 + maxi(treeIP4Height(node->L), treeIP4Height(node->R));
-   else
-      return -1;
-}
-
-
-bool checkIP4Balance(IP4Node *node)
-{
-   if (node)
-   {
-      bool c = true;
-      if (node->L)
-         c = checkIP4Balance(node->L);
-
-      if (c && node->R)
-         c = checkIP4Balance(node->R);
-
-      if (c)
-      {
-         int d = treeIP4Height(node->R) - treeIP4Height(node->L);
-         c = (-1 <= d && d <= 1);
-      }
-
-      return c;
-   }
-
-   return true;
-}
-
-
-IP4Node *sortedIP4SetsToTree(IP4Set *sortedIP4Sets, int start, int end)
-{
-   IP4Node *node;
-   if (start <= end && (node = allocate(sizeof(IP4Node), true)))
-   {
-      int mid = (start + end)/2;
-      node->lo = sortedIP4Sets[mid][0];
-      node->hi = sortedIP4Sets[mid][1];
-      node->cc = sortedIP4Sets[mid][2];
-
-      node->L = sortedIP4SetsToTree(sortedIP4Sets, start, mid-1);
-      node->R = sortedIP4SetsToTree(sortedIP4Sets, mid+1, end);
-
-      return node;
-   }
-   else
-      return NULL;
 }
 
 
@@ -797,32 +718,6 @@ int addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
 }
 
 
-void importIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
-{
-   IP6Node *o = *node;
-
-   if (o != NULL)
-   {
-      if (lo < o->lo)
-         importIP6Node(lo, hi, cc, &o->L);
-
-      else if (lo > o->lo)
-         importIP6Node(lo, hi, cc, &o->R);
-   }
-
-   else // (o == NULL)                    // if the IP6Node is not in the tree
-   {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IP6Node), true))
-      {
-         o->lo = lo;
-         o->hi = hi;
-         o->cc = cc;
-         *node = o;                       // report back the new node
-      }
-   }
-}
-
-
 int removeIP6Node(uint128_t ip, IP6Node **node)
 {
    IP6Node *o = *node;
@@ -932,59 +827,6 @@ void releaseIP6Tree(IP6Node *node)
 
       deallocate(VPR(node), false);
    }
-}
-
-
-int treeIP6Height(IP6Node *node)
-{
-   if (node)
-      return +1 + maxi(treeIP6Height(node->L), treeIP6Height(node->R));
-   else
-      return -1;
-}
-
-
-bool checkIP6Balance(IP6Node *node)
-{
-   if (node)
-   {
-      bool c = true;
-      if (node->L)
-         c = checkIP6Balance(node->L);
-
-      if (c && node->R)
-         c = checkIP6Balance(node->R);
-
-      if (c)
-      {
-         int d = treeIP6Height(node->R) - treeIP6Height(node->L);
-         c = (-1 <= d && d <= 1);
-      }
-
-      return c;
-   }
-
-   return true;
-}
-
-
-IP6Node *sortedIP6SetsToTree(IP6Set *sortedIP6Sets, int start, int end)
-{
-   IP6Node *node;
-   if (start <= end && (node = allocate(sizeof(IP6Node), true)))
-   {
-      int mid = (start + end)/2;
-      node->lo = sortedIP6Sets[mid][0];
-      node->hi = sortedIP6Sets[mid][1];
-      node->cc = (uint32_t)sortedIP6Sets[mid][2];
-
-      node->L = sortedIP6SetsToTree(sortedIP6Sets, start, mid-1);
-      node->R = sortedIP6SetsToTree(sortedIP6Sets, mid+1, end);
-
-      return node;
-   }
-   else
-      return NULL;
 }
 
 

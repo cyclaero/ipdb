@@ -187,14 +187,14 @@ void daemonize(DaemonKind kind)
 }
 
 
-bool  allowMatch = true;
+bool allowMatch = true;
 
 CCNode **CCTable = NULL;
-IP4Node  *IPStore = NULL;
+IP4Set  *sortedIP4Sets = NULL;
 
 void releaseStores(void)
 {
-   releaseIP4Tree(IPStore);
+   deallocate(VPR(sortedIP4Sets), false);
    releaseCCTable(CCTable);
 }
 
@@ -285,15 +285,17 @@ int main(int argc, char *argv[])
    FILE *in;
    if (stat(bstfname, &st) == noerr && st.st_size && (in = fopen(bstfname, "r")))
    {
-      IP4Set *sortedIP4Sets = allocate(st.st_size, false);
-      if (fread(sortedIP4Sets, st.st_size, 1, in))
-         IPStore = sortedIP4SetsToTree(sortedIP4Sets, 0, (int)(st.st_size/sizeof(uint32_t))/3 - 1);
-      deallocate(VPR(sortedIP4Sets), false);
-      fclose(in);
+      sortedIP4Sets = allocate(st.st_size, false);
       atexit(releaseStores);
+      rc = (int)fread(sortedIP4Sets, st.st_size, 1, in);
+      fclose(in);
+      if (!rc)
+      {
+         syslog(LOG_ERR, "IPv4 database file could not be loaded.");
+         exit(EXIT_FAILURE);
+      }
 
       int divertSock;
-
       if ((divertSock = socket(PF_INET, SOCK_RAW, IPPROTO_DIVERT)) < 0)
       {
          syslog(LOG_ERR, "Error creating the divert socket: %d", errno);
@@ -314,7 +316,8 @@ int main(int argc, char *argv[])
       struct sockaddr_in addr;
       socklen_t addrlen = sizeof(addr);
       ssize_t recvlen, sendlen;
-      IP4Node *node;
+
+      int o, n = (int)(st.st_size/sizeof(IP4Set));
 
       for (;;)
       {
@@ -324,10 +327,10 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
          }
 
-         // don't filter if no CC list was given or if the source IP cannot be found in the ranges database
-         if (CCTable && (node = findIP4Node(htonl(ip->ip_src.s_addr), IPStore)))
+         // don't filter if no CC list was given or if the source IP cannot be found in the IP ranges sets
+         if (CCTable && (o = bisectionIP4Search(htonl(ip->ip_src.s_addr), sortedIP4Sets, n)) >= 0)
          {
-            bool doesMatch = findCC(CCTable, node->cc) != NULL;
+            bool doesMatch = findCC(CCTable, sortedIP4Sets[o][2]) != NULL;
             if (allowMatch && !doesMatch || !allowMatch && doesMatch)
                continue;
          }

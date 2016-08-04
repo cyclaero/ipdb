@@ -477,13 +477,27 @@ typedef struct IP4Node
 IP4Node  *findIP4Node(uint32_t ip, IP4Node  *node);
 IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node  *node);
 int        addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node);
-void    importIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node);
 int     removeIP4Node(uint32_t ip, IP4Node **node);
+void serializeIP4Tree(FILE *out, IP4Node *node);
 void   releaseIP4Tree(IP4Node *node);
 
-void        serializeIP4Tree(FILE *out, IP4Node *node);
-IP4Node *sortedIP4SetsToTree(IP4Set *sortedIP4Sets, int start, int end);
+static inline int bisectionIP4Search(uint32_t ip4, IP4Set *sortedIP4Sets, int count)
+{
+   uint32_t  u;
+   int o, p, q;
+   for (p = 0, q = count-1; p <= q;)
+   {
+      o = (p + q) >> 1;
+      if ((u = sortedIP4Sets[o][0]) <= ip4 && ip4 <= sortedIP4Sets[o][1])
+         return o;
+      else if (ip4 < u)
+         q = o-1;
+      else // (ip4 > sortedIP4Sets[o][1])
+         p = o+1;
+   }
 
+   return -1;
+}
 
 
 #pragma mark ••• AVL Tree of IPv6-Ranges •••
@@ -511,13 +525,27 @@ typedef struct IP6Node
 IP6Node  *findIP6Node(uint128_t ip, IP6Node  *node);
 IP6Node *findNet6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node  *node);
 int        addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node);
-void    importIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node);
 int     removeIP6Node(uint128_t ip, IP6Node **node);
+void serializeIP6Tree(FILE *out, IP6Node *node);
 void   releaseIP6Tree(IP6Node *node);
 
-void        serializeIP6Tree(FILE *out, IP6Node *node);
-IP6Node *sortedIP6SetsToTree(IP6Set *sortedIP6Sets, int start, int end);
+static inline int bisectionIP6Search(uint128_t ip6, IP6Set *sortedIP6Sets, int count)
+{
+   uint128_t u;
+   int o, p, q;
+   for (p = 0, q = count-1; p <= q;)
+   {
+      o = (p + q) >> 1;
+      if ((u = sortedIP6Sets[o][0]) <= ip6 && ip6 <= sortedIP6Sets[o][1])
+         return o;
+      else if (ip6 < u)
+         q = o-1;
+      else // (ip6 > sortedIP6Sets[o][1])
+         p = o+1;
+   }
 
+   return -1;
+}
 
 
 #pragma mark ••• AVL Tree of Country Codes •••
@@ -655,7 +683,7 @@ static inline int32_t intlb6(uint128_t v)
 {
    uint128_t u;
    int o, p, q;
-   for (p = 0, q = 127;;)
+   for (p = 0, q = 127; p <= q;)
    {
       o = (p + q) >> 1;
       if ((u = v6[o].number) < v && v <= v6[o+1].number)
@@ -665,4 +693,6 @@ static inline int32_t intlb6(uint128_t v)
       else // (v > v6[o+1])
          p = o+1;
    }
+
+   return 0;
 }

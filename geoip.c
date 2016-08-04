@@ -66,8 +66,6 @@ void usage(const char *executable)
 
 
 CCNode **CCTable  = NULL;
-IP4Node *IP4Store = NULL;
-IP6Node *IP6Store = NULL;
 
 int main(int argc, char *argv[])
 {
@@ -174,6 +172,7 @@ int main(int argc, char *argv[])
 //
    if (ccList == NULL)
    {
+      int       o;
       uint32_t  ipv4;
       uint128_t ipv6;
       if (ipv4 = ipv4_str2bin(argv[0]))
@@ -187,14 +186,10 @@ int main(int argc, char *argv[])
             {
                if (fread(sortedIP4Sets, st.st_size, 1, in))
                {
-                  IP4Store = sortedIP4SetsToTree(sortedIP4Sets, 0, (int)(st.st_size/sizeof(IP4Set)) - 1);
-                  IP4Node *node = findIP4Node(ipv4, IP4Store);
-                  if (node)
-                     printf("%s in %s - %s in %s\n\n", argv[0], ipv4_bin2str(node->lo, ipstr_lo), ipv4_bin2str(node->hi, ipstr_hi), (char *)&node->cc);
+                  if ((o = bisectionIP4Search(ipv4, sortedIP4Sets, (int)(st.st_size/sizeof(IP4Set)))) >= 0)
+                     printf("%s in %s - %s in %s\n\n", argv[0], ipv4_bin2str(sortedIP4Sets[o][0], ipstr_lo), ipv4_bin2str(sortedIP4Sets[o][1], ipstr_hi), (char *)&sortedIP4Sets[o][2]);
                   else
                      printf("%s not found.\n\n", argv[0]);
-
-                  releaseIP4Tree(IP4Store);
                   rc = 0;
                }
                else
@@ -222,14 +217,10 @@ int main(int argc, char *argv[])
             {
                if (fread(sortedIP6Sets, st.st_size, 1, in))
                {
-                  IP6Store = sortedIP6SetsToTree(sortedIP6Sets, 0, (int)(st.st_size/sizeof(IP6Set)) - 1);
-                  IP6Node *node = findIP6Node(ipv6, IP6Store);
-                  if (node)
-                     printf("%s in %s - %s in %s\n\n", argv[0], ipv6_bin2str(node->lo, ipstr_lo), ipv6_bin2str(node->hi, ipstr_hi), (char *)&node->cc);
+                  if ((o = bisectionIP6Search(ipv6, sortedIP6Sets, (int)(st.st_size/sizeof(IP6Set)))) >= 0)
+                     printf("%s in %s - %s in %s\n\n", argv[0], ipv6_bin2str(sortedIP6Sets[o][0], ipstr_lo), ipv6_bin2str(sortedIP6Sets[o][1], ipstr_hi), (char *)&sortedIP6Sets[o][2]);
                   else
                      printf("%s not found.\n\n", argv[0]);
-
-                  releaseIP6Tree(IP6Store);
                   rc = 0;
                }
                else
