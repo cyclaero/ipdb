@@ -1123,21 +1123,6 @@ void releaseCCTree(CCNode *node)
 
 #pragma mark ••• Pseudo Hash Table of Country Codes •••
 
-#define ccTableSize 4096
-#define cc0Offset     16
-#define cc1Offset    -64
-
-typedef union
-{
-   uint8_t  byte[2];
-   uint16_t code;
-} CCDesc;
-
-static inline uint32_t cci(uint32_t cc)
-{
-   CCDesc ccd = {.code = (uint16_t)cc};
-   return ((uint32_t)(ccd.byte[b4_0] + cc0Offset)*(uint32_t)(ccd.byte[b4_1] + cc1Offset)) % ccTableSize;
-}
 
 // Table creation and release
 CCNode **createCCTable(void)
@@ -1157,6 +1142,12 @@ void releaseCCTable(CCNode *table[])
 
 
 // finding/storing/removing country codes
+
+static inline uint32_t cci(uint32_t cc)
+{
+   return (cc = cce((uint16_t)cc) < ccTableSize) ? cc : 0;  // the resulting index MUST FIT into the hash table
+}
+
 CCNode *findCC(CCNode *table[], uint32_t cc)
 {
    return findCCNode(cc, table[cci(cc)]);

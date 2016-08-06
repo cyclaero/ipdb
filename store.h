@@ -608,6 +608,14 @@ void releaseCCTree(CCNode *node);
 
 #pragma mark ••• Pseudo Hash Table of Country Codes •••
 
+#define ccTableSize 676
+
+static inline uint32_t cce(uint16_t cc)
+{
+   uint8_t *ca = (uint8_t *)&cc;
+   return (ca[b2_0]-'A')*26 + (ca[b2_1]-'A');   // AA to ZZ ranges from 0 to 675
+}
+
 CCNode **createCCTable(void);
 void    releaseCCTable(CCNode *table[]);
 
@@ -618,18 +626,6 @@ void  removeCC(CCNode *table[], uint32_t cc);
 
 
 #pragma mark ••• More utility functions •••
-
-static inline int maxi(int a, int b)
-{
-   return (a > b) ? a : b;
-}
-
-static inline int ccEncode(uint16_t cc)
-{
-   uint8_t *ca = (uint8_t *)&cc;
-   return (ca[b2_0]-60)*1000 + ca[b2_1]*10;
-}
-
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
