@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
          int tl = taglen(cc);
          if (cc[tl] == ':')
             cc[tl++] = '\0';
-         storeCC(CCTable, *(uint16_t *)uppercase(cc, 2));
+         storeCC(CCTable, cc);
          cc += tl;
       }
    }

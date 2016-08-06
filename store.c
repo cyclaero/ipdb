@@ -984,7 +984,7 @@ CCNode *findCCNode(uint32_t cc, CCNode *node)
 }
 
 
-int addCCNode(uint32_t cc, CCNode **node)
+int addCCNode(uint32_t cc, uint32_t ui, CCNode **node)
 {
    CCNode *o = *node;
 
@@ -993,10 +993,10 @@ int addCCNode(uint32_t cc, CCNode **node)
       int change;
 
       if (cc < o->cc)
-         change = -addCCNode(cc, &o->L);
+         change = -addCCNode(cc, ui, &o->L);
 
       else if (cc > o->cc)
-         change = +addCCNode(cc, &o->R);
+         change = +addCCNode(cc, ui, &o->R);
 
       else // (cc == o->cc)               // already in the list, do nothing
          return 0;
@@ -1015,6 +1015,7 @@ int addCCNode(uint32_t cc, CCNode **node)
       if (o = allocate(sizeof(CCNode), true))
       {
          o->cc = cc;
+         o->ui = ui;
          *node = o;                       // report back the new node
          return 1;                        // add the weight of 1 leaf onto the balance
       }
@@ -1161,9 +1162,23 @@ CCNode *findCC(CCNode *table[], uint32_t cc)
    return findCCNode(cc, table[cci(cc)]);
 }
 
-void storeCC(CCNode *table[], uint32_t cc)
+void storeCC(CCNode *table[], char *ccui)
 {
-   addCCNode(cc, &table[cci(cc)]);
+   int len = strvlen(ccui = trim(ccui));
+   if (len >= 2)
+   {
+      uint16_t cc;
+      int64_t  ui = 0;
+      cc = *(uint16_t *)uppercase(ccui, 2);
+      if (len > 2)
+      {
+         for (ccui += 2; *ccui && *ccui != '='; ccui++);
+         if (*ccui)
+            ui = strtol(ccui+1, NULL, 10);
+      }
+
+      addCCNode(cc, (0 < ui && ui < 4294967295) ? (uint32_t)ui : 0, &table[cci(cc)]);
+   }
 }
 
 void removeCC(CCNode *table[], uint32_t cc)

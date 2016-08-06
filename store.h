@@ -393,6 +393,48 @@
 
 #endif
 
+// forward skip white space  !!! s MUST NOT be NULL !!!
+static inline char *skip(char *s)
+{
+   for (;;)
+      switch (*s)
+      {
+         case '\t':
+         case '\n':
+         case '\r':
+         case ' ':
+            s++;
+            break;
+
+         default:
+            return s;
+      }
+}
+
+// backward skip white space  !!! s MUST NOT be NULL !!!
+static inline char *bskip(char *s)
+{
+   for (;;)
+      switch (*--s)
+      {
+         case '\t':
+         case '\n':
+         case '\r':
+         case ' ':
+            break;
+
+         default:
+            return s+1;
+      }
+}
+
+static inline char *trim(char *s)
+{
+   *bskip(s+strvlen(s)) = '\0';
+   return skip(s);
+}
+
+
 static inline char *lowercase(char *s, int n)
 {
    if (s)
@@ -553,13 +595,14 @@ static inline int bisectionIP6Search(uint128_t ip6, IP6Set *sortedIP6Sets, int c
 typedef struct CCNode
 {
    uint32_t cc;            // country code
+   uint32_t ui;            // user info
 
-   int32_t B;              // house holding
+   int32_t  B;             // house holding
    struct CCNode *L, *R;
 } CCNode;
 
 CCNode *findCCNode(uint32_t cc, CCNode  *node);
-int      addCCNode(uint32_t cc, CCNode **node);
+int      addCCNode(uint32_t cc, uint32_t ui, CCNode **node);
 int   removeCCNode(uint32_t cc, CCNode **node);
 void releaseCCTree(CCNode *node);
 
@@ -569,7 +612,7 @@ CCNode **createCCTable(void);
 void    releaseCCTable(CCNode *table[]);
 
 CCNode *findCC(CCNode *table[], uint32_t cc);
-void   storeCC(CCNode *table[], uint32_t cc);
+void   storeCC(CCNode *table[], char *ccui);
 void  removeCC(CCNode *table[], uint32_t cc);
 
 

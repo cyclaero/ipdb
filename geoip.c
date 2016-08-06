@@ -51,6 +51,9 @@ void usage(const char *executable)
    printf("   %s -t [CC:DD:EE:..] [-n table number] [-v table value] [-x offset] [-4] [-6] [-p] [-r bstfile] [-h]\n\n", r);
    printf("      -t [CC:DD:EE:..]  output all IP address/masklen pairs belonging to the listed countries, given by 2 letter\n");
    printf("                        capital country codes, separated by colon. An empty CC list means any country code.\n");
+   printf("                        A table value can be assigned per country code in the following manner:\n");
+   printf("                        -t BR=10000:DE=10100:US:CA:AU=10200. In the case of no assignment, no value\n");
+   printf("                        or the global value defined by either the -v or the -x option is utilized.\n");
    printf("      -n table number   the ipfw table number between 0 and 65534 [default: 0].\n");
    printf("      -v table value    the 32-bit unsigned value of the ipfw table entry [default: 0].\n");
    printf("      -x offset         output the decimal encoded country code + offset as the table value:\n");
@@ -250,14 +253,14 @@ int main(int argc, char *argv[])
       if (CCTable = createCCTable())
       {
          int count = 0;
-         char *cc = ccList;
-         while (*cc)
+         char *ccui = ccList;
+         while (*ccui)
          {
-            int tl = taglen(cc);
-            if (cc[tl] == ':')
-               cc[tl++] = '\0';
-            storeCC(CCTable, *(uint16_t *)uppercase(cc, 2));
-            cc += tl;
+            int tl = taglen(ccui);
+            if (ccui[tl] == ':')
+               ccui[tl++] = '\0';
+            storeCC(CCTable, ccui);
+            ccui += tl;
          }
 
       //
@@ -268,7 +271,8 @@ int main(int argc, char *argv[])
             *(uint32_t *)&inName[namelen] = *(uint32_t *)".v4";
             if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
             {
-               IP4Str ipstr;
+               CCNode *ccn = NULL;
+               IP4Str  ipstr;
                IP4Set *sortedIP4Sets = allocate(st.st_size, false);
                if (sortedIP4Sets)
                {
@@ -277,9 +281,10 @@ int main(int argc, char *argv[])
                      int i, n = (int)(st.st_size/sizeof(IP4Set));
                      for (i = 0; i < n; i++)
                      {
-                        if (!*ccList || findCC(CCTable, sortedIP4Sets[i][2]))
+                        if (!*ccList || (ccn = findCC(CCTable, sortedIP4Sets[i][2])))
                         {
                            uint32_t k, ip = sortedIP4Sets[i][0];
+                           uint32_t ui = (ccn) ? ccn->ui : 0;
                            do
                            {
                               int32_t m = intlb4(sortedIP4Sets[i][1] - ip + 1);
@@ -288,6 +293,8 @@ int main(int argc, char *argv[])
 
                               if (plainFlag)
                                  printf("%s/%d\n", ipv4_bin2str(ip, ipstr), 32 - m);
+                              else if (ui != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, ui);
                               else if (tval != 0)
                                  printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, tval);
                               else if (ccValFlag)
@@ -325,7 +332,8 @@ int main(int argc, char *argv[])
             *(uint32_t *)&inName[namelen] = *(uint32_t *)".v6";
             if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
             {
-               IP6Str ipstr;
+               CCNode *ccn = NULL;
+               IP6Str  ipstr;
                IP6Set *sortedIP6Sets = allocate(st.st_size, false);
                if (sortedIP6Sets)
                {
@@ -334,9 +342,10 @@ int main(int argc, char *argv[])
                      int i, n = (int)(st.st_size/sizeof(IP6Set));
                      for (i = 0; i < n; i++)
                      {
-                        if (!*ccList || findCC(CCTable, (uint32_t)sortedIP6Sets[i][2]))
+                        if (!*ccList || (ccn = findCC(CCTable, (uint32_t)sortedIP6Sets[i][2])))
                         {
                            uint128_t k, ip = sortedIP6Sets[i][0];
+                           uint32_t  ui = (ccn) ? ccn->ui : 0;
                            do
                            {
                               int32_t m = intlb6(sortedIP6Sets[i][1] - ip + 1);
@@ -345,6 +354,8 @@ int main(int argc, char *argv[])
 
                               if (plainFlag)
                                  printf("%s/%d\n", ipv6_bin2str(ip, ipstr), 128 - m);
+                              else if (ui != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, ui);
                               else if (tval != 0)
                                  printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, tval);
                               else if (ccValFlag)
