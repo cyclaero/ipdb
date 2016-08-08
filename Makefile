@@ -46,10 +46,10 @@ LDFLAGS   = -lm
 PREFIX   ?= /usr/local
 
 HEADER    = store.h
-SOURCES   = store.c ipdb.c geoip.c geod.c
+SOURCES   = store.c ipdb.c geoip.c
 OBJECTS   = $(SOURCES:.c=.o)
 
-all: $(HEADER) $(SOURCES) $(OBJECTS) ipdb geoip geod
+all: $(HEADER) $(SOURCES) $(OBJECTS) ipdb geoip
 
 depend:
 	$(CC) $(CFLAGS) -E -MM *.c > .depend
@@ -63,17 +63,13 @@ ipdb: $(OBJECTS)
 geoip: $(OBJECTS)
 	$(CC) store.o geoip.o $(LDFLAGS) -o $@
 
-geod: $(OBJECTS)
-	$(CC) store.o geod.o $(LDFLAGS) -o $@
-
 clean:
-	rm -rf *.o *.core ipdb geoip geod
+	rm -rf *.o *.core ipdb geoip
 
 update: clean all
 
-install: ipdb geoip geod
+install: ipdb geoip
 	install -m 555 -s ipdb ${PREFIX}/bin/ipdb
 	install -m 555 -s geoip ${PREFIX}/bin/geoip
-	install -m 555 -s geod ${PREFIX}/bin/geod
-	install -m 555 geod.rc ${PREFIX}/etc/rc.d/geod
 	install -m 555 ipdb-update.sh ${PREFIX}/bin/ipdb-update.sh
+	install -m 555 ipdbtools.1 ${PREFIX}/man/man1/ipdbtools.1

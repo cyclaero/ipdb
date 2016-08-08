@@ -52,6 +52,7 @@
 		7E37300C1D3C20B000CF7A4F /* geoip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = geoip.c; sourceTree = "<group>"; };
 		7E3730161D3C22E100CF7A4F /* geoip */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = geoip; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E3730181D3C6DB800CF7A4F /* README.md */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 4; };
+		7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */ = {isa = PBXFileReference; explicitFileType = text.man; path = ipdbtools.1; sourceTree = "<group>"; };
 		7EEC62071D32BCCD005630F5 /* ipdb */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ipdb; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EEC62111D32BDCD005630F5 /* ipdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ipdb.c; sourceTree = "<group>"; };
 		7EEC62131D32BDD6005630F5 /* store.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = store.c; sourceTree = "<group>"; };
@@ -96,6 +97,7 @@
 				7E37300C1D3C20B000CF7A4F /* geoip.c */,
 				7E1929451D37DE340010CA93 /* geod.c */,
 				7EEE068D1D3A944C0084AF67 /* geod.rc */,
+				7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */,
 				7EEE068A1D3A63E50084AF67 /* Makefile */,
 				7E30DB911D36655C007B1C7D /* ipdb-update.sh */,
 				7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */,
