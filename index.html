@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px 'SourceCodePro'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px 'SourceCodePro'; min-height: 14.0px}
+    span.s1 {font-variant-ligatures: no-common-ligatures}
+    span.s2 {text-decoration: underline ; font-variant-ligatures: no-common-ligatures}
+    @font-face {
+      font-family: SourceCodePro;
+      font-style: normal;
+      font-weight: 400;
+      src: url('SourceCodePro-Regular.ttf.woff') format('woff');
+    }
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">ipdbtools(1)<span class="spaces">            </span>FreeBSD General Commands Manual <span class="spaces">          </span>ipdbtools(1)</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>NAME</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>geoip</b> <b>-</b> <b>ipdb</b> <b>-</b> <b>ipdb-update.sh</b> -- Tools for IP based Geo-blocking and Geo-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>routing at the firewall on FreeBSD.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>SYNOPSIS</b></span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>1)<span class="spaces">    </span>look up the country code belonging to an IP address given by the</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>last command line argument:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>geoip</b> [<b>-h</b>] [<b>-r</b> </span><span class="s2">bstfile</span><span class="s1">] &lt;</span><span class="s2">IP_address</span><span class="s1">&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>2)<span class="spaces">    </span>generate a sorted list of IP address/masklen pairs per country</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>code, formatted as ipfw table construction directives:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>geoip</b> [<b>-h</b>] <b>-t</b> </span><span class="s2">CC:DD:..</span><span class="s1"> | </span><span class="s2">CC=nnnnn:DD=mmmmm:..</span><span class="s1"> | </span><span class="s2">""</span><span class="s1"> [<b>-n</b> </span><span class="s2">table_number</span><span class="s1">]</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>[<b>-v</b> </span><span class="s2">table_value</span><span class="s1">] [<b>-x</b> </span><span class="s2">offset</span><span class="s1">] [<b>-p</b>] [<b>-4</b>] [<b>-6</b>] [<b>-r</b> </span><span class="s2">bstfile</span><span class="s1">]</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>3)<span class="spaces">    </span>query for the encoded value of a country code:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>geoip</b> [<b>-h</b>] <b>-q</b> </span><span class="s2">CC</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>4)<span class="spaces">    </span>generate binary sorted tables (outnamebase.v4 and outnamebase.v6)</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>of IP ranges + country codes from RIR delegation statistics input</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>data files:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>ipdb</b> &lt;</span><span class="s2">outnamebase</span><span class="s1">&gt; &lt;</span><span class="s2">datafile1</span><span class="s1">&gt; &lt;</span><span class="s2">datafile2</span><span class="s1">&gt; &lt;</span><span class="s2">datafile3</span><span class="s1">&gt; ...</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>5)<span class="spaces">    </span>update the geoip database by downloading the 5 RIR delegation</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>statistics files from a <b>R</b>egional <b>I</b>nternet <b>R</b>egistry mirror, and</span></p>
+<p class="p1"><span class="s1"><span class="spaces">           </span>directly invoking (4) for generating the binary sorted tables:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>ipdb-update.sh</b> [&lt;</span><span class="s2">ftp.RIR__mirror_name.net</span><span class="s1">&gt;]</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>DESCRIPTION</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>In general, access control by the firewall is established by selectors</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>that can be attributed to incoming and outgoing IP-packets, like physical</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>interfaces on which the packets are going, source and target IP</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>addresses, protocol types, port numbers, content types and content, etc.</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>The geo-location would be just another selector, but this information is</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>not carried explicitly with the IP packets, however, it can be obtained</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>using the source IP address as a key for looking-up the location in a</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>geo-database. For example, besides other information, the country to</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>which a given IP address is delegated, can be obtained with the common</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>unix tool <b>whois</b>(1).</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>whois</b> does an online lookup in the databases of the 5 <b>R</b>egional <b>I</b>nternet</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>R</b>egistries (AFRINIC, APNIC, ARIN, LACNIC, RIPENCC), and this is the most</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>reliable way to obtain the country code for a given IP address, because</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>the RIR's are the authorities for internet number delegations. Unfortu-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>nately, online database lookup is by far too slow for even thinking about</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>being utilized on the firewall level, where IP packets need to be pro-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>cessed in a 10th or a 100th of a millisecond. Therefore, a locally main-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>tained Geo-IP database is indispensable in the given respect, and the</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>ipdbtools</b>(1) are designed to provide this on FreeBSD:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>- <b>ipdb-update.sh</b><span class="spaces">  </span>A shell script for updating the geoip database by</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>downloading the latest delegation statistics files of</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>the 5 RIR's.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>- <b>ipdb</b><span class="spaces">            </span>A tool for consolidating the IP address ranges from</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>the RIR delegation statistics files into binary sorted</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>tables, suitable for direct utilization by the very</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>fast bisection search algorithm of the geoip lookup</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>tool.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>- <b>geoip</b> <span class="spaces">          </span>A tool for manually looking up an IP address on the</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>command line, and for generation of CIDR conforming IP</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>tables per country code that are ready to use for IP</span></p>
+<p class="p1"><span class="s1"><span class="spaces">                        </span>table based actions by <b>ipfw</b>(8).</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>Setting</b> <b>up</b> <b>the</b> <b>local</b> <b>Geo-IP</b> <b>database</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>The authoritative Geo-IP information must be obtained from the 5 RIR's,</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>and compiled into an optimized format suitable for quickly looking up the</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>country codes of given IP addresses. This information is present in so</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>called delegation statistics file on the ftp servers of each RIR, and</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>APNIC, LACNIC and RIPENCC mirror the files of the other RIR's on their</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>servers - as of the date of this writing, ARIN and AFRINIC do not mirror</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>current delegation statistics of the other RIR's.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>1) Choose one of the three useful mirror sites, depending on where you</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>are located:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span><b>ftp.ripencc.net</b><span class="spaces">  </span>RIPENCC -- Europe and Eurasia [default mirror]</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span><b>ftp.apnic.net</b><span class="spaces">    </span>APNIC -- Asia Pacific</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span><b>ftp.lacnic.net</b> <span class="spaces">  </span>LACNIC -- Latin America and Caribbean</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>2) As user root execute the shell script <b>ipdb-update.sh</b> with the chosen</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>mirror as the parameter, for example ftp.apnic.net:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span># ipdb-update.sh ftp.apnic.net</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>&gt;&gt;&gt;&gt;</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/afrinic.md5<span class="spaces">  </span>100% of <span class="spaces">  </span>74<span class="spaces">  </span>B<span class="spaces">  </span>277 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/afrinic.dat<span class="spaces">  </span>100% of<span class="spaces">  </span>397 kB 1330 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/apnic.md5<span class="spaces">    </span>100% of <span class="spaces">  </span>73<span class="spaces">  </span>B<span class="spaces">  </span>264 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/apnic.dat<span class="spaces">    </span>100% of 4045 kB 1259 kBps 4s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/arin.md5 <span class="spaces">    </span>100% of <span class="spaces">  </span>67<span class="spaces">  </span>B<span class="spaces">  </span>246 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/arin.dat <span class="spaces">    </span>100% of 8160 kB 1270 kBps 7s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/lacnic.md5 <span class="spaces">  </span>100% of <span class="spaces">  </span>74<span class="spaces">  </span>B<span class="spaces">  </span>274 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/lacnic.dat <span class="spaces">  </span>100% of 1870 kB 1271 kBps 2s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.md5<span class="spaces">  </span>100% of <span class="spaces">  </span>74<span class="spaces">  </span>B<span class="spaces">  </span>270 kBps 0s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.dat<span class="spaces">  </span>100% of <span class="spaces">  </span>10 MB 1258 kBps 9s</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>ipdb v1.1 (34), Copyright A(C) 2016 Dr. Rolf Jansen</span></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>Processing RIR data files ...</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">       </span>afrinic.dat<span class="spaces">  </span>apnic.dat<span class="spaces">  </span>arin.dat<span class="spaces">  </span>lacnic.dat<span class="spaces">  </span>ripencc.dat</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">      </span>Number of processed IP-Ranges = 112602</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>As shown above, this would download the delegation statistics data</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>together with MD5 hashes for integrity checking into the directory</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span></span><span class="s2">/usr/local/etc/ipdb/IPRanges/</span><span class="s1">.<span class="spaces">  </span>Then just in the same go, the <b>ipdb</b> tool</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>would process the data files and generate two binary sorted table (.bst)</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>files, one for the IPv4 ranges </span><span class="s2">/usr/local/etc/IP-Ranges/ipcc.bst.v4</span><span class="s1"> and</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>another one for the IPv6 ranges </span><span class="s2">/usr/local/etc/IP-Ranges/ipcc.bst.v6</span><span class="s1">.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>Quering</b> <b>the</b> <b>local</b> <b>Geo-IP</b> <b>database</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>Use the <b>geoip</b> tool for the variuos queries:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>-h</b> <span class="spaces">      </span>Show the usage instructions.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-r</b> </span><span class="s2">bstfile</span><span class="s1">]</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>Base path to the binary sorted tables (.v4 and .v6) with the</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>consolidated IP ranges which were generated by the <b>ipdb</b> tool</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>[default: </span><span class="s2">/usr/local/etc/ipdb/IPRanges/ipcc.bst</span><span class="s1">].</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>First</b> <b>usage</b> <b>form</b> -- CC query:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>&lt;</span><span class="s2">IP_address</span><span class="s1">&gt;</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>IPv4 or IPv6 address of which the country code should be looked</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>up.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>Second</b> <b>usage</b> <b>form</b> -- firewall table generation:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>-t</b> </span><span class="s2">CC:DD:..</span><span class="s1"> | </span><span class="s2">CC=nnnnn:DD=mmmmm:..</span><span class="s1"> | </span><span class="s2">CC:DD=ooooo:EE;..</span><span class="s1"> | </span><span class="s2">""</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>Output all IP address/masklen pairs belonging to the listed</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>countries, given by 2 letter capital country codes, separated by</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>colon.<span class="spaces">  </span>An empty CC list means any country code. A table value</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>can be assigned per country code in the following manner: -t</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>BR=10000:DE=10100:US:CA:AU=10200. In the case of no assignment,</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>no value or the global value defined by either the -v or the -x</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>option is utilized.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-n</b> </span><span class="s2">table_number</span><span class="s1">]</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>The ipfw table number between 0 and 65534 [default: 0].</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-v</b> </span><span class="s2">table_value</span><span class="s1">]</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>A global 32-bit unsigned value for all ipfw table entries</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>[default: 0].</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-x</b> </span><span class="s2">offset</span><span class="s1">]</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>Decimal encode the given </span><span class="s2">CC</span><span class="s1"> and add it to the </span><span class="s2">offset</span><span class="s1"> for comput-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>ing the table value: value = </span><span class="s2">offset</span><span class="s1"> + ((C1 - 'A')*26 + (C2 -</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>'A'))*10.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-p</b>] <span class="spaces">    </span>Plain IP table generation, i.e. without ipfw table construction</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>directives, and any -n, -v and -x flags are ignored in this</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>mode.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-4</b>] <span class="spaces">    </span>Process only the </span><span class="s2">IPv4</span><span class="s1"> address ranges..</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>[<b>-6</b>] <span class="spaces">    </span>Process only the </span><span class="s2">IPv6</span><span class="s1"> address ranges.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>Third</b> <b>usage</b> <b>form</b> -- compute the encoded value of a country code (see -x</span></p>
+<p class="p1"><span class="s1"><span class="spaces">              </span>flag above):</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>-q</b> </span><span class="s2">CC</span><span class="s1"><span class="spaces">    </span>The country code to be encoded.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>EXAMPLES</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>Check whether the database is ready by looking up some addresses using</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>the <b>geoip</b> tool:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>$ geoip 62.175.157.33</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>62.175.157.33 in 62.174.0.0 - 62.175.255.255 in ES</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>$ geoip 141.33.17.2</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>141.33.17.2 in 141.12.0.0 - 141.80.255.255 in DE</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>$ geoip 99.67.80.80</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>99.67.80.80 in 98.160.0.0 - 99.191.255.255 in US</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>$ geoip 192.168.1.1</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>192.168.1.1 not found</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>$ geoip 2001:0618:85a3:08d3:1319:8a2e:0370:7344</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>2001:0618:85a3:08d3:1319:8a2e:0370:7344 in 2001:618:0:0:0:0:0:0 -</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>2001:618:ffff:ffff:ffff:ffff:ffff:ffff in CH</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>geoip</b> can be used for Geo-blocking together with <b>ipfw</b>(8). For this spur-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>pose, <b>geoip</b> would generate tables of CIDR ranges for the selected country</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>codes, and these tables can be directly piped into <b>ipfw</b>(8).<span class="spaces">  </span>The respec-</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>tive configuration script may contain something like:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span># allow only web access from DE, BR, US:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/usr/local/bin/geoip -t DE:BR:US -n 7 | /sbin/ipfw -q /dev/stdin</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/sbin/ipfw -q add 70 deny tcp from not table\(7\) to any 80,443 in recv</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>em0 setup</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span><b>OR</b> vice versa:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span># deny web access from certain disgraceful regions:</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/usr/local/bin/geoip -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/sbin/ipfw -q add 70 allow tcp from not table to any 80,443 in recv em0</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>setup</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>For keeping the database updated, <b>ipdb-update.sh</b> may be executed by a</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>weekly cronjob, for this you might want to add the following entry to</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/etc/crontab:</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span># weekly update of the IP geo-location databases</span></p>
+<p class="p1"><span class="s1"><span class="spaces">       </span>5<span class="spaces">    </span>4<span class="spaces">    </span>*<span class="spaces">    </span>*<span class="spaces">    </span>6<span class="spaces">    </span>root<span class="spaces">    </span>/usr/local/bin/ipdb-update.sh</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>ftp.apnic.net &gt; /dev/null 2&gt;&amp;1 &amp;&amp; /usr/sbin/service geod restart &gt;</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/dev/null</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>...</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>FILES</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/usr/local/etc/IP-Ranges/</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>directory for maintainig the geoip database</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/usr/local/etc/IP-Ranges/ipcc.bst.v4</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>binary (</span><span class="s2">uint32_t</span><span class="s1">), sorted table of IPv4 ranges and its country codes</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>/usr/local/etc/IP-Ranges/ipcc.bst.v4</span></p>
+<p class="p1"><span class="s1"><span class="spaces">        </span>binary (</span><span class="s2">uint128_t</span><span class="s1">), sorted table of IPv6 ranges and its country codes</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>SEE</b> <b>ALSO</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>whois(1), ipfw(8), ip2cc(1), IP::Country(3)</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>AUTHOR</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>Dr. Rolf Jansen - Copyright (c) 2016 - all rights reserved.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>IMPORTANT</b> <b>NOTE</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>Improper use of the <b>ipdb</b> <b>tools</b> may result in erroneous IP tables, and a</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>firewall may be rendered non-functional once configured with incorrect</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>tables.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>In NO event shall the author and/or copyright owner be liable for ANY</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>damages resulting from ANY use of this software. Use the <b>ipdb</b> <b>tools</b> at</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>your own risk!</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><b>BUGS</b></span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>The <b>ipdb</b> <b>tools</b> have been carefully developed and tested. Anyway the tools</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>are provided without any expressed or implied warrantee of being 100 %</span></p>
+<p class="p1"><span class="s1"><span class="spaces">     </span>bug free.</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">FreeBSD <span class="spaces">                        </span>August 8, 2016 <span class="spaces">                        </span>FreeBSD</span></p>
+</body>
+</html>
