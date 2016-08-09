@@ -131,7 +131,7 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.0 (42), Copyright © 2016 Dr. Rolf Jansen
+ ipdb v1.1.0 (44), Copyright © 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
@@ -167,7 +167,9 @@ The ipfw table number between 0 and 65534 [default: 0].
 .It Op Fl v Ar table_value
 A global 32-bit unsigned value for all ipfw table entries [default: 0].
 .It Op Fl x Ar offset
-Decimal encode the given \fICC\fP and add it to the \fIoffset\fP for computing the table value: value = \fIoffset\fP + ((C1 - 'A')*26 + (C2 - 'A'))*10.
+Decimal encode the given \fICC\fP and add it to the \fIoffset\fP for computing the table value:
+.br
+value = \fIoffset\fP + ((C1 - 'A')*26 + (C2 - 'A'))*10.
 .It Op Fl p
 Plain IP table generation, i.e. without ipfw table construction directives, and any -n, -v and -x flags are ignored in this mode.
 .It Op Fl 4

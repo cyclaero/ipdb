@@ -58,7 +58,7 @@ void usage(const char *executable)
    printf("      -n table number   The ipfw table number between 0 and 65534 [default: 0].\n");
    printf("      -v table value    A global 32-bit unsigned value for all ipfw table entries [default: 0].\n");
    printf("      -x offset         Decimal encoded given CC and add it to the offset for computing the table value:\n");
-   printf("                        value = offset + ((C1 - 'A')*26 + (C2 - 'A'))*10\n");
+   printf("                        value = offset + ((C1 - 'A')*26 + (C2 - 'A'))*10.\n");
    printf("      -p                Plain IP table generation, i.e. without ipfw table construction directives,\n");
    printf("                        and any -n, -v and -x flags are ignored in this mode.\n");
    printf("      -4                Process only the IPv4 address ranges.\n");
