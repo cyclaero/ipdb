@@ -49,10 +49,10 @@ void usage(const char *executable)
    printf("      <IP address>      IPv4 or IPv6 address of which the country code is to be looked up.\n\n");
    printf("      -h                Show these usage instructions.\n\n");
    printf("2) generate a sorted list of IP address/masklen pairs per country code, formatted as ipfw table construction directives:\n\n");
-   printf("   %s -t CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | "" [-n table number] [-v table value] [-x offset] [-p] [-4] [-6] [-r bstfiles]\n\n", r);
+   printf("   %s -t CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | \"\" [-n table number] [-v table value] [-x offset] [-p] [-4] [-6] [-r bstfiles]\n\n", r);
    printf("      -t CC:DD:..       Output all IP address/masklen pairs belonging to the listed countries, given by 2 letter\n");
    printf("         | CC=nnnnn:..  capital country codes, separated by colon. An empty CC list means any country code.\n");
-   printf("           | ""         A table value can be assigned per country code in the following manner:\n");
+   printf("           | \"\"         A table value can be assigned per country code in the following manner:\n");
    printf("                        -t BR=10000:DE=10100:US:CA:AU=10200. In the case of no assignment, no value\n");
    printf("                        or the global value defined by either the -v or the -x option is utilized.\n");
    printf("      -n table number   The ipfw table number between 0 and 65534 [default: 0].\n");
