@@ -40,7 +40,7 @@ REVNUM != svnversion
 REVNUM != cut -d= -f2 svnrev.xcconfig
 .endif
 
-CC        = clang
+CC       ?= clang
 CFLAGS    = $(CDEFS) -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -mssse3 -Wno-parentheses -Wno-empty-body
 LDFLAGS   = -lm
 PREFIX   ?= /usr/local
