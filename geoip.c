@@ -42,7 +42,7 @@ void usage(const char *executable)
 {
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
-   printf("%s v1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n\n", r);
+   printf("%s v1.1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n\n", r);
    printf("Usage:\n\n");
    printf("1) look up the country code belonging to an IP address given by the last command line argument:\n\n");
    printf("   %s [-r bstfiles] [-h] <IP address>\n", r);
@@ -57,7 +57,7 @@ void usage(const char *executable)
    printf("                        or the global value defined by either the -v or the -x option is utilized.\n");
    printf("      -n table number   The ipfw table number between 0 and 65534 [default: 0].\n");
    printf("      -v table value    A global 32-bit unsigned value for all ipfw table entries [default: 0].\n");
-   printf("      -x offset         Decimal encoded given \fICC\fP and add it to the \fIoffset\fP for computing the table value:\n");
+   printf("      -x offset         Decimal encoded given CC and add it to the offset for computing the table value:\n");
    printf("                        value = offset + ((C1 - 'A')*26 + (C2 - 'A'))*10\n");
    printf("      -p                Plain IP table generation, i.e. without ipfw table construction directives,\n");
    printf("                        and any -n, -v and -x flags are ignored in this mode.\n");
