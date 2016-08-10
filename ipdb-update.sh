@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Shell Script for updating the geoip database by downloading
+# Shell Script for updating the Geo-location databases by downloading
 # the latest delegation statistics files of the 5 RIR's.
 #
 # Created by Dr. Rolf Jansen on 2016-07-15.
@@ -26,6 +26,20 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+# verify the path to the fetch utility
+if [ -e "/usr/bin/fetch" ]; then
+   FETCH="/usr/bin/fetch"
+elif [ -e "/usr/local/bin/fetch" ]; then
+   FETCH="/usr/local/bin/fetch"
+elif [ -e "/opt/local/bin/fetch" ]; then
+   FETCH="/opt/local/bin/fetch"
+else
+   echo "No fetch utility can be found on the system -- Stopping."
+   echo "On Mac OS X, execute either 'sudo port install fetch' or install"
+   echo "fetch from source into '/usr/local/bin', and then try again."
+   exit 1
+fi
+
 if [ "$1" == "" ]; then
 #  ?IRROR="ftp.afrinic.net" -- as of 2016-07-15, AFRINIC does not mirror the data of the other RIR's
 #  MIRROR="ftp.apnic.net"   -- the RIPE directory is named ripe-ncc instead of ripencc
@@ -41,7 +55,7 @@ if [ $MIRROR == "" ]; then
 fi
 
 if [ $MIRROR == "ftp.afrinic.net" ] || [ $MIRROR == "ftp.arin.net" ]; then
-   echo "WARNING:  ARIN and AFRINIC do not reliably mirror the data of the other RIR's"
+   echo "ARIN and AFRINIC do not reliably mirror the data of the other RIR's -- Stopping."
    exit 1
 fi
 
@@ -59,8 +73,8 @@ fi
 
 # AFRINIC IPv4 ranges
 rm -f "$IPRanges/afrinic.md5"
-/usr/bin/fetch -o "$IPRanges/afrinic.md5" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest.md5" && \
-/usr/bin/fetch -o "$IPRanges/afrinic.dat" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest"
+$FETCH -o "$IPRanges/afrinic.md5" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest.md5" && \
+$FETCH -o "$IPRanges/afrinic.dat" "ftp://$MIRROR/pub/stats/afrinic/delegated-afrinic-extended-latest"
 if [ -f "$IPRanges/afrinic.md5" ] && [ -f "$IPRanges/afrinic.dat" ]; then
    stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/afrinic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/afrinic.dat"`
@@ -73,8 +87,8 @@ fi
 
 # APNIC IPv4 ranges
 rm -f "$IPRanges/apnic.md5"
-/usr/bin/fetch -o "$IPRanges/apnic.md5" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest.md5" && \
-/usr/bin/fetch -o "$IPRanges/apnic.dat" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest"
+$FETCH -o "$IPRanges/apnic.md5" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest.md5" && \
+$FETCH -o "$IPRanges/apnic.dat" "ftp://$MIRROR/pub/stats/apnic/delegated-apnic-extended-latest"
 if [ -f "$IPRanges/apnic.md5" ] && [ -f "$IPRanges/apnic.dat" ]; then
    stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/apnic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/apnic.dat"`
@@ -87,8 +101,8 @@ fi
 
 # ARIN IPv4 ranges
 rm -f "$IPRanges/arin.md5"
-/usr/bin/fetch -o "$IPRanges/arin.md5" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest.md5" && \
-/usr/bin/fetch -o "$IPRanges/arin.dat" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest"
+$FETCH -o "$IPRanges/arin.md5" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest.md5" && \
+$FETCH -o "$IPRanges/arin.dat" "ftp://$MIRROR/pub/stats/arin/delegated-arin-extended-latest"
 if [ -f "$IPRanges/arin.md5" ] && [ -f "$IPRanges/arin.dat" ]; then
    stored_md5=`/usr/bin/cut -d " " -f1 "$IPRanges/arin.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/arin.dat"`
@@ -101,8 +115,8 @@ fi
 
 # LACNIC IPv4 ranges
 rm -f "$IPRanges/lacnic.md5"
-/usr/bin/fetch -o "$IPRanges/lacnic.md5" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest.md5" && \
-/usr/bin/fetch -o "$IPRanges/lacnic.dat" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest"
+$FETCH -o "$IPRanges/lacnic.md5" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest.md5" && \
+$FETCH -o "$IPRanges/lacnic.dat" "ftp://$MIRROR/pub/stats/lacnic/delegated-lacnic-extended-latest"
 if [ -f "$IPRanges/lacnic.md5" ] && [ -f "$IPRanges/lacnic.dat" ]; then
    stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/lacnic.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/lacnic.dat"`
@@ -115,8 +129,8 @@ fi
 
 # RIPENCC IPv4 ranges
 rm -f "$IPRanges/ripencc.md5"
-/usr/bin/fetch -o "$IPRanges/ripencc.md5" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest.md5" && \
-/usr/bin/fetch -o "$IPRanges/ripencc.dat" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest"
+$FETCH -o "$IPRanges/ripencc.md5" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest.md5" && \
+$FETCH -o "$IPRanges/ripencc.dat" "ftp://$MIRROR/pub/stats/$RIPEDIR/delegated-ripencc-extended-latest"
 if [ -f "$IPRanges/ripencc.md5" ] && [ -f "$IPRanges/ripencc.dat" ]; then
    stored_md5=`/usr/bin/cut -d " " -f4 "$IPRanges/ripencc.md5"`
    actual_md5=`/sbin/md5 -q "$IPRanges/ripencc.dat"`

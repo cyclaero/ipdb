@@ -1,5 +1,5 @@
-//  geoip.c
-//  geoip
+//  ipup.c
+//  ipup
 //
 //  Created by Dr. Rolf Jansen on 2016-07-17.
 //  Copyright © 2016 projectworld.net. All rights reserved.

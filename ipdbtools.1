@@ -22,24 +22,22 @@
 .\" IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 .\" THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd 2016-08-09
+.Dd 2016-08-10
 .Dt ipdbtools 1
-.Os FreeBSD
+.Os FreeBSD, Darwin
 .Sh NAME
-.Nm geoip
+.Nm ipup
 .Nm - ipdb
 .Nm - ipdb-update.sh
-.Nd Tools for IP based Geo-blocking and Geo-routing at the firewall on FreeBSD
+.Nd Tools for generating IP based Geo-blocking and Geo-routing tables
+in order to configure the system's firewall and/or routing facilities
+.sp
 .Sh SYNOPSIS
-\fP
-.Cd \fP1)\ \ \ \ look up the country code belonging to an IP address given by the last command line argument:
 .Nm
 .Op Fl h
 .Op Fl r Ar bstfiles
 .Ao Ar IP_address Ac
-\fP
 .sp
-.Cd \fP2)\ \ \ \ generate a sorted list of IP address/masklen pairs per country code, formatted as ipfw table construction directives:
 .Nm
 .Op Fl h
 .Fl t Ar CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | \*q\*q
@@ -50,58 +48,59 @@
 .Op Fl 4
 .Op Fl 6
 .Op Fl r Ar bstfiles
-\fP
 .sp
-.Cd \fP3)\ \ \ \ query for the encoded value of a country code:
 .Nm
 .Op Fl h
 .Fl q Ar CC
-\fP
 .sp
-.Cd \fP4)\ \ \ \ generate binary sorted tables (outnamebase.v4 and outnamebase.v6) of IP ranges + country codes from RIR delegation statistics input data files:
 .Nm ipdb
 .Ao Ar outnamebase Ac Ao Ar datafile1 Ac Ao Ar datafile2 Ac Ao Ar datafile3 Ac ...
-\fP
 .sp
-.Cd \fP5)\ \ \ \ update the geoip database by downloading the 5 RIR delegation statistics files from a
-\fBR\fPegional \fBI\fPnternet \fBR\fPegistry mirror, and directly invoking (4) for generating the binary sorted tables:
 .Nm ipdb-update.sh
 .Op Ao Ar ftp.RIR__mirror_name.net Ac
+.sp
 .Sh DESCRIPTION
-In general, access control by the firewall is established by selectors that can be attributed to incoming and outgoing IP-packets,
-like physical interfaces on which the packets are going, source and target IP addresses, protocol types, port numbers, content types
-and content, etc. The geo-location would be just another selector, but this information is not carried explicitly with the IP packets,
-however, it can be obtained using the source IP address as a key for looking-up the location in a geo-database. For example, besides
-other information, the country to which a given IP address is delegated, can be obtained with the common unix tool \fBwhois\fP(1).
+In general, routing is determined by destination IP addresses, and access control by the firewall is established by selectors that
+can be attributed to incoming and outgoing IP packets, like physical interfaces on which the packets are going, source and target IP
+addresses, protocol types, port numbers, content types and content, etc. The geo-location would be just another selector, but this
+information is not carried explicitly with IP packets, however, it can be obtained using an IP address as a key for looking-up the
+location in an IP database. For example the country to which a given IP address is delegated, can be obtained with the common Unix tool \fBwhois\fP(1).
 .Pp
-\fBwhois\fP does an online lookup in the databases of the 5 \fBR\fPegional \fBI\fPnternet \fBR\fPegistries (AFRINIC, APNIC, ARIN, LACNIC, RIPENCC),
-and this is the most reliable way to obtain the country code for a given IP address, because the RIR's are the authorities for
-internet number delegations. Unfortunately, online database lookup is by far too slow for even thinking about being utilized
-on the firewall level, where IP packets need to be processed in a 10th or a 100th of a millisecond. Therefore, a locally maintained
-Geo-IP database is indispensable in the given respect, and the \fBipdbtools\fP(1) are designed to provide this on FreeBSD:
-.Bl -tag -width " - ipdb-update.sh "
-.It \ - \fBipdb-update.sh\fP
-A shell script for updating the geoip database by downloading the latest delegation statistics files of the 5 RIR's.
-.It \ - \fBipdb\fP
+\fBwhois\fP does an online look-up in the IP databases of the 5 \fBR\fPegional \fBI\fPnternet \fBR\fPegistries (AFRINIC, APNIC, ARIN, LACNIC, RIPENCC),
+and this is the most reliable way to obtain the country code for a given IP address, because the \fBRIR\fP's are the authorities for
+internet number delegations. Unfortunately, online database look-up is by far too slow for even thinking about being utilized
+on the firewall level, where IP packets need to be processed in a microsecond time scale. Therefore, a locally maintained
+IP Geo-location database is indispensable in the given respect. The System's own routing and filtering tables can be configured
+to do these tasks if there is a source of the appropriate data. The \fBipdbtools\fP(1) are designed to provide this data
+and to assist managing and using it.
+.Pp
+The three tools in the package are:
+.Bl -tag -width "  ipdb-update.sh"
+.It \ \ \fBipup\fP
+A tool to utilize the database files to look-up the country code belonging to an IP address or generate a sorted lists of CIDR
+compatible IP address/masklen pairs per country code, formatted as raw CIDR ranges or \fBipfw\fP(8) table construction directives.
+.It \ \ \fBipdb\fP
 A tool for consolidating the IP address ranges from the RIR delegation statistics files into binary sorted tables, suitable for
-direct utilization by the very fast bisection search algorithm of the geoip lookup tool.
-.It \ - \fBgeoip\fP
-A tool for manually looking up an IP address on the command line, and for generation of CIDR conforming IP tables
-per country code that are ready to use for IP table based actions by \fBipfw\fP(8).
+direct utilization by the \fBipup\fP look-up tool. This tool will generate binary sorted tables of IP ranges + country codes, for both
+IPv4 and IPv6, from the RIR delegation statistics input data files.
+.It \ \ \fBipdb-update.sh\fP
+A shell script to update the IP Geo-location database by downloading the 5 RIR delegation statistics files from a \fBR\fPegional \fBI\fPnternet
+\fBR\fPegistry mirror, and invoking \fBipdb\fP to generate the binary sorted tables. It is suitable for inclusion into cron.
 .El
-.Sh Setting up the local Geo-IP database
-The authoritative Geo-IP information must be obtained from the 5 RIR's, and compiled into an optimized format suitable for quickly
-looking up the country codes of given IP addresses. This information is present in so called delegation statistics files on the
+.sp
+.Sh Setting up the local IP Geo-location database
+The authoritative IP Geo-location information must be obtained from the 5 RIR's, and compiled into an optimized format, suitable for quickly
+looking-up the country codes of given IP addresses. This information is present in so called delegation statistics files on the
 ftp servers of each RIR, and APNIC, LACNIC and RIPENCC mirror the files of the other RIR's on their servers - as of the date
 of this writing, ARIN and AFRINIC do not mirror current delegation statistics of the other RIR's.
 .Pp
 1) Choose one of the three useful mirror sites, depending on where you are located:
-.Bl -tag -width "   ftp.ripencc.net "
-.It \ \ \ \fBftp.ripencc.net\fP
+.Bl -tag -width "  ftp.ripencc.net "
+.It \ \ \fBftp.ripencc.net\fP
 RIPENCC -- Europe and Eurasia [default mirror]
-.It \ \ \ \fBftp.apnic.net\fP
+.It \ \ \fBftp.apnic.net\fP
 APNIC -- Asia Pacific
-.It \ \ \ \fBftp.lacnic.net\fP
+.It \ \ \fBftp.lacnic.net\fP
 LACNIC -- Latin America and Caribbean
 .El
 .Pp
@@ -131,7 +130,7 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.0 (44), Copyright © 2016 Dr. Rolf Jansen
+ ipdb v1.1.0 (50), Copyright © 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
@@ -139,13 +138,16 @@ LACNIC -- Latin America and Caribbean
 .sp
  Number of processed IP-Ranges = 112602
 .sp
-As shown above, this would download the delegation statistics data together with MD5 hashes for integrity checking into the directory
+As shown above, this will download the delegation statistics data together with MD5 hashes for integrity checking into the directory
 .Ar /usr/local/etc/ipdb/IPRanges/ .
-Then just in the same go, the \fBipdb\fP tool would process the data files and generate two binary sorted table (.bst) files, one for the IPv4 ranges
+Then the \fBipdb\fP tool will process the data files and generate two binary sorted table (.bst) files, one for the IPv4 ranges
 .Ar /usr/local/etc/IP-Ranges/ipcc.bst.v4
 and another one for the IPv6 ranges
 .Ar /usr/local/etc/IP-Ranges/ipcc.bst.v6 .
-.Sh Quering the local Geo-IP database
+.sp
+.Sh USAGE AND OPTIONS
+\fBQuering the local IP Geo-location database\fP
+.sp
 Use the
 .Nm
 tool for the various queries:
@@ -154,18 +156,23 @@ tool for the various queries:
 Show the usage instructions.
 .It Op Fl r Ar bstfiles
 Base path to the binary sorted tables (.v4 and .v6) with the consolidated IP ranges which were generated by the \fBipdb\fP tool [default: \fI/usr/local/etc/ipdb/IPRanges/ipcc.bst\fP].
+.sp
 .It \fBFirst usage form\fP -- CC query:
 .It Ao Ar IP_address Ac
-IPv4 or IPv6 address for which the country code should be looked up.
+IPv4 or IPv6 address for which the country code should be looked-up.
+.sp
 .It \fBSecond usage form\fP -- firewall table generation:
 .It Fl t Ar CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | CC:DD=ooooo:EE;.. | \*q\*q
-Output all IP address/masklen pairs belonging to the listed countries, given by 2 letter capital country codes, separated by colon.
-An empty CC list means any country code. A table value can be assigned per country code in the following manner:
--t BR=10000:DE=10100:US:CA:AU=10200. In the case of no assignment, no value or the global value defined by either the -v or the -x option is utilized.
+Output all IP address/masklen pairs belonging to the listed countries, given by 2 letter capital country codes, separated by colon. An empty CC
+list means any country code. A table value can be assigned per country code in the following manner:
+.br
+\ \ -t BR=10000:DE=10100:US:CA:AU=10200.
+.br
+In the case of no assignment, no value [0] or the global value defined by either the -v or the -x option is utilized.
 .It Op Fl n Ar table_number
 The ipfw table number between 0 and 65534 [default: 0].
 .It Op Fl v Ar table_value
-A global 32-bit unsigned value for all ipfw table entries [default: 0].
+A global 32-bit unsigned value for all ipfw table entries [default: no value -> 0].
 .It Op Fl x Ar offset
 Decimal encode the given \fICC\fP and add it to the \fIoffset\fP for computing the table value:
 .br
@@ -176,83 +183,108 @@ Plain IP table generation, i.e. without ipfw table construction directives, and 
 Process only the \fIIPv4\fP address ranges.
 .It Op Fl 6
 Process only the \fIIPv6\fP address ranges.
-.It \fBThird usage form\fP -- compute the encoded value of a country code (see -x flag above):
+.sp
+.It \fBThird usage form\fP -- compute the encoded value of a country code:
 .It Fl q Ar CC
-The country code to be encoded.
+The country code to be encoded (see -x flag above).
 .El
+.sp
 .Sh EXAMPLES
-Check whether the database is ready by looking up some addresses using the
+Check whether the IP Geo-location database is ready by looking-up some addresses using the
 .Nm
 tool:
 .br
 .sp
-$ geoip 62.175.157.33
+$ ipup 62.175.157.33
 .br
 \ \ \ 62.175.157.33 in 62.174.0.0 - 62.175.255.255 in ES
 .br
 .sp
-$ geoip 141.33.17.2
+$ ipup 141.33.17.2
 .br
 \ \ \ 141.33.17.2 in 141.12.0.0 - 141.80.255.255 in DE
 .br
 .sp
-$ geoip 99.67.80.80
+$ ipup 99.67.80.80
 .br
 \ \ \ 99.67.80.80 in 98.160.0.0 - 99.191.255.255 in US
 .br
 .sp
-$ geoip 192.168.1.1
+$ ipup 192.168.1.1
 .br
 \ \ \ 192.168.1.1 not found
 .br
 .sp
-$ geoip 2001:0618:85a3:08d3:1319:8a2e:0370:7344
+$ ipup 2001:0618:85a3:08d3:1319:8a2e:0370:7344
 .br
 \ \ \ 2001:0618:85a3:08d3:1319:8a2e:0370:7344 in 2001:618:0:0:0:0:0:0 - 2001:618:ffff:ffff:ffff:ffff:ffff:ffff in CH
 .br
 .sp
+.Sh Firewall Examples
 .Nm
-can be used for Geo-blocking together with \fBipfw\fP(8). For this spurpose,
+can be used for Geo-blocking together with \fBipfw\fP(8). For this purpose,
 .Nm
-would generate tables of CIDR ranges for the selected country codes, and these tables can be directly piped into \fBipfw\fP(8).
-The respective configuration script may contain something like:
-.br
+would generate tables of CIDR ranges for the selected country codes, and these tables can be directly piped into
+\fBipfw\fP(8). The respective configuration script may contain something like:
 .sp
 \&.\&.\&.
 .br
-# allow only web access from DE, BR, US:
+# Allow only web access from DE, BR, US:
 .br
-/usr/local/bin/geoip -t DE:BR:US -n 7 | /sbin/ipfw -q /dev/stdin
+/usr/local/bin/ipup -t DE:BR:US -n 7 | /sbin/ipfw -q /dev/stdin
 .br
 /sbin/ipfw -q add 70 deny tcp from not table\e(7\e) to any 80,443 in recv em0 setup
 .br
 \&.\&.\&.
-.br
 .sp
 \fBOR\fP vice versa:
-.br
 .sp
 \&.\&.\&.
 .br
-# deny web access from certain disgraceful regions:
+# Deny web access from certain we don't like this week:
 .br
-/usr/local/bin/geoip -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin
+/usr/local/bin/ipup -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin
 .br
-/sbin/ipfw -q add 70 allow tcp from not table\(66\) to any 80,443 in recv em0 setup
+/sbin/ipfw -q add 70 allow tcp from not table\e(66\e) to any 80,443 in recv em0 setup
 .br
 \&.\&.\&.
 .br
 .sp
+In the case of a different firewall facility, a plain table (without ipfw directives) can be generated using
+.Nm
+by specifying the \fB-p\fP flag. The table may be piped into sort of a pre-processing command before being passed to the firewall utility:
+.sp
+# Output data in the format of some other fictional firewall:
+.br
+/usr/local/bin/ipup -t FR:ES:PT -x0 | awk '{print "add-filter", $4, $5}'
+.sp
+\fBOR\fP
+.sp
+/usr/local/bin/ipup -p -t US:CA | while read TABLE NUM ADD ADDR VAL; myfirewall add filter $ADDR value $VAL; done
+.sp
+.br
+.Sh Routing Example
+.Nm
+is well suited for manipulating the system's routing table by the way of the \fBroute\fP(8) utility:
+.br
+\&.\&.\&.
+.br
+# Force packets to Austria to take a different route:
+.br
+/usr/local/bin/ipup -p -t AT | while read LINE ; do /sbin/route add $LINE $SOMEROUTER; done
+.br
+\&.\&.\&.
 .br
 .sp
-For keeping the database updated, \fBipdb-update.sh\fP may be executed by a weekly cronjob, for this you might want to add the following entry to /etc/crontab:
-.br
+.Sh Cronjob for keeping the IP Geo-location database updated
+\fBipdb-update.sh\fP may be executed by a weekly (perhaps daily) cronjob,
+for this you might want to add the following entry to /etc/crontab:
 .sp
 \&.\&.\&.
 .br
-# weekly update of the IP geo-location databases
+# Weekly update of the IP Geo-location database files
 .br
-\ \ 5    4    *    *    6    root    /usr/local/bin/ipdb-update.sh ftp.apnic.net > /dev/null 2>&1 && /usr/sbin/service geod restart > /dev/null
+\ \ 5    4    *    *    6    root    /usr/local/bin/ipdb-update.sh ftp.apnic.net > /dev/null 2>&1 && /fullpath/to/fw_or_router_reinit_script
 .br
 \&.\&.\&.
 .br
@@ -260,25 +292,30 @@ For keeping the database updated, \fBipdb-update.sh\fP may be executed by a week
 .Sh FILES
 .Bl -tag -width
 .It Pa /usr/local/etc/IP-Ranges/
-directory for maintainig the geoip database
+directory for maintaining the IP Geo-location database
 .It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
 binary (\fIuint32_t\fP), sorted table of IPv4 ranges and its country codes
 .It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
 binary (\fIuint128_t\fP), sorted table of IPv6 ranges and its country codes
 .El
+.sp
 .Sh SEE ALSO
 .Xr whois 1 ,
 .Xr ipfw 8 ,
+.Xr route 8 ,
 .Xr ip2cc 1 ,
 .Xr IP::Country 3
+.sp
 .Sh AUTHOR
 .An Dr. Rolf Jansen - Copyright (c) 2016 - all rights reserved.
+.sp
 .Sh IMPORTANT NOTE
 Improper use of the \fBipdb tools\fP may result in erroneous IP tables, and a
 firewall may be rendered non-functional once configured with incorrect tables.
 .Pp
 In NO event shall the author and/or copyright owner be liable for ANY damages
 resulting from ANY use of this software. Use the \fBipdb tools\fP at your own risk!
+.sp
 .Sh BUGS
 The \fBipdb tools\fP have been carefully developed and tested. Anyway the tools
 are provided without any expressed or implied warrantee of being 100 % bug free.

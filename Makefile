@@ -46,10 +46,10 @@ LDFLAGS   = -lm
 PREFIX   ?= /usr/local
 
 HEADER    = store.h
-SOURCES   = store.c ipdb.c geoip.c
+SOURCES   = store.c ipup.c ipdb.c
 OBJECTS   = $(SOURCES:.c=.o)
 
-all: $(HEADER) $(SOURCES) $(OBJECTS) ipdb geoip
+all: $(HEADER) $(SOURCES) $(OBJECTS) ipup ipdb
 
 depend:
 	$(CC) $(CFLAGS) -E -MM *.c > .depend
@@ -57,19 +57,22 @@ depend:
 $(OBJECTS):
 	$(CC) $(CFLAGS) $< -c -o $@
 
+ipup: $(OBJECTS)
+	$(CC) store.o ipup.o $(LDFLAGS) -o $@
+
 ipdb: $(OBJECTS)
 	$(CC) store.o ipdb.o $(LDFLAGS) -o $@
 
-geoip: $(OBJECTS)
-	$(CC) store.o geoip.o $(LDFLAGS) -o $@
-
 clean:
-	rm -rf *.o *.core ipdb geoip
+	rm -rf *.o *.core ipup ipdb
 
 update: clean all
 
-install: ipdb geoip
-	install -m 555 -s ipdb ${PREFIX}/bin/ipdb
-	install -m 555 -s geoip ${PREFIX}/bin/geoip
-	install -m 555 ipdb-update.sh ${PREFIX}/bin/ipdb-update.sh
-	install -m 555 ipdbtools.1 ${PREFIX}/man/man1/ipdbtools.1
+install: ipdb ipup
+	install -m 555 -s ipup $(DESTDIR)${PREFIX}/bin/ipup
+	install -m 555 -s ipdb $(DESTDIR)${PREFIX}/bin/ipdb
+	install -m 555 ipdb-update.sh $(DESTDIR)${PREFIX}/bin/ipdb-update.sh
+	install -m 555 ipdbtools.1 $(DESTDIR)${PREFIX}/man/man1/ipdbtools.1
+	ln -f -s ipdbtools.1 $(DESTDIR)${PREFIX}/man/man1/ipup.1
+	ln -f -s ipdbtools.1 $(DESTDIR)${PREFIX}/man/man1/ipdb.1
+	ln -f -s ipdbtools.1 $(DESTDIR)${PREFIX}/man/man1/ipdb-update.sh.1

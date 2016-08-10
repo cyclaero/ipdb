@@ -10,7 +10,7 @@
 		7E1929491D37DF740010CA93 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 		7E1929501D37DFA90010CA93 /* geod.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E1929451D37DE340010CA93 /* geod.c */; };
 		7E37300F1D3C22E100CF7A4F /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
-		7E3730171D3C22FD00CF7A4F /* geoip.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E37300C1D3C20B000CF7A4F /* geoip.c */; };
+		7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E37300C1D3C20B000CF7A4F /* ipup.c */; };
 		7EEC62121D32BDCD005630F5 /* ipdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62111D32BDCD005630F5 /* ipdb.c */; };
 		7EEC62141D32BDD6005630F5 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 /* End PBXBuildFile section */
@@ -49,8 +49,8 @@
 		7E1929451D37DE340010CA93 /* geod.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = geod.c; sourceTree = "<group>"; };
 		7E19294F1D37DF740010CA93 /* geod */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = geod; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E30DB911D36655C007B1C7D /* ipdb-update.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ipdb-update.sh"; sourceTree = "<group>"; };
-		7E37300C1D3C20B000CF7A4F /* geoip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = geoip.c; sourceTree = "<group>"; };
-		7E3730161D3C22E100CF7A4F /* geoip */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = geoip; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E37300C1D3C20B000CF7A4F /* ipup.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ipup.c; sourceTree = "<group>"; };
+		7E3730161D3C22E100CF7A4F /* ipup */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ipup; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E3730181D3C6DB800CF7A4F /* README.md */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 4; };
 		7E374ECF1D59F6EB0085F3A8 /* gh-pages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "gh-pages"; sourceTree = "<group>"; };
 		7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */ = {isa = PBXFileReference; explicitFileType = text.man; path = ipdbtools.1; sourceTree = "<group>"; };
@@ -58,7 +58,7 @@
 		7EEC62111D32BDCD005630F5 /* ipdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ipdb.c; sourceTree = "<group>"; };
 		7EEC62131D32BDD6005630F5 /* store.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = store.c; sourceTree = "<group>"; };
 		7EEC62151D32BDDB005630F5 /* store.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = store.h; sourceTree = "<group>"; };
-		7EEE068A1D3A63E50084AF67 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		7EEE068A1D3A63E50084AF67 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = svnrev.xcconfig; sourceTree = "<group>"; };
 		7EEE068D1D3A944C0084AF67 /* geod.rc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.rc; path = geod.rc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,16 +91,16 @@
 		7EEC61FE1D32BCCD005630F5 = {
 			isa = PBXGroup;
 			children = (
-				7E3730181D3C6DB800CF7A4F /* README.md */,
 				7EEC62151D32BDDB005630F5 /* store.h */,
 				7EEC62131D32BDD6005630F5 /* store.c */,
 				7EEC62111D32BDCD005630F5 /* ipdb.c */,
-				7E37300C1D3C20B000CF7A4F /* geoip.c */,
+				7E37300C1D3C20B000CF7A4F /* ipup.c */,
 				7E1929451D37DE340010CA93 /* geod.c */,
 				7EEE068D1D3A944C0084AF67 /* geod.rc */,
+				7E30DB911D36655C007B1C7D /* ipdb-update.sh */,
 				7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */,
 				7EEE068A1D3A63E50084AF67 /* Makefile */,
-				7E30DB911D36655C007B1C7D /* ipdb-update.sh */,
+				7E3730181D3C6DB800CF7A4F /* README.md */,
 				7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */,
 				7E374ECF1D59F6EB0085F3A8 /* gh-pages */,
 				7EEC62081D32BCCD005630F5 /* Products */,
@@ -112,7 +112,7 @@
 			children = (
 				7EEC62071D32BCCD005630F5 /* ipdb */,
 				7E19294F1D37DF740010CA93 /* geod */,
-				7E3730161D3C22E100CF7A4F /* geoip */,
+				7E3730161D3C22E100CF7A4F /* ipup */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,9 +137,9 @@
 			productReference = 7E19294F1D37DF740010CA93 /* geod */;
 			productType = "com.apple.product-type.tool";
 		};
-		7E37300D1D3C22E100CF7A4F /* geoip */ = {
+		7E37300D1D3C22E100CF7A4F /* ipup */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7E3730131D3C22E100CF7A4F /* Build configuration list for PBXNativeTarget "geoip" */;
+			buildConfigurationList = 7E3730131D3C22E100CF7A4F /* Build configuration list for PBXNativeTarget "ipup" */;
 			buildPhases = (
 				7E37300E1D3C22E100CF7A4F /* Sources */,
 				7E3730111D3C22E100CF7A4F /* Frameworks */,
@@ -149,9 +149,9 @@
 			);
 			dependencies = (
 			);
-			name = geoip;
+			name = ipup;
 			productName = ipdb;
-			productReference = 7E3730161D3C22E100CF7A4F /* geoip */;
+			productReference = 7E3730161D3C22E100CF7A4F /* ipup */;
 			productType = "com.apple.product-type.tool";
 		};
 		7EEC62061D32BCCD005630F5 /* ipdb */ = {
@@ -197,8 +197,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				7E37300D1D3C22E100CF7A4F /* ipup */,
 				7EEC62061D32BCCD005630F5 /* ipdb */,
-				7E37300D1D3C22E100CF7A4F /* geoip */,
 				7E1929461D37DF740010CA93 /* geod */,
 			);
 		};
@@ -219,7 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E37300F1D3C22E100CF7A4F /* store.c in Sources */,
-				7E3730171D3C22FD00CF7A4F /* geoip.c in Sources */,
+				7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,7 +357,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7E3730131D3C22E100CF7A4F /* Build configuration list for PBXNativeTarget "geoip" */ = {
+		7E3730131D3C22E100CF7A4F /* Build configuration list for PBXNativeTarget "ipup" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7E3730141D3C22E100CF7A4F /* Debug */,
