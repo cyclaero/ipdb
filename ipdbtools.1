@@ -1,7 +1,7 @@
 .\" man file ipdbtools(1)
 .\"
 .\" Created by Dr. Rolf Jansen on 2013-01-13.
-.\" Copyright (c) 2013-2016. All rights reserved.
+.\" Copyright (c) 2016. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without modification,
 .\" are permitted provided that the following conditions are met:
@@ -62,7 +62,7 @@ in order to configure the system's firewall and/or routing facilities
 .Sh DESCRIPTION
 In general, routing is determined by destination IP addresses, and access control by the firewall is established by selectors that
 can be attributed to incoming and outgoing IP packets, like physical interfaces on which the packets are going, source and target IP
-addresses, protocol types, port numbers, content types and content, etc. The geo-location would be just another selector, but this
+addresses, protocol types, port numbers, content types and content, etc. The Geo-location would be just another selector, but this
 information is not carried explicitly with IP packets, however, it can be obtained using an IP address as a key for looking-up the
 location in an IP database. For example the country to which a given IP address is delegated, can be obtained with the common Unix tool \fBwhois\fP(1).
 .Pp
@@ -77,18 +77,17 @@ and to assist managing and using it.
 The three tools in the package are:
 .Bl -tag -width "  ipdb-update.sh"
 .It \ \ \fBipup\fP
-A tool to utilize the database files to look-up the country code belonging to an IP address or generate a sorted lists of CIDR
+A tool to utilize the IP Geo-location tables to look-up the country code belonging to an IP address or generate sorted lists of CIDR
 compatible IP address/masklen pairs per country code, formatted as raw CIDR ranges or \fBipfw\fP(8) table construction directives.
 .It \ \ \fBipdb\fP
-A tool for consolidating the IP address ranges from the RIR delegation statistics files into binary sorted tables, suitable for
-direct utilization by the \fBipup\fP look-up tool. This tool will generate binary sorted tables of IP ranges + country codes, for both
-IPv4 and IPv6, from the RIR delegation statistics input data files.
+A tool for consolidating the IP address ranges from the RIR delegation statistics files into binary sorted tables of IP ranges + country codes,
+suitable for direct utilization by the \fBipup\fP look-up tool. IPv4 and IPv6 ranges are stored in separate files.
 .It \ \ \fBipdb-update.sh\fP
-A shell script to update the IP Geo-location database by downloading the 5 RIR delegation statistics files from a \fBR\fPegional \fBI\fPnternet
+A shell script to update the IP Geo-location tables by downloading the 5 RIR delegation statistics files from a \fBR\fPegional \fBI\fPnternet
 \fBR\fPegistry mirror, and invoking \fBipdb\fP to generate the binary sorted tables. It is suitable for inclusion into cron.
 .El
 .sp
-.Sh Setting up the local IP Geo-location database
+.Sh Setting up the local IP Geo-location tables
 The authoritative IP Geo-location information must be obtained from the 5 RIR's, and compiled into an optimized format, suitable for quickly
 looking-up the country codes of given IP addresses. This information is present in so called delegation statistics files on the
 ftp servers of each RIR, and APNIC, LACNIC and RIPENCC mirror the files of the other RIR's on their servers - as of the date
@@ -130,7 +129,7 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.0 (50), Copyright © 2016 Dr. Rolf Jansen
+ ipdb v1.1.0 (51), Copyright © 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
@@ -146,7 +145,7 @@ and another one for the IPv6 ranges
 .Ar /usr/local/etc/IP-Ranges/ipcc.bst.v6 .
 .sp
 .Sh USAGE AND OPTIONS
-\fBQuering the local IP Geo-location database\fP
+\fBQuering the local IP Geo-location tables\fP
 .sp
 Use the
 .Nm
@@ -161,7 +160,7 @@ Base path to the binary sorted tables (.v4 and .v6) with the consolidated IP ran
 .It Ao Ar IP_address Ac
 IPv4 or IPv6 address for which the country code should be looked-up.
 .sp
-.It \fBSecond usage form\fP -- firewall table generation:
+.It \fBSecond usage form\fP -- firewall and routing table generation:
 .It Fl t Ar CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | CC:DD=ooooo:EE;.. | \*q\*q
 Output all IP address/masklen pairs belonging to the listed countries, given by 2 letter capital country codes, separated by colon. An empty CC
 list means any country code. A table value can be assigned per country code in the following manner:
@@ -190,7 +189,7 @@ The country code to be encoded (see -x flag above).
 .El
 .sp
 .Sh EXAMPLES
-Check whether the IP Geo-location database is ready by looking-up some addresses using the
+Check whether the IP Geo-location tables are ready by looking-up some addresses using the
 .Nm
 tool:
 .br
@@ -276,13 +275,13 @@ is well suited for manipulating the system's routing table by the way of the \fB
 \&.\&.\&.
 .br
 .sp
-.Sh Cronjob for keeping the IP Geo-location database updated
+.Sh Cronjob for keeping the IP Geo-location tables updated
 \fBipdb-update.sh\fP may be executed by a weekly (perhaps daily) cronjob,
 for this you might want to add the following entry to /etc/crontab:
 .sp
 \&.\&.\&.
 .br
-# Weekly update of the IP Geo-location database files
+# Weekly update of the IP Geo-location tables
 .br
 \ \ 5    4    *    *    6    root    /usr/local/bin/ipdb-update.sh ftp.apnic.net > /dev/null 2>&1 && /fullpath/to/fw_or_router_reinit_script
 .br
@@ -292,11 +291,11 @@ for this you might want to add the following entry to /etc/crontab:
 .Sh FILES
 .Bl -tag -width
 .It Pa /usr/local/etc/IP-Ranges/
-directory for maintaining the IP Geo-location database
+directory for maintaining the IP Geo-location tables
 .It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
-binary (\fIuint32_t\fP), sorted table of IPv4 ranges and its country codes
+binary (\fIuint32_t\fP) sorted table of IPv4 ranges and its country codes
 .It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
-binary (\fIuint128_t\fP), sorted table of IPv6 ranges and its country codes
+binary (\fIuint128_t\fP) sorted table of IPv6 ranges and its country codes
 .El
 .sp
 .Sh SEE ALSO
