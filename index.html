@@ -83,7 +83,7 @@
 <p class="p1"><span class="s1"><span class="space">                       </span>downloading the 5 RIR delegation statistics files from</span></p>
 <p class="p1"><span class="s1"><span class="space">                       </span>a <b>R</b>egional <b>I</b>nternet <b>R</b>egistry mirror, and invoking <b>ipdb</b></span></p>
 <p class="p1"><span class="s1"><span class="space">                       </span>to generate the binary sorted tables. It is suitable</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>for inclusion into cron.</span></p>
+<p class="p1"><span class="s1"><span class="space">                       </span>for invocation by cron.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>Setting</b> <b>up</b> <b>the</b> <b>local</b> <b>IP</b> <b>Geo-location</b> <b>tables</b></span></p>
@@ -119,7 +119,7 @@
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/lacnic.dat <span class="space">  </span>100% of 1870 kB 1271 kBps 2s</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.md5<span class="space">  </span>100% of <span class="space">  </span>74<span class="space">  </span>B<span class="space">  </span>270 kBps 0s</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.dat<span class="space">  </span>100% of <span class="space">  </span>10 MB 1258 kBps 9s</span></p>
-<p class="p1"><span class="s1"><span class="space">      </span>ipdb v1.1.0 (51), Copyright A(C) 2016 Dr. Rolf Jansen</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span>ipdb v1.1.0 (52), Copyright A(C) 2016 Dr. Rolf Jansen</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>Processing RIR data files ...</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">       </span>afrinic.dat<span class="space">  </span>apnic.dat<span class="space">  </span>arin.dat<span class="space">  </span>lacnic.dat<span class="space">  </span>ripencc.dat</span></p>
@@ -130,8 +130,8 @@
 <p class="p1"><span class="s1"><span class="space">     </span>together with MD5 hashes for integrity checking into the directory</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span></span><span class="s2">/usr/local/etc/ipdb/IPRanges/</span><span class="s1">.<span class="space">  </span>Then the <b>ipdb</b> tool will process the data</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>files and generate two binary sorted table (.bst) files, one for the IPv4</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>ranges </span><span class="s2">/usr/local/etc/IP-Ranges/ipcc.bst.v4</span><span class="s1"> and another one for the IPv6</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>ranges </span><span class="s2">/usr/local/etc/IP-Ranges/ipcc.bst.v6</span><span class="s1">.</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>ranges </span><span class="s2">/usr/local/etc/IPRanges/ipcc.bst.v4</span><span class="s1"> and another one for the IPv6</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>ranges </span><span class="s2">/usr/local/etc/IPRanges/ipcc.bst.v6</span><span class="s1">.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>USAGE</b> <b>AND</b> <b>OPTIONS</b></span></p>
@@ -159,8 +159,8 @@
 <p class="p1"><span class="s1"><span class="space">     </span><b>-t</b> </span><span class="s2">CC:DD:..</span><span class="s1"> | </span><span class="s2">CC=nnnnn:DD=mmmmm:..</span><span class="s1"> | </span><span class="s2">CC:DD=ooooo:EE;..</span><span class="s1"> | </span><span class="s2">""</span></p>
 <p class="p1"><span class="s1"><span class="space">              </span>Output all IP address/masklen pairs belonging to the listed</span></p>
 <p class="p1"><span class="s1"><span class="space">              </span>countries, given by 2 letter capital country codes, separated by</span></p>
-<p class="p1"><span class="s1"><span class="space">              </span>colon. An empty CC list means any country code. A table value</span></p>
-<p class="p1"><span class="s1"><span class="space">              </span>can be assigned per country code in the following manner:</span></p>
+<p class="p1"><span class="s1"><span class="space">              </span>colon. An empty CC list (denoted by "") means any country code. A table</span></p>
+<p class="p1"><span class="s1"><span class="space">              </span>value can be assigned per country code in the following manner:</span></p>
 <p class="p1"><span class="s1"><span class="space">                </span>-t BR=10000:DE=10100:US:CA:AU=10200.</span></p>
 <p class="p1"><span class="s1"><span class="space">              </span>In the case of no assignment, no value [0] or the global value</span></p>
 <p class="p1"><span class="s1"><span class="space">              </span>defined by either the -v or the -x option is utilized.</span></p>
@@ -228,7 +228,7 @@
 <p class="p1"><span class="s1"><span class="space">     </span><b>OR</b> vice versa:</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span>...</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span># Deny web access from certain we don't like this week:</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span># Deny web access from certain countries we don't like this week:</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>/usr/local/bin/ipup -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>/sbin/ipfw -q add 70 allow tcp from not table\(66\) to any 80,443 in recv</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>em0 setup</span></p>
@@ -236,8 +236,8 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span>In the case of a different firewall facility, a plain table (without ipfw</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>directives) can be generated using <b>ipup</b> by specifying the <b>-p</b> flag. The</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>table may be piped into sort of a pre-processing command before being</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>passed to the firewall utility:</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>table may be piped into a pre-processing command before being passed</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>to the firewall utility:</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span># Output data in the format of some other fictional firewall:</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>/usr/local/bin/ipup -t FR:ES:PT -x0 | awk '{print "add-filter", $4, $5}'</span></p>
@@ -270,18 +270,20 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>FILES</b></span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IP-Ranges/</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IPRanges/</span></p>
 <p class="p1"><span class="s1"><span class="space">          </span>directory for maintaining the IP Geo-location tables</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IP-Ranges/ipcc.bst.v4</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IPRanges/ipcc.bst.v4</span></p>
 <p class="p1"><span class="s1"><span class="space">          </span>binary (</span><span class="s2">uint32_t</span><span class="s1">) sorted table of IPv4 ranges and its country codes</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IP-Ranges/ipcc.bst.v4</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>/usr/local/etc/IPRanges/ipcc.bst.v6</span></p>
 <p class="p1"><span class="s1"><span class="space">          </span>binary (</span><span class="s2">uint128_t</span><span class="s1">) sorted table of IPv6 ranges and its country codes</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>SEE</b> <b>ALSO</b></span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>whois(1), ipfw(8), route(8), ip2cc(1), IP::Country(3)</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>whois(1), ipfw(8), route(8)</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="space">     </span>in Ports: ip2cc(1), IP::Country(3)</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>AUTHOR</b></span></p>
