@@ -84,7 +84,7 @@ A tool for consolidating the IP address ranges from the RIR delegation statistic
 suitable for direct utilization by the \fBipup\fP look-up tool. IPv4 and IPv6 ranges are stored in separate files.
 .It \ \ \fBipdb-update.sh\fP
 A shell script to update the IP Geo-location tables by downloading the 5 RIR delegation statistics files from a \fBR\fPegional \fBI\fPnternet
-\fBR\fPegistry mirror, and invoking \fBipdb\fP to generate the binary sorted tables. It is suitable for inclusion into cron.
+\fBR\fPegistry mirror, and invoking \fBipdb\fP to generate the binary sorted tables. It is suitable for invocation by cron.
 .El
 .sp
 .Sh Setting up the local IP Geo-location tables
@@ -129,7 +129,7 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.0 (51), Copyright © 2016 Dr. Rolf Jansen
+ ipdb v1.1.0 (52), Copyright © 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
@@ -140,9 +140,9 @@ LACNIC -- Latin America and Caribbean
 As shown above, this will download the delegation statistics data together with MD5 hashes for integrity checking into the directory
 .Ar /usr/local/etc/ipdb/IPRanges/ .
 Then the \fBipdb\fP tool will process the data files and generate two binary sorted table (.bst) files, one for the IPv4 ranges
-.Ar /usr/local/etc/IP-Ranges/ipcc.bst.v4
+.Ar /usr/local/etc/IPRanges/ipcc.bst.v4
 and another one for the IPv6 ranges
-.Ar /usr/local/etc/IP-Ranges/ipcc.bst.v6 .
+.Ar /usr/local/etc/IPRanges/ipcc.bst.v6 .
 .sp
 .Sh USAGE AND OPTIONS
 \fBQuering the local IP Geo-location tables\fP
@@ -163,7 +163,7 @@ IPv4 or IPv6 address for which the country code should be looked-up.
 .It \fBSecond usage form\fP -- firewall and routing table generation:
 .It Fl t Ar CC:DD:.. | CC=nnnnn:DD=mmmmm:.. | CC:DD=ooooo:EE;.. | \*q\*q
 Output all IP address/masklen pairs belonging to the listed countries, given by 2 letter capital country codes, separated by colon. An empty CC
-list means any country code. A table value can be assigned per country code in the following manner:
+list (denoted by "") means any country code. A table value can be assigned per country code in the following manner:
 .br
 \ \ -t BR=10000:DE=10100:US:CA:AU=10200.
 .br
@@ -240,7 +240,7 @@ would generate tables of CIDR ranges for the selected country codes, and these t
 .sp
 \&.\&.\&.
 .br
-# Deny web access from certain we don't like this week:
+# Deny web access from certain countries we don't like this week:
 .br
 /usr/local/bin/ipup -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin
 .br
@@ -251,7 +251,7 @@ would generate tables of CIDR ranges for the selected country codes, and these t
 .sp
 In the case of a different firewall facility, a plain table (without ipfw directives) can be generated using
 .Nm
-by specifying the \fB-p\fP flag. The table may be piped into sort of a pre-processing command before being passed to the firewall utility:
+by specifying the \fB-p\fP flag. The table may be piped into a pre-processing command before being passed to the firewall utility:
 .sp
 # Output data in the format of some other fictional firewall:
 .br
@@ -290,18 +290,20 @@ for this you might want to add the following entry to /etc/crontab:
 .sp
 .Sh FILES
 .Bl -tag -width
-.It Pa /usr/local/etc/IP-Ranges/
+.It Pa /usr/local/etc/IPRanges/
 directory for maintaining the IP Geo-location tables
-.It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
+.It Pa /usr/local/etc/IPRanges/ipcc.bst.v4
 binary (\fIuint32_t\fP) sorted table of IPv4 ranges and its country codes
-.It Pa /usr/local/etc/IP-Ranges/ipcc.bst.v4
+.It Pa /usr/local/etc/IPRanges/ipcc.bst.v6
 binary (\fIuint128_t\fP) sorted table of IPv6 ranges and its country codes
 .El
 .sp
 .Sh SEE ALSO
 .Xr whois 1 ,
 .Xr ipfw 8 ,
-.Xr route 8 ,
+.Xr route 8
+.sp
+in Ports:
 .Xr ip2cc 1 ,
 .Xr IP::Country 3
 .sp
