@@ -93,8 +93,8 @@
 			children = (
 				7EEC62151D32BDDB005630F5 /* store.h */,
 				7EEC62131D32BDD6005630F5 /* store.c */,
-				7EEC62111D32BDCD005630F5 /* ipdb.c */,
 				7E37300C1D3C20B000CF7A4F /* ipup.c */,
+				7EEC62111D32BDCD005630F5 /* ipdb.c */,
 				7E1929451D37DE340010CA93 /* geod.c */,
 				7EEE068D1D3A944C0084AF67 /* geod.rc */,
 				7E30DB911D36655C007B1C7D /* ipdb-update.sh */,

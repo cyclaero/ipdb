@@ -129,7 +129,7 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.0 (53), Copyright (C) 2016 Dr. Rolf Jansen
+ ipdb v1.1.0 (54), Copyright (C) 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
@@ -259,7 +259,7 @@ by specifying the \fB-p\fP flag. The table may be piped into a pre-processing co
 .sp
 \fBOR\fP
 .sp
-/usr/local/bin/ipup -p -t US:CA | while read TABLE NUM ADD ADDR VAL; myfirewall add filter $ADDR value $VAL; done
+/usr/local/bin/ipup -p -t US:CA | while read TABLE NUM ADD ADDR VAL; do myfirewall add filter $ADDR value $VAL; done
 .sp
 .br
 .Sh Routing Example
@@ -270,7 +270,7 @@ is well suited for manipulating the system's routing table by the way of the \fB
 .br
 # Force packets to Austria to take a different route:
 .br
-/usr/local/bin/ipup -p -t AT | while read LINE ; do /sbin/route add $LINE $SOMEROUTER; done
+/usr/local/bin/ipup -p -t AT | while read LINE; do /sbin/route add $LINE $SOMEROUTER; done
 .br
 \&.\&.\&.
 .br
