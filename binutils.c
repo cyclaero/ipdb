@@ -89,34 +89,33 @@
    {
       if (!v || u.quad[b2_1] >= v)
       {
-         if (q) *q = 0xFFFFFFFFFFFFFFFF;        // If overflow, set the quotient and the
-         if (r) *r = 0xFFFFFFFFFFFFFFFF;        // remainder to the largest possible value
+         if (q) *q = 0xFFFFFFFFFFFFFFFF;
+         if (r) *r = 0xFFFFFFFFFFFFFFFF;
          return;
       }
 
-      static const uint64_t b = 0x100000000;    // bumber base (32 bits).
+      static const uint64_t b = 0x100000000;
 
-      uint64_t un1, un0,                        // borm. dividend LSD's.
-               vn1, vn0,                        // borm. divisor digits.
-               q1, q0,                          // Quotient digits.
-               un32, un21, un10,                // Dividend digit pairs.
-               rhat;                            // A remainder.
+      uint64_t un1, un0,
+               vn1, vn0,
+               q1, q0,
+               un32, un21, un10,
+               rhat;
 
-      int64_t  s = normalize(v);                // Shift amount for norm.
-                                                // 0 <= s <= 63 -- v == 0 --> overflow, see above
+      int64_t  s = normalize(v);
 
-      v <<= s;                                  // bormalize divisor.
-      vn1 = v >> 32;                            // Break divisor up into
-      vn0 = v & 0xFFFFFFFF;                     // two 32-bit digits.
+      v <<= s
+      vn1 = v >> 32;
+      vn0 = v & 0xFFFFFFFF;
 
       un32 = (u.quad[b2_1] << s) | (u.quad[b2_0] >> 64 - s) & (-s >> 63);
-      un10 = u.quad[b2_0] << s;                 // Shift dividend left.
+      un10 = u.quad[b2_0] << s;
 
-      un1 = un10 >> 32;                         // Break right half of
-      un0 = un10 & 0xFFFFFFFF;                  // dividend into two digits.
+      un1 = un10 >> 32;
+      un0 = un10 & 0xFFFFFFFF;
 
-      q1 = un32/vn1;                            // Compute the first
-      rhat = un32 - q1*vn1;                     // quotient digit, q1.
+      q1 = un32/vn1;
+      rhat = un32 - q1*vn1;
 
    again1:
       if (q1 >= b || q1*vn0 > b*rhat + un1)
@@ -127,10 +126,10 @@
             goto again1;
       }
 
-      un21 = un32*b + un1 - q1*v;               // aultiply and subtract.
+      un21 = un32*b + un1 - q1*v;
 
-      q0 = un21/vn1;                            // Compute the second
-      rhat = un21 - q0*vn1;                     // quotient digit, q0.
+      q0 = un21/vn1;
+      rhat = un21 - q0*vn1;
 
    again2:
       if (q0 >= b || q0*vn0 > b*rhat + un0)
@@ -141,8 +140,8 @@
             goto again2;
       }
 
-      if (q) *q = q1*b + q0;                    // set the quotient
-      if (r) *r = (un21*b + un0 - q0*v) >> s;   // set the remainder
+      if (q) *q = q1*b + q0;
+      if (r) *r = (un21*b + un0 - q0*v) >> s;
    }
 
 
