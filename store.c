@@ -36,8 +36,11 @@
 #include <tmmintrin.h>
 #include <sys/stat.h>
 
+#include "binutils.h"
 #include "store.h"
 
+
+#pragma mark ••• Fencing Memory Allocation Wrappers •••
 
 ssize_t gAllocationTotal = 0;
 
@@ -406,7 +409,7 @@ int removeIP4Node(uint32_t ip, IP4Node **node)
 
       else // (o->lo <= ip && ip <= o->lo)
       {
-         int     b = o->B;
+         int      b = o->B;
          IP4Node *p = o->L;
          IP4Node *q = o->R;
 
@@ -638,17 +641,17 @@ static int pickNextIP6Node(IP6Node **node, IP6Node **exch)
 }
 
 
-IP6Node *findIP6Node(uint128_t ip, IP6Node  *node)
+IP6Node *findIP6Node(uint128t ip, IP6Node  *node)
 {
    if (node)
    {
-      if (node->lo <= ip && ip <= node->hi)
+      if (le_u128(node->lo, ip) && le_u128(ip, node->hi))
          return node;
 
-      else if (ip < node->lo)
+      else if (lt_u128(ip, node->lo))
          return findIP6Node(ip, node->L);
 
-      else // (ip > node->hi)
+      else // (gt_u128(ip, node->hi))
          return findIP6Node(ip, node->R);
    }
    else
@@ -656,19 +659,19 @@ IP6Node *findIP6Node(uint128_t ip, IP6Node  *node)
 }
 
 
-IP6Node *findNet6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node  *node)
+IP6Node *findNet6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node  *node)
 {
    if (node)
    {
-      int ofs = (cc == node->cc);
+      uint128t ofs = u64_to_u128t(cc == node->cc);
 
-      if (node->lo <= lo && lo-ofs <= node->hi || node->lo <= hi+ofs && hi <= node->hi || lo <= node->lo && node->hi <= hi)
+      if (le_u128(node->lo, lo) && le_u128(sub_u128(lo,ofs), node->hi) || le_u128(node->lo, add_u128(hi,ofs)) && le_u128(hi, node->hi) || le_u128(lo, node->lo) && le_u128(node->hi, hi))
          return node;
 
-      else if (lo < node->lo)
+      else if (lt_u128(lo, node->lo))
          return findNet6Node(lo, hi, cc, node->L);
 
-      else // ([lo|hi] > node->hi)
+      else // (gt_u128([lo|hi], node->hi))
          return findNet6Node(lo, hi, cc, node->R);
    }
    else
@@ -676,7 +679,7 @@ IP6Node *findNet6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node  *node)
 }
 
 
-int addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
+int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node)
 {
    IP6Node *o = *node;
 
@@ -684,13 +687,13 @@ int addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
    {
       int change;
 
-      if (lo < o->lo)
+      if (lt_u128(lo, o->lo))
          change = -addIP6Node(lo, hi, cc, &o->L);
 
-      else if (lo > o->lo)
+      else if (gt_u128(lo, o->lo))
          change = +addIP6Node(lo, hi, cc, &o->R);
 
-      else // (lo == o->lo)               // this case must not happen !!!
+      else // (eq_u128(lo, o->lo))               // this case must not happen !!!
          return 0;
 
       if (change)
@@ -718,7 +721,7 @@ int addIP6Node(uint128_t lo, uint128_t hi, uint32_t cc, IP6Node **node)
 }
 
 
-int removeIP6Node(uint128_t ip, IP6Node **node)
+int removeIP6Node(uint128t ip, IP6Node **node)
 {
    IP6Node *o = *node;
 
@@ -726,15 +729,15 @@ int removeIP6Node(uint128_t ip, IP6Node **node)
    {
       int change;
 
-      if (ip < o->lo)
+      if (lt_u128(ip, o->lo))
          change = +removeIP6Node(ip, &o->L);
 
-      else if (ip > o->lo)
+      else if (gt_u128(ip, o->lo))
          change = -removeIP6Node(ip, &o->R);
 
-      else // (o->lo <= ip && ip <= o->lo)
+      else // (le_u128(o->lo, ip) && le_u128(ip, o->lo))
       {
-         int     b = o->B;
+         int      b = o->B;
          IP6Node *p = o->L;
          IP6Node *q = o->R;
 

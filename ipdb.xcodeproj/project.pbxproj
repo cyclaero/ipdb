@@ -11,6 +11,9 @@
 		7E1929501D37DFA90010CA93 /* geod.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E1929451D37DE340010CA93 /* geod.c */; };
 		7E37300F1D3C22E100CF7A4F /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 		7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E37300C1D3C20B000CF7A4F /* ipup.c */; };
+		7ECC37301D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
+		7ECC37311D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
+		7ECC37321D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
 		7EEC62121D32BDCD005630F5 /* ipdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62111D32BDCD005630F5 /* ipdb.c */; };
 		7EEC62141D32BDD6005630F5 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 /* End PBXBuildFile section */
@@ -54,6 +57,8 @@
 		7E3730181D3C6DB800CF7A4F /* README.md */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; tabWidth = 4; };
 		7E374ECF1D59F6EB0085F3A8 /* gh-pages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "gh-pages"; sourceTree = "<group>"; };
 		7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */ = {isa = PBXFileReference; explicitFileType = text.man; path = ipdbtools.1; sourceTree = "<group>"; };
+		7ECC372E1D60207100E6948D /* binutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binutils.h; sourceTree = "<group>"; };
+		7ECC372F1D60207100E6948D /* binutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = binutils.c; sourceTree = "<group>"; };
 		7EEC62071D32BCCD005630F5 /* ipdb */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ipdb; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EEC62111D32BDCD005630F5 /* ipdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ipdb.c; sourceTree = "<group>"; };
 		7EEC62131D32BDD6005630F5 /* store.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = store.c; sourceTree = "<group>"; };
@@ -91,6 +96,8 @@
 		7EEC61FE1D32BCCD005630F5 = {
 			isa = PBXGroup;
 			children = (
+				7ECC372E1D60207100E6948D /* binutils.h */,
+				7ECC372F1D60207100E6948D /* binutils.c */,
 				7EEC62151D32BDDB005630F5 /* store.h */,
 				7EEC62131D32BDD6005630F5 /* store.c */,
 				7E37300C1D3C20B000CF7A4F /* ipup.c */,
@@ -209,6 +216,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ECC37321D60207100E6948D /* binutils.c in Sources */,
 				7E1929491D37DF740010CA93 /* store.c in Sources */,
 				7E1929501D37DFA90010CA93 /* geod.c in Sources */,
 			);
@@ -218,6 +226,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ECC37301D60207100E6948D /* binutils.c in Sources */,
 				7E37300F1D3C22E100CF7A4F /* store.c in Sources */,
 				7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */,
 			);
@@ -227,6 +236,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ECC37311D60207100E6948D /* binutils.c in Sources */,
 				7EEC62141D32BDD6005630F5 /* store.c in Sources */,
 				7EEC62121D32BDCD005630F5 /* ipdb.c in Sources */,
 			);
@@ -268,6 +278,7 @@
 			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -304,6 +315,7 @@
 			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;

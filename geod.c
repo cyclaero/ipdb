@@ -41,7 +41,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-
+#include "binutils.h"
 #include "store.h"
 
 #define DAEMON_NAME "geod"
@@ -285,9 +285,9 @@ int main(int argc, char *argv[])
    FILE *in;
    if (stat(bstfname, &st) == noerr && st.st_size && (in = fopen(bstfname, "r")))
    {
-      sortedIP4Sets = allocate(st.st_size, false);
+      sortedIP4Sets = allocate((ssize_t)st.st_size, false);
       atexit(releaseStores);
-      rc = (int)fread(sortedIP4Sets, st.st_size, 1, in);
+      rc = (int)fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in);
       fclose(in);
       if (!rc)
       {

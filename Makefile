@@ -45,11 +45,11 @@ CFLAGS    = $(CDEFS) -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -mssse3 -Wno-par
 LDFLAGS   = -lm
 PREFIX   ?= /usr/local
 
-HEADER    = store.h
-SOURCES   = store.c ipup.c ipdb.c
+HEADERS   = binutils.h store.h
+SOURCES   = binutils.c store.c ipup.c ipdb.c
 OBJECTS   = $(SOURCES:.c=.o)
 
-all: $(HEADER) $(SOURCES) $(OBJECTS) ipup ipdb
+all: $(HEADERS) $(SOURCES) $(OBJECTS) ipup ipdb
 
 depend:
 	$(CC) $(CFLAGS) -E -MM *.c > .depend
@@ -58,10 +58,10 @@ $(OBJECTS):
 	$(CC) $(CFLAGS) $< -c -o $@
 
 ipup: $(OBJECTS)
-	$(CC) store.o ipup.o $(LDFLAGS) -o $@
+	$(CC) binutils.o store.o ipup.o $(LDFLAGS) -o $@
 
 ipdb: $(OBJECTS)
-	$(CC) store.o ipdb.o $(LDFLAGS) -o $@
+	$(CC) binutils.o store.o ipdb.o $(LDFLAGS) -o $@
 
 clean:
 	rm -rf *.o *.core ipup ipdb

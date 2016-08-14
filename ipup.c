@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#include "binutils.h"
 #include "store.h"
 
 
@@ -42,7 +43,7 @@ void usage(const char *executable)
 {
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
-   printf("%s v1.1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n\n", r);
+   printf("%s v1.1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n\n", r);
    printf("Usage:\n\n");
    printf("1) look up the country code belonging to an IP address given by the last command line argument:\n\n");
    printf("   %s [-r bstfiles] [-h] <IP address>\n", r);
@@ -195,19 +196,19 @@ int main(int argc, char *argv[])
 //
    if (ccList == NULL)
    {
-      int       o;
-      uint32_t  ipv4;
-      uint128_t ipv6;
+      int      o;
+      uint32_t ipv4;
+      uint128t ipv6;
       if (ipv4 = ipv4_str2bin(argv[0]))
       {
          *(uint32_t *)&inName[namelen] = *(uint32_t *)".v4";
          if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
          {
             IP4Str ipstr_lo, ipstr_hi;
-            IP4Set *sortedIP4Sets = allocate(st.st_size, false);
+            IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, false);
             if (sortedIP4Sets)
             {
-               if (fread(sortedIP4Sets, st.st_size, 1, in))
+               if (fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in))
                {
                   if ((o = bisectionIP4Search(ipv4, sortedIP4Sets, (int)(st.st_size/sizeof(IP4Set)))) >= 0)
                      printf("%s in %s - %s in %s\n\n", argv[0], ipv4_bin2str(sortedIP4Sets[o][0], ipstr_lo), ipv4_bin2str(sortedIP4Sets[o][1], ipstr_hi), (char *)&sortedIP4Sets[o][2]);
@@ -229,16 +230,16 @@ int main(int argc, char *argv[])
             printf("IPv4 database file could not be found.\n\n");
       }
 
-      else if (ipv6 = ipv6_str2bin(argv[0]))
+      else if (gt_u128(ipv6 = ipv6_str2bin(argv[0]), u64_to_u128t(0)))
       {
          *(uint32_t *)&inName[namelen] = *(uint32_t *)".v6";
          if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
          {
             IP6Str ipstr_lo, ipstr_hi;
-            IP6Set *sortedIP6Sets = allocate(st.st_size, false);
+            IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, false);
             if (sortedIP6Sets)
             {
-               if (fread(sortedIP6Sets, st.st_size, 1, in))
+               if (fread(sortedIP6Sets, (ssize_t)st.st_size, 1, in))
                {
                   if ((o = bisectionIP6Search(ipv6, sortedIP6Sets, (int)(st.st_size/sizeof(IP6Set)))) >= 0)
                      printf("%s in %s - %s in %s\n\n", argv[0], ipv6_bin2str(sortedIP6Sets[o][0], ipstr_lo), ipv6_bin2str(sortedIP6Sets[o][1], ipstr_hi), (char *)&sortedIP6Sets[o][2]);
@@ -293,22 +294,23 @@ int main(int argc, char *argv[])
             {
                CCNode *ccn = NULL;
                IP4Str  ipstr;
-               IP4Set *sortedIP4Sets = allocate(st.st_size, false);
+               IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, false);
                if (sortedIP4Sets)
                {
-                  if (fread(sortedIP4Sets, st.st_size, 1, in))
+                  if (fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in))
                   {
                      int i, n = (int)(st.st_size/sizeof(IP4Set));
                      for (i = 0; i < n; i++)
                      {
                         if (!*ccList || (ccn = findCC(CCTable, sortedIP4Sets[i][2])))
                         {
-                           uint32_t k, ip = sortedIP4Sets[i][0];
+                           uint32_t ip = sortedIP4Sets[i][0];
                            uint32_t ui = (ccn) ? ccn->ui : 0;
+                           int32_t  m;
                            do
                            {
-                              int32_t m = intlb4(sortedIP4Sets[i][1] - ip + 1);
-                              while (ip % (k = inteb4(m)))
+                              m = intlb4_1p(sortedIP4Sets[i][1] - ip);
+                              while (ip - (ip >> m << m))
                                  m--;
 
                               if (plainFlag)
@@ -324,7 +326,7 @@ int main(int argc, char *argv[])
 
                               count++;
                            }
-                           while ((ip += k) < sortedIP4Sets[i][1]);
+                           while ((ip += (uint32_t)1<<m) < sortedIP4Sets[i][1]);
                         }
                      }
 
@@ -354,22 +356,23 @@ int main(int argc, char *argv[])
             {
                CCNode *ccn = NULL;
                IP6Str  ipstr;
-               IP6Set *sortedIP6Sets = allocate(st.st_size, false);
+               IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, false);
                if (sortedIP6Sets)
                {
-                  if (fread(sortedIP6Sets, st.st_size, 1, in))
+                  if (fread(sortedIP6Sets, (ssize_t)st.st_size, 1, in))
                   {
                      int i, n = (int)(st.st_size/sizeof(IP6Set));
                      for (i = 0; i < n; i++)
                      {
-                        if (!*ccList || (ccn = findCC(CCTable, (uint32_t)sortedIP6Sets[i][2])))
+                        if (!*ccList || (ccn = findCC(CCTable, *(uint32_t*)&sortedIP6Sets[i][2])))
                         {
-                           uint128_t k, ip = sortedIP6Sets[i][0];
-                           uint32_t  ui = (ccn) ? ccn->ui : 0;
+                           uint128t ip = sortedIP6Sets[i][0];
+                           uint32_t ui = (ccn) ? ccn->ui : 0;
+                           int32_t  m;
                            do
                            {
-                              int32_t m = intlb6(sortedIP6Sets[i][1] - ip + 1);
-                              while (ip % (k = inteb6(m)))
+                              m = intlb6_1p(sub_u128(sortedIP6Sets[i][1], ip));
+                              while (gt_u128(sub_u128(ip, shl_u128(shr_u128(ip, m), m)), u64_to_u128t(0)))
                                  m--;
 
                               if (plainFlag)
@@ -379,13 +382,13 @@ int main(int argc, char *argv[])
                               else if (tval != 0)
                                  printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, tval);
                               else if (ccValFlag)
-                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, ccv((uint16_t)sortedIP6Sets[i][2], toff));
+                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, ccv(*(uint16_t*)&sortedIP6Sets[i][2], toff));
                               else
                                  printf("table %d add %s/%d\n",    tnum, ipv6_bin2str(ip, ipstr), 128 - m);
 
                               count++;
                            }
-                           while ((ip += k) < sortedIP6Sets[i][1]);
+                           while (lt_u128(ip = add_u128(ip, shl_u128(u64_to_u128t(1), m)), sortedIP6Sets[i][1]));
                         }
                      }
 
@@ -405,8 +408,8 @@ int main(int argc, char *argv[])
                printf("IPv6 database file could not be found.\n\n");
          }
 
-         if (!count)
-            printf("\n");
+         // if (!count)
+            printf("%d\n", count);
 
          releaseCCTable(CCTable);
       }

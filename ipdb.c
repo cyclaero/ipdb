@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#include "binutils.h"
 #include "store.h"
 
 
@@ -133,8 +134,8 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
 
                   else if (*(uint32_t*)iv == *(uint32_t*)"ipv6")
                   {
-                     IP6Node  *node;
-                     uint128_t iplo, iphi;
+                     IP6Node *node;
+                     uint128t iplo, iphi;
 
                      uppercase(cc, fl);
                      cc[fl] = '\0';
@@ -143,17 +144,17 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
                         ip = iv+fieldlen(iv)+1;
                         fl = fieldlen(ip);
                         ip[fl] = '\0';
-                        if (iplo = ipv6_str2bin(ip))
+                        if (gt_u128(iplo = ipv6_str2bin(ip), u64_to_u128t(0)))
                         {
                            char *pfx = ip+fl+1;
-                           iphi = iplo + inteb6(128 - (int32_t)strtoul(pfx, NULL, 10)) - 1;
+                           iphi = add_u128(iplo, inteb6_m1(128 - (int32_t)strtoul(pfx, NULL, 10)));
 
                            while (node = findNet6Node(iplo, iphi, *(uint16_t*)cc, IP6Store))
                            {
-                              if (node->lo < iplo)
+                              if (lt_u128(node->lo, iplo))
                                  iplo = node->lo;
 
-                              if (node->hi > iphi)
+                              if (gt_u128(node->hi, iphi))
                                  iphi = node->hi;
 
                               removeIP6Node(node->lo, &IP6Store); count--;
@@ -192,7 +193,7 @@ int main(int argc, const char *argv[])
             FILE  *in;
             struct stat st;
 
-            printf("ipdb v1.1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
+            printf("ipdb v1.1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
             for (int inc = 2; inc < argc; inc++)
             {
                if (stat(argv[inc], &st) == noerr && st.st_size && (in = fopen(argv[inc], "r")))
@@ -205,7 +206,7 @@ int main(int argc, const char *argv[])
                   printf(" %s ", file);
                   fflush(stdout);
 
-                  count += readRIRStatisticsFormat_v2(in, st.st_size);
+                  count += readRIRStatisticsFormat_v2(in, (size_t)st.st_size);
 
                   fclose(in);
                }
