@@ -24,16 +24,14 @@
 //  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
+#if !defined(__x86_64__) && !defined(__arm64__)
 
-#include "binutils.h"
+   #include <stdbool.h>
+   #include <stdint.h>
+   #include <string.h>
 
+   #include "binutils.h"
 
-#if defined(__x86_64__)
-
-#else
 
    uint128t mul_u128(uint128t a, uint128t b)
    {
