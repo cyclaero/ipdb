@@ -408,8 +408,8 @@ int main(int argc, char *argv[])
                printf("IPv6 database file could not be found.\n\n");
          }
 
-         // if (!count)
-            printf("%d\n", count);
+         if (!count)
+            printf("\n");
 
          releaseCCTable(CCTable);
       }
