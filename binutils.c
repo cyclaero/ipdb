@@ -104,7 +104,7 @@
 
       int64_t  s = normalize(v);
 
-      v <<= s
+      v <<= s;
       vn1 = v >> 32;
       vn0 = v & 0xFFFFFFFF;
 
