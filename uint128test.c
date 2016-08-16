@@ -758,7 +758,7 @@ uint128u num[] =
 
 int main(int argc, const char *argv[])
 {
-   uint128u r;
+   uint128u r, s;
    uint32_t i, j, k, m, n = sizeof(num)/sizeof(uint128u);
 
    for (i = 0; i < n; i++)
@@ -809,6 +809,17 @@ int main(int argc, const char *argv[])
          if (num[i].v << k != (r = (uint128u)shl_u128(num[i].t, k)).v)
             printf("%5u, %5u -- 0x%016llX|%016llX\n", i, k, r.q[1], r.q[0]);
       }
+
+      // increment and decrement
+      s = r = num[i];
+      if (++s.v != ((uint128u)inc_u128(&r.t)).v)
+         printf("%5u, -- 0x%016llX|%016llX\n", i, r.q[1], r.q[0]);
+
+      if (--s.v != ((uint128u)dec_u128(&r.t)).v || num[i].v != r.v)
+         printf("%5u, -- 0x%016llX|%016llX\n", i, r.q[1], r.q[0]);
+
+      if (--s.v != ((uint128u)dec_u128(&r.t)).v)
+         printf("%5u, -- 0x%016llX|%016llX\n", i, r.q[1], r.q[0]);
 
       if ((m = (i*10000)/(n-1)) % 1000 == 0)
          printf("%3u %%\n", m/100);

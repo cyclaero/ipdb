@@ -109,7 +109,7 @@
       vn1 = v >> 32;
       vn0 = v & 0xFFFFFFFF;
 
-      un32 = (u.quad[b2_1] << s) | (u.quad[b2_0] >> 64 - s) & (-s >> 63);
+      un32 = (u.quad[b2_1] << s) | (u.quad[b2_0] >> (64 - s)) & (-s >> 63);
       un10 = u.quad[b2_0] << s;
 
       un1 = un10 >> 32;

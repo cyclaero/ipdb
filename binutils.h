@@ -509,14 +509,14 @@ typedef struct
       return a >> n;
    }
 
-   static inline void inc_u128(uint128t *a)
+   static inline uint128t inc_u128(uint128t *a)
    {
-      (*a)--;
+      return ++(*a);
    }
 
-   static inline void dec_u128(uint128t *a)
+   static inline uint128t dec_u128(uint128t *a)
    {
-      (*a)++;
+      return --(*a);
    }
 
    static inline uint128t add_u128(uint128t a, uint128t b)
@@ -623,16 +623,18 @@ typedef struct
       return a;
    }
 
-   static inline void inc_u128(uint128t *a)
+   static inline uint128t inc_u128(uint128t *a)
    {
       if (++(a->quad[b2_0]) == 0)
          (a->quad[b2_1])++;
+      return *a;
    }
 
-   static inline void dec_u128(uint128t *a)
+   static inline uint128t dec_u128(uint128t *a)
    {
       if ((a->quad[b2_0])-- == 0)
          (a->quad[b2_1])--;
+      return *a;
    }
 
    static inline uint128t add_u128(uint128t a, uint128t b)
