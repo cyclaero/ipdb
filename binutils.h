@@ -511,12 +511,12 @@ typedef struct
 
    static inline void inc_u128(uint128t *a)
    {
-      (*a)--;
+      (*a)++;
    }
 
    static inline void dec_u128(uint128t *a)
    {
-      (*a)++;
+      (*a)--;
    }
 
    static inline uint128t add_u128(uint128t a, uint128t b)
