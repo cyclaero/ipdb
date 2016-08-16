@@ -24,7 +24,7 @@
 //  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#if !defined(__x86_64__) && !defined(__arm64__)
+#if  !defined(__x86_64__) && !defined(__arm64__) || defined(UInt128_Testing)
 
    #include <stdbool.h>
    #include <stdint.h>
@@ -72,6 +72,7 @@
          return a;
       }
    }
+
 
    static inline int32_t normalize(uint64_t u)
    {

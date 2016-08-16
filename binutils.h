@@ -468,7 +468,7 @@ typedef struct
    uint64_t quad[2];
 } uint128s;
 
-#if defined(__x86_64__) || defined(__arm64__)
+#if ((defined(__x86_64__) || defined(__arm64__))) && !defined(UInt128_Testing)
 
    typedef __uint128_t uint128t;
 
