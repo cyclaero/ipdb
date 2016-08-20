@@ -22,7 +22,7 @@
 .\" IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 .\" THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd 2016-08-14
+.Dd 2016-08-20
 .Dt ipdbtools 1
 .Os FreeBSD, Darwin
 .Sh NAME
@@ -60,11 +60,11 @@ in order to configure the system's firewall and/or routing facilities
 .Op Ao Ar ftp.RIR__mirror_name.net Ac
 .sp
 .Sh DESCRIPTION
-In general, routing is determined by destination IP addresses, and access control by the firewall is established by selectors that
-can be attributed to incoming and outgoing IP packets, like physical interfaces on which the packets are going, source and target IP
-addresses, protocol types, port numbers, content types and content, etc. The Geo-location would be just another selector, but this
-information is not carried explicitly with IP packets, however, it can be obtained using an IP address as a key for looking-up the
-location in an IP database. For example the country to which a given IP address is delegated, can be obtained with the common Unix tool \fBwhois\fP(1).
+In general, access control by the \fBfirewall\fP is established by selectors that can be attributed to incoming and outgoing IP packets, like
+physical interfaces on which the packets are going, source and destination IP addresses, protocol types, port numbers, content types and
+content, etc., and \fBrouting\fP is determined by destination IP addresses. The Geo-location would be just another selector, but this
+information is not carried explicitly with IP packets, however, it can be obtained using the IP address as a key for looking-up the location
+in an IP database. For example, the country to which a given IP address is delegated, can be obtained with the common Unix tool \fBwhois\fP(1).
 .Pp
 \fBwhois\fP does an online look-up in the IP databases of the 5 \fBR\fPegional \fBI\fPnternet \fBR\fPegistries (AFRINIC, APNIC, ARIN, LACNIC, RIPENCC),
 and this is the most reliable way to obtain the country code for a given IP address, because the \fBRIR\fP's are the authorities for
@@ -94,8 +94,8 @@ ftp servers of each RIR, and APNIC, LACNIC and RIPENCC mirror the files of the o
 of this writing, ARIN and AFRINIC do not mirror current delegation statistics of the other RIR's.
 .Pp
 1) Choose one of the three useful mirror sites, depending on where you are located:
-.Bl -tag -width "  ftp.ripencc.net "
-.It \ \ \fBftp.ripencc.net\fP
+.Bl -tag -width "  ftp.lacnic.net "
+.It \ \ \fBftp.ripe.net\fP
 RIPENCC -- Europe and Eurasia [default mirror]
 .It \ \ \fBftp.apnic.net\fP
 APNIC -- Asia Pacific
@@ -129,13 +129,13 @@ LACNIC -- Latin America and Caribbean
 .br
  /usr/local/etc/ipdb/IPRanges/ripencc.dat  100% of   10 MB 1258 kBps 9s
 .br
- ipdb v1.1.1 (64), Copyright (C) 2016 Dr. Rolf Jansen
+ ipdb v1.1.1 (67), Copyright (C) 2016 Dr. Rolf Jansen
 .br
  Processing RIR data files ...
 .sp
   afrinic.dat  apnic.dat  arin.dat  lacnic.dat  ripencc.dat
 .sp
- Number of processed IP-Ranges = 112602
+ Number of processed IP-Ranges = 113267
 .sp
 As shown above, this will download the delegation statistics data together with MD5 hashes for integrity checking into the directory
 .Ar /usr/local/etc/ipdb/IPRanges/ .
@@ -311,8 +311,8 @@ in Ports:
 .An Dr. Rolf Jansen - Copyright (c) 2016 - all rights reserved.
 .sp
 .Sh IMPORTANT NOTE
-Improper use of the \fBipdb tools\fP may result in erroneous IP tables, and a
-firewall may be rendered non-functional once configured with incorrect tables.
+Improper use of the \fBipdb tools\fP may result in erroneous IP tables, and firewalls
+or routers may be rendered non-functional once configured with incorrect tables.
 .Pp
 In NO event shall the author and/or copyright owner be liable for ANY damages
 resulting from ANY use of this software. Use the \fBipdb tools\fP at your own risk!
