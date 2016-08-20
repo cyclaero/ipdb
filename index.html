@@ -42,16 +42,16 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>DESCRIPTION</b></span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>In general, routing is determined by destination IP addresses, and access</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>control by the firewall is established by selectors that can be attrib-</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>uted to incoming and outgoing IP packets, like physical interfaces on</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>which the packets are going, source and target IP addresses, protocol</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>types, port numbers, content types and content, etc. The Geo-location</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>would be just another selector, but this information is not carried</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>explicitly with IP packets, however, it can be obtained using an IP</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>address as a key for looking-up the location in an IP database. For exam-</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>ple the country to which a given IP address is delegated, can be obtained</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>with the common Unix tool <b>whois</b>(1).</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>In general, access control by the <b>firewall</b> is established by selectors</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>that can be attributed to incoming and outgoing IP packets, like physi-</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>cal interfaces on which the packets are going, source and destination</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>IP addresses, protocol types, port numbers, content types and content,</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>etc., and <b>routing</b> is determined by destination IP addresses. The Geo-</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>location would be just another selector, but this information is not</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>carried explicitly with IP packets, however, it can be obtained using</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>the IP address as a key for looking-up the location in an IP database.</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>For example, the country to which a given IP address is delegated, can</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>be obtained with the common Unix tool <b>whois</b>(1).</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span><b>whois</b> does an online look-up in the IP databases of the 5 <b>R</b>egional <b>I</b>nter-</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>net <b>R</b>egistries (AFRINIC, APNIC, ARIN, LACNIC, RIPENCC), and this is the</span></p>
@@ -67,23 +67,23 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span>The three tools in the package are:</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">       </span><b>ipup</b><span class="space">            </span>A tool to utilize the IP Geo-location tables to look-up</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>the country code belonging to an IP address or generate</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>sorted lists of CIDR compatible IP address/masklen</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>pairs per country code, formatted as raw CIDR ranges or</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span><b>ipfw</b>(8) table construction directives.</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span><b>ipup</b><span class="space">              </span>A tool to utilize the IP Geo-location tables to look-up</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>the country code belonging to an IP address or generate</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>sorted lists of CIDR compatible IP address/masklen</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>pairs per country code, formatted as raw CIDR ranges or</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span><b>ipfw</b>(8) table construction directives.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">       </span><b>ipdb</b><span class="space">            </span>A tool for consolidating the IP address ranges from the</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>RIR delegation statistics files into binary sorted</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>tables of IP ranges + country codes, suitable for</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>direct utilization by the <b>ipup</b> look-up tool. IPv4 and</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>IPv6 ranges are stored in separate files.</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span><b>ipdb</b><span class="space">              </span>A tool for consolidating the IP address ranges from the</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>RIR delegation statistics files into binary sorted</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>tables of IP ranges + country codes, suitable for</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>direct utilization by the <b>ipup</b> look-up tool. IPv4 and</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>IPv6 ranges are stored in separate files.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">       </span><b>ipdb-update.sh</b><span class="space">  </span>A shell script to update the IP Geo-location tables by</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>downloading the 5 RIR delegation statistics files from</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>a <b>R</b>egional <b>I</b>nternet <b>R</b>egistry mirror, and invoking <b>ipdb</b></span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>to generate the binary sorted tables. It is suitable</span></p>
-<p class="p1"><span class="s1"><span class="space">                       </span>for invocation by cron.</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span><b>ipdb-update.sh</b><span class="space">  </span>A shell script to update the IP Geo-location tables by</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>downloading the 5 RIR delegation statistics files from</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>a <b>R</b>egional <b>I</b>nternet <b>R</b>egistry mirror, and invoking <b>ipdb</b></span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>to generate the binary sorted tables. It is suitable</span></p>
+<p class="p1"><span class="s1"><span class="space">                        </span>for invocation by cron.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>Setting</b> <b>up</b> <b>the</b> <b>local</b> <b>IP</b> <b>Geo-location</b> <b>tables</b></span></p>
@@ -98,7 +98,7 @@
 <p class="p1"><span class="s1"><span class="space">     </span>1) Choose one of the three useful mirror sites, depending on where you</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>are located:</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">       </span><b>ftp.ripencc.net</b> <span class="space">  </span>RIPENCC -- Europe and Eurasia [default mirror]</span></p>
+<p class="p1"><span class="s1"><span class="space">       </span><b>ftp.ripe.net</b> <span class="space">     </span>RIPENCC -- Europe and Eurasia [default mirror]</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">       </span><b>ftp.apnic.net</b> <span class="space">    </span>APNIC -- Asia Pacific</span></p>
 <p class="p2"><span class="s1"></span><br></p>
@@ -119,12 +119,12 @@
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/lacnic.dat <span class="space">  </span>100% of 1870 kB 1271 kBps 2s</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.md5<span class="space">  </span>100% of <span class="space">  </span>74<span class="space">  </span>B<span class="space">  </span>270 kBps 0s</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>/usr/local/etc/ipdb/IPRanges/ripencc.dat<span class="space">  </span>100% of <span class="space">  </span>10 MB 1258 kBps 9s</span></p>
-<p class="p1"><span class="s1"><span class="space">      </span>ipdb v1.1.1 (64), Copyright (C) 2016 Dr. Rolf Jansen</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span>ipdb v1.1.1 (67), Copyright (C) 2016 Dr. Rolf Jansen</span></p>
 <p class="p1"><span class="s1"><span class="space">      </span>Processing RIR data files ...</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">       </span>afrinic.dat<span class="space">  </span>apnic.dat<span class="space">  </span>arin.dat<span class="space">  </span>lacnic.dat<span class="space">  </span>ripencc.dat</span></p>
 <p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="space">      </span>Number of processed IP-Ranges = 112602</span></p>
+<p class="p1"><span class="s1"><span class="space">      </span>Number of processed IP-Ranges = 113267</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span>As shown above, this will download the delegation statistics data</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>together with MD5 hashes for integrity checking into the directory</span></p>
@@ -291,9 +291,8 @@
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><b>IMPORTANT</b> <b>NOTE</b></span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>Improper use of the <b>ipdb</b> <b>tools</b> may result in erroneous IP tables, and a</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>firewall may be rendered non-functional once configured with incorrect</span></p>
-<p class="p1"><span class="s1"><span class="space">     </span>tables.</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>Improper use of the <b>ipdb</b> <b>tools</b> may result in erroneous IP tables, and firewalls</span></p>
+<p class="p1"><span class="s1"><span class="space">     </span>or routers may be rendered non-functional once configured with incorrect tables.</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1"><span class="space">     </span>In NO event shall the author and/or copyright owner be liable for ANY</span></p>
 <p class="p1"><span class="s1"><span class="space">     </span>damages resulting from ANY use of this software. Use the <b>ipdb</b> <b>tools</b> at</span></p>
