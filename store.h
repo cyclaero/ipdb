@@ -24,29 +24,6 @@
 //  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#pragma mark ••• Fencing Memory Allocation Wrappers •••
-
-// void pointer reference
-#define VPR(p) (void **)&(p)
-
-typedef struct
-{
-   ssize_t size;
-   size_t  check;
-   char    payload[16];
-// size_t  zerowall;       // the allocation routines allocate sizeof(size_t) extra space and set this to zero
-} allocation;
-
-#define allocationMetaSize (offsetof(allocation, payload) - offsetof(allocation, size))
-
-extern ssize_t gAllocationTotal;
-
-void *allocate(ssize_t size, bool cleanout);
-void *reallocate(void *p, ssize_t size, bool cleanout, bool free_on_error);
-void deallocate(void **p, bool cleanout);
-void deallocate_batch(bool cleanout, ...);
-
-
 #pragma mark ••• AVL Tree of IPv4-Ranges •••
 
 typedef union

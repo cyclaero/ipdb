@@ -54,7 +54,7 @@ all: $(HEADERS) $(SOURCES) $(OBJECTS) ipup ipdb
 depend:
 	$(CC) $(CFLAGS) -E -MM *.c > .depend
 
-$(OBJECTS):
+$(OBJECTS): Makefile
 	$(CC) $(CFLAGS) $< -c -o $@
 
 ipup: $(OBJECTS)
