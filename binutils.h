@@ -623,11 +623,11 @@ typedef struct
       if (n &= 0x7F)
       {
          if (n > 64)
-            a.quad[b2_1] = a.quad[b2_0] << (n - 64),                          a.quad[b2_0] = 0;
+            a.quad[b2_1] = a.quad[b2_0] << (n - 64),                         a.quad[b2_0] = 0;
          else if (n < 64)
-            a.quad[b2_1] = (a.quad[b2_1] << n) | (a.quad[b2_0] >> (64 - n)),  a.quad[b2_0] = a.quad[b2_0] << n;
+            a.quad[b2_1] = (a.quad[b2_1] << n) | (a.quad[b2_0] >> (64 - n)), a.quad[b2_0] = a.quad[b2_0] << n;
          else // (n == 64)
-            a.quad[b2_1] = a.quad[b2_0],                                      a.quad[b2_0] = 0;
+            a.quad[b2_1] = a.quad[b2_0],                                     a.quad[b2_0] = 0;
       }
       return a;
    }
@@ -637,11 +637,11 @@ typedef struct
       if (n &= 0x7F)
       {
          if (n > 64)
-            a.quad[b2_0] = a.quad[b2_1] >> (n - 64),                          a.quad[b2_1] = 0;
+            a.quad[b2_0] = a.quad[b2_1] >> (n - 64),                         a.quad[b2_1] = 0;
          else if (n < 64)
-            a.quad[b2_0] = (a.quad[b2_0] >> n) | (a.quad[b2_1] << (64 - n)),  a.quad[b2_1] = a.quad[b2_1] >> n;
+            a.quad[b2_0] = (a.quad[b2_0] >> n) | (a.quad[b2_1] << (64 - n)), a.quad[b2_1] = a.quad[b2_1] >> n;
          else // (n == 64)
-            a.quad[b2_0] = a.quad[b2_1],                                      a.quad[b2_1] = 0;
+            a.quad[b2_0] = a.quad[b2_1],                                     a.quad[b2_1] = 0;
       }
       return a;
    }
