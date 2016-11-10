@@ -157,7 +157,7 @@
    // Drop-in replacement for strlen(), utilizing some builtin SSSE3 instructions
    static inline int strvlen(const char *str)
    {
-      if (!*str)
+      if (!str || !*str)
          return 0;
 
       unsigned bmask;
@@ -172,7 +172,7 @@
 
    static inline int linelen(const char *line)
    {
-      if (!*line)
+      if (!line || !*line)
          return 0;
 
       unsigned bmask;
@@ -189,7 +189,7 @@
 
    static inline int taglen(const char *tag)
    {
-      if (!*tag)
+      if (!tag || !*tag)
          return 0;
 
       unsigned bmask;
@@ -206,7 +206,7 @@
 
    static inline int fieldlen(const char *field)
    {
-      if (!*field)
+      if (!field || !*field)
          return 0;
 
       unsigned bmask;
@@ -223,7 +223,7 @@
 
    static inline int wordlen(const char *word)
    {
-      if (!*word)
+      if (!word || !*word)
          return 0;
 
       unsigned bmask;
@@ -238,7 +238,7 @@
 
    static inline int blanklen(const char *blank)
    {
-      if (!*blank)
+      if (!blank || !*blank)
          return 0;
 
       unsigned bmask;
@@ -310,7 +310,7 @@
 
    static inline int linelen(const char *line)
    {
-      if (!*line)
+      if (!line || !*line)
          return 0;
 
       int l;
@@ -321,7 +321,7 @@
 
    static inline int taglen(const char *tag)
    {
-      if (!*tag)
+      if (!tag || !*tag)
          return 0;
 
       int l;
@@ -332,7 +332,7 @@
 
    static inline int fieldlen(const char *field)
    {
-      if (!*field)
+      if (!field || !*field)
          return 0;
 
       int l;
@@ -343,7 +343,7 @@
 
    static inline int wordlen(const char *word)
    {
-      if (!*word)
+      if (!word || !*word)
          return 0;
 
       int l;
@@ -354,7 +354,7 @@
 
    static inline int blanklen(const char *blank)
    {
-      if (!*blank)
+      if (!blank || !*blank)
          return 0;
 
       int l;
