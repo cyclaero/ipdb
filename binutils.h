@@ -28,6 +28,7 @@
 
 typedef unsigned char uchar;
 
+
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
    #define b2_0 0
@@ -153,7 +154,6 @@ typedef unsigned char uchar;
    static const __m128i lfd16 = {0x0A0A0A0A0A0A0A0AULL, 0x0A0A0A0A0A0A0A0AULL};  // 16 bytes with line feed
    static const __m128i col16 = {0x3A3A3A3A3A3A3A3AULL, 0x3A3A3A3A3A3A3A3AULL};  // 16 bytes with colon ':' limit
    static const __m128i vtl16 = {0x7C7C7C7C7C7C7C7CULL, 0x7C7C7C7C7C7C7C7CULL};  // 16 bytes with vertical line '|' limit
-   static const __m128i obl16 = {0x2121212121212121ULL, 0x2121212121212121ULL};  // 16 bytes with outer blank limit
    static const __m128i blk16 = {0x2020202020202020ULL, 0x2020202020202020ULL};  // 16 bytes with inner blank limit
 
    // Drop-in replacement for strlen(), utilizing some builtin SSSE3 instructions
@@ -164,7 +164,7 @@ typedef unsigned char uchar;
 
       unsigned bmask;
 
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)str), nul16)))
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)str), nul16)))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)str%16;; len += 16)
@@ -179,8 +179,8 @@ typedef unsigned char uchar;
 
       unsigned bmask;
 
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)line), nul16))
-                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)line), lfd16)))
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)line), nul16))
+                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)line), lfd16)))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)line%16;; len += 16)
@@ -196,8 +196,8 @@ typedef unsigned char uchar;
 
       unsigned bmask;
 
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)tag), nul16))
-                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)tag), col16)))
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)tag), nul16))
+                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)tag), col16)))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)tag%16;; len += 16)
@@ -213,8 +213,8 @@ typedef unsigned char uchar;
 
       unsigned bmask;
 
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)field), nul16))
-                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_lddqu_si128((__m128i *)field), vtl16)))
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)field), nul16))
+                | (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i *)field), vtl16)))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)field%16;; len += 16)
@@ -230,11 +230,12 @@ typedef unsigned char uchar;
 
       unsigned bmask;
 
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmplt_epi8(_mm_abs_epi8(_mm_lddqu_si128((__m128i *)word)), obl16)))
+                                           // unsigned comparison (a >= b) is identical to a == maxu(a, b)
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(blk16, _mm_max_epu8(blk16, _mm_loadu_si128((__m128i *)word)))))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)word%16;; len += 16)
-         if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmplt_epi8(_mm_abs_epi8(_mm_load_si128((__m128i *)&word[len])), obl16)))
+         if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(blk16, _mm_max_epu8(blk16, _mm_load_si128((__m128i *)&word[len])))))
             return len + __builtin_ctz(bmask);
    }
 
@@ -244,12 +245,12 @@ typedef unsigned char uchar;
          return 0;
 
       unsigned bmask;
-
-      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpgt_epi8(_mm_abs_epi8(_mm_lddqu_si128((__m128i *)blank)), obl16)))
+                                           // unsigned comparison (a <= b) is identical to a == minu(a, b)
+      if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(blk16, _mm_min_epu8(blk16, _mm_loadu_si128((__m128i *)blank)))))
          return __builtin_ctz(bmask);
 
       for (int len = 16 - (intptr_t)blank%16;; len += 16)
-         if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpgt_epi8(_mm_abs_epi8(_mm_load_si128((__m128i *)&blank[len])), obl16)))
+         if (bmask = (unsigned)_mm_movemask_epi8(_mm_cmpeq_epi8(blk16, _mm_min_epu8(blk16, _mm_load_si128((__m128i *)&blank[len])))))
             return len + __builtin_ctz(bmask);
    }
 
@@ -378,11 +379,11 @@ typedef unsigned char uchar;
       if (l)
       {
          if (!*l)
-            *l = (int)strvlen(src);
+            *l = (int)strlen(src);
          k = *l;
       }
       else
-         k = (int)strvlen(src);
+         k = (int)strlen(src);
 
       if (!m)
          n = k;

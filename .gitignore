@@ -1,4 +1,11 @@
 .DS_Store
+.depend
+ipup
+ipdb
+geod
+uint128test
+*.o
+*.core
 gh-pages
 xcuserdata
 *.xcworkspace
