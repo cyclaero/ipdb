@@ -30,7 +30,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
-#include <tmmintrin.h>
 
 #include "binutils.h"
 #include "store.h"

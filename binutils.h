@@ -26,6 +26,8 @@
 
 #define noerr 0
 
+typedef unsigned char uchar;
+
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
    #define b2_0 0
@@ -145,14 +147,14 @@
 
 #if defined(__x86_64__)
 
-   #include <tmmintrin.h>
+   #include <x86intrin.h>
 
    static const __m128i nul16 = {0x0000000000000000ULL, 0x0000000000000000ULL};  // 16 bytes with nul
    static const __m128i lfd16 = {0x0A0A0A0A0A0A0A0AULL, 0x0A0A0A0A0A0A0A0AULL};  // 16 bytes with line feed
    static const __m128i col16 = {0x3A3A3A3A3A3A3A3AULL, 0x3A3A3A3A3A3A3A3AULL};  // 16 bytes with colon ':' limit
    static const __m128i vtl16 = {0x7C7C7C7C7C7C7C7CULL, 0x7C7C7C7C7C7C7C7CULL};  // 16 bytes with vertical line '|' limit
-   static const __m128i blk16 = {0x2020202020202020ULL, 0x2020202020202020ULL};  // 16 bytes with inner blank limit
    static const __m128i obl16 = {0x2121212121212121ULL, 0x2121212121212121ULL};  // 16 bytes with outer blank limit
+   static const __m128i blk16 = {0x2020202020202020ULL, 0x2020202020202020ULL};  // 16 bytes with inner blank limit
 
    // Drop-in replacement for strlen(), utilizing some builtin SSSE3 instructions
    static inline int strvlen(const char *str)
@@ -347,7 +349,7 @@
          return 0;
 
       int l;
-      for (l = 0; word[l] > ' '; l++)
+      for (l = 0; (uchar)word[l] > ' '; l++)
          ;
       return l;
    }
@@ -358,7 +360,7 @@
          return 0;
 
       int l;
-      for (l = 0; blank[l] > ' '; l++)
+      for (l = 0; (uchar)blank[l] <= ' '; l++)
          ;
       return l;
    }
