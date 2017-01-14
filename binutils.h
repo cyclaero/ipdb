@@ -382,7 +382,7 @@ typedef unsigned char uchar;
          k = (int)strlen(src);
 
       if (!m)
-         n = k;
+         n = m = k;
       else
          n = (k < m) ? k : m-1;
 
@@ -480,7 +480,7 @@ extern ssize_t gAllocationTotal;
 void *allocate(ssize_t size, bool cleanout);
 void *reallocate(void *p, ssize_t size, bool cleanout, bool free_on_error);
 void deallocate(void **p, bool cleanout);
-void deallocate_batch(bool cleanout, ...);
+void deallocate_batch(unsigned cleanout, ...);
 
 
 #pragma mark ••• uint128 Arithmetic •••

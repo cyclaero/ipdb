@@ -30,6 +30,8 @@
 #   make install clean
 #   make clean install CDEFS="-DDEBUG"
 
+CC ?= clang
+
 .if exists(.svn) || exists(../.svn) || exists(../../.svn) || exists(../../../.svn)
 .ifmake update
 REVNUM != svn update > /dev/null; svnversion
@@ -40,8 +42,15 @@ REVNUM != svnversion
 REVNUM != cut -d= -f2 svnrev.xcconfig
 .endif
 
-CC       ?= clang
-CFLAGS    = $(CDEFS) -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -mssse3 -Wno-parentheses -Wno-empty-body
+.if $(MACHINE) == "i386" || $(MACHINE) == "amd64" || $(MACHINE) == "x86_64"
+CFLAGS = $(CDEFS) -march=native -mssse3 -ffast-math
+.elif $(MACHINE) == "arm"
+CFLAGS = $(CDEFS) -fsigned-char
+.else
+CFLAGS = $(CDEFS)
+.endif
+
+CFLAGS   += -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
 LDFLAGS   = -lm
 PREFIX   ?= /usr/local
 
