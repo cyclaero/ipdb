@@ -382,11 +382,11 @@ typedef unsigned char uchar;
          k = (int)strlen(src);
 
       if (!m)
-         n = m = k;
+         n = k;
       else
          n = (k < m) ? k : m-1;
 
-      strlcpy(dst, src, m);
+      strlcpy(dst, src, n+1);
       return n;
    }
 
