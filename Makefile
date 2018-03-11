@@ -43,14 +43,14 @@ REVNUM != cut -d= -f2 svnrev.xcconfig
 .endif
 
 .if $(MACHINE) == "i386" || $(MACHINE) == "amd64" || $(MACHINE) == "x86_64"
-CFLAGS = $(CDEFS) -march=native -mssse3 -ffast-math
+CFLAGS = $(CDEFS) -march=native -mssse3
 .elif $(MACHINE) == "arm"
 CFLAGS = $(CDEFS) -fsigned-char
 .else
 CFLAGS = $(CDEFS)
 .endif
 
-CFLAGS   += -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -Ofast -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
+CFLAGS   += -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -O3 -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
 LDFLAGS   = -lm
 PREFIX   ?= /usr/local
 
