@@ -193,7 +193,7 @@ int main(int argc, const char *argv[])
             FILE  *in;
             struct stat st;
 
-            printf("ipdb v1.1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
+            printf("ipdb v1.1.2 ("SVNREV"), Copyright © 2016-2018 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
             for (int inc = 2; inc < argc; inc++)
             {
                if (stat(argv[inc], &st) == noerr && st.st_size && (in = fopen(argv[inc], "r")))

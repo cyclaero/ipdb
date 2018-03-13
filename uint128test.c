@@ -3,7 +3,7 @@
 //  Created by Rolf on 2016-08-15
 //  Copyright © 2016 projectworld.net. All rights reserved.
 //
-//  clang -DUInt128_Testing -std=c11 -Ofast -mssse3 -Wno-parentheses binutils.c uint128test.c -o uint128test
+//  clang -DUInt128_Testing -std=c11 -O3 -mssse3 -Wno-parentheses binutils.c uint128test.c -o uint128test
 
 
 #include <stdio.h>

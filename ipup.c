@@ -43,7 +43,7 @@ void usage(const char *executable)
 {
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
-   printf("%s v1.1.1 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n\n", r);
+   printf("%s v1.1.2 ("SVNREV"), Copyright © 2016-2018 Dr. Rolf Jansen\n\n", r);
    printf("Usage:\n\n");
    printf("1) look up the country code belonging to an IP address given by the last command line argument:\n\n");
    printf("   %s [-r bstfiles] [-h] <IP address>\n", r);
