@@ -30,7 +30,8 @@
 #   make install clean
 #   make clean install CDEFS="-DDEBUG"
 
-CC ?= clang
+CC     ?= clang
+CFLAGS ?= -g0 -O3
 
 .if exists(.svn) || exists(../.svn) || exists(../../.svn) || exists(../../../.svn)
 .ifmake update
@@ -43,20 +44,20 @@ REVNUM != cut -d= -f2 svnrev.xcconfig
 .endif
 
 .if $(MACHINE) == "i386" || $(MACHINE) == "amd64" || $(MACHINE) == "x86_64"
-CFLAGS = $(CDEFS) -march=native -mssse3
+CFLAGS += $(CDEFS) -mssse3
 .elif $(MACHINE) == "arm"
-CFLAGS = $(CDEFS) -fsigned-char
+CFLAGS += $(CDEFS) -fsigned-char
 .else
-CFLAGS = $(CDEFS)
+CFLAGS += $(CDEFS)
 .endif
 
-CFLAGS   += -DSVNREV=\"$(REVNUM)\" -std=c11 -g0 -O3 -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
-LDFLAGS   = -lm
-PREFIX   ?= /usr/local
+CFLAGS += -DSVNREV=\"$(REVNUM)\" -std=c11 -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
+LDFLAGS = -lm
+PREFIX ?= /usr/local
 
-HEADERS   = binutils.h store.h
-SOURCES   = binutils.c store.c ipup.c ipdb.c
-OBJECTS   = $(SOURCES:.c=.o)
+HEADERS = binutils.h store.h
+SOURCES = binutils.c store.c ipup.c ipdb.c
+OBJECTS = $(SOURCES:.c=.o)
 
 all: $(HEADERS) $(SOURCES) $(OBJECTS) ipup ipdb
 
