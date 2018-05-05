@@ -4,7 +4,7 @@ See also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](
 
 ### Opting out of the EU's General Data Protection Regulation by Geo Blocking the EU
 
-The [EU-GDPR - 88 pages of the lawyers finest, compressed by 9.6 pt EUAlbertina](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679) is going to become effective on May 25th, 2018. One option is to opt-out of this bullshit by Geo-Blocking the EU.
+The [EU-GDPR - 88 pages of the lawyer's finest, compressed by 9.6 pt EUAlbertina](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679) is going to become effective on May 25th, 2018. One option is to opt-out of this bullshit by Geo-Blocking the EU.
 
 On the FreeBSD gateway of your internet service to be hidden from EU citizens, do the following:
 1. `pkg install ipdbtools`,
