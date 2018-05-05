@@ -1,7 +1,7 @@
-see also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](https://cyclaero.github.io/ipdb/)
+See also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](https://cyclaero.github.io/ipdb/)
 
-Latest & hotest case study
-==========================
+## Latest & hotest case study
+
 ### Opting out of the EU's General Data Protection Regulation by Geo Blocking the EU
 
 The [EU-GDPR - 88 pages of the lawyers finest, compressed by 9.6 pt EUAlbertina](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679) is going to become effective on May 25th, 2018. One option is to opt-out of this bullshit by Geo-Blocking th EU.
@@ -9,7 +9,8 @@ The [EU-GDPR - 88 pages of the lawyers finest, compressed by 9.6 pt EUAlbertina]
 On the FreeBSD gateway of your internet service to be hidden from EU citizens, do the following:
 1. `pkg install ipdbtools`,
 2. `ipdb-update.sh`,
-3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic:
+3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic: 
+
     ...
     # EU-GDPR Geo blocking using an ipfw table
     /sbin/ipfw -q table 66 create
@@ -18,9 +19,7 @@ On the FreeBSD gateway of your internet service to be hidden from EU citizens, d
     ...
 
 
-
-Geo-blocking at the Firewall
-============================
+## Geo-blocking at the Firewall
 
 In general, access control by the firewall is established by selectors that can be attributed to incoming and outgoing IP-packets, like physical interfaces on which the packets are going, source and target IP addresses, protocol types, port numbers, content types and content, etc. The geo-location would be just another selector, but this information is not carried explicitly with the IP packets, however, it can be obtained using the source IP address as a key for looking-up the location in a geo-database. For example, besides other information, the country to which the IPv4 address I00.0.0.1 is delegated, can be obtained with the common unix tool `whois`:
 
