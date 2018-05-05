@@ -11,6 +11,7 @@ On the FreeBSD gateway of your internet service to be hidden from EU citizens, d
 2. `ipdb-update.sh`,
 3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic:
 
+[//]: # (list end)
 
     ...
     # EU-GDPR Geo blocking using an ipfw table
