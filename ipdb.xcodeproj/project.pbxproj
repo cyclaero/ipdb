@@ -70,6 +70,7 @@
 		7E374ECF1D59F6EB0085F3A8 /* gh-pages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "gh-pages"; sourceTree = "<group>"; };
 		7E6091F81DD4FC2A006806A5 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		7E6091FA1DD4FC7D006806A5 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		7E7EEBAB209DECA000180BB6 /* related */ = {isa = PBXFileReference; lastKnownFileType = folder; path = related; sourceTree = "<group>"; };
 		7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */ = {isa = PBXFileReference; explicitFileType = text.man; path = ipdbtools.1; sourceTree = "<group>"; };
 		7ECC372E1D60207100E6948D /* binutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binutils.h; sourceTree = "<group>"; };
 		7ECC372F1D60207100E6948D /* binutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = binutils.c; sourceTree = "<group>"; };
@@ -136,6 +137,7 @@
 				7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */,
 				7E6091F81DD4FC2A006806A5 /* .gitignore */,
 				7E374ECF1D59F6EB0085F3A8 /* gh-pages */,
+				7E7EEBAB209DECA000180BB6 /* related */,
 				7EEC62081D32BCCD005630F5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -331,26 +333,24 @@
 		7EE060381D62A4FF00E008A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				OTHER_CFLAGS = (
 					"-DSVNREV=\\\"$(SVNREV)\\\"",
 					"-DUInt128_Testing",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
 		7EE060391D62A4FF00E008A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				OTHER_CFLAGS = (
 					"-DSVNREV=\\\"$(SVNREV)\\\"",
 					"-DUInt128_Testing",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

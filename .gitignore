@@ -4,8 +4,9 @@ ipup
 ipdb
 geod
 uint128test
+related
+gh-pages
 *.o
 *.core
-gh-pages
 xcuserdata
 *.xcworkspace
