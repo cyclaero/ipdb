@@ -1,5 +1,24 @@
 see also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](https://cyclaero.github.io/ipdb/)
 
+Latest & hotest case study
+==========================
+### Opting out of the EU's General Data Protection Regulation by Geo Blocking the EU
+
+The [EU-GDPR - 88 pages of the lawyers finest, compressed by 9.6 pt EUAlbertina](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679) is going to become effective on May 25th, 2018. One option is to opt-out of this bullshit by Geo-Blocking th EU.
+
+On the FreeBSD gateway of your internet service to be hidden from EU citizens, do the following:
+1. `pkg install ipdbtools`,
+2. `ipdb-update.sh`,
+3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic:
+    ...
+    # EU-GDPR Geo blocking using an ipfw table
+    /sbin/ipfw -q table 66 create
+    /usr/local/bin/ipup -t AL:AT:BE:BG:CY:CZ:DE:DK:EE:ES:FI:FR:GB:GR:HR:HU:IE:IT:LT:LU:LV:ME:MK:MT:NL:PL:PT:RO:RS:SE:SI:SK:TR -n 66 -4 | /sbin/ipfw -q /dev/stdin
+    /sbin/ipfw -q add 66 deny tcp from table\(66\) to any 80,443 in recv $WAN setup
+    ...
+
+
+
 Geo-blocking at the Firewall
 ============================
 
@@ -31,13 +50,13 @@ In general, access control by the firewall is established by selectors that can 
 
 `whois` does an online lookup in the databases of the [5 Regional Internet Registries](https://en.wikipedia.org/wiki/Regional_Internet_registry) (`AFRINIC, APNIC, ARIN, LACNIC, RIPENCC)`, and this is the most reliable way to obtain the country code for an IP address, because the RIR's are the authorities for internet number delegations.
 
-Unfortunately, online database look-up is by far too slow for even thinking about being utilized on the firewall level, where IP packets need to be processed in a 10th or a 100th of a millisecond. Therefore a locally maintained Geo-location database is indispensable in the given respect, and I uploaded the source code for the necessary tools for FreeBSD to GitHub -- [Tools for IP based Geo-blocking and Geo-routing at the firewall on FreeBSD](https://cyclaero.github.io/ipdb/)
+Unfortunately, online database look-up is by far too slow for even thinking about being utilized on the firewall level, where IP packets need to be processed in a 10th or a 100th of a millisecond. Therefore a locally maintained Geo-location database is indispensable in the given respect, and I uploaded the source code for the necessary tools for FreeBSD to the present GitHub site.
 
-### The local Geo-location database {style="text-align: justify;"}
+### The local Geo-location database
 
-The idea is to obtain the authoritative Geo-location information from the 5 RIR's, compile it into an optimized format suitable for quickly looking up the country codes of given IP addresses. This information is present in so called delegation statistics file on the ftp servers of each RIR, and APNIC, LACNIC and RIPENCC mirror the files of the other RIR's on their servers – ARIN and AFRINIC do not mirror the latest delegation statistics of the other RIR's.
+The idea is to obtain the authoritative Geo-location information from the 5 RIR's, compile it into an optimized format suitable for quickly looking up the country codes of given IP addresses. This information is present in so called delegation statistics files on the ftp servers of each RIR, and APNIC, LACNIC and RIPENCC mirror these files of each of the other RIR's on their servers as well, while ARIN and AFRINIC do not mirror the latest delegation statistics of the other RIR's.
 
-Said GitHub repository provides the source code of the tools and a shell script `ipdb-update.sh` which can be used for the purpose. Download the package from GitHub to your FreeBSD system, and as user `root` execute `# make install` from within the `ipdb` directory.
+This GitHub repository provides the source code of the tools and a shell script `ipdb-update.sh` which can be used for the purpose. Download the package from GitHub to your FreeBSD system, and as user `root` execute `# make install` from within the `ipdb` directory.
 
 Choose one of the three useful mirror sites, depending on where you are located:
 
@@ -47,7 +66,7 @@ Choose one of the three useful mirror sites, depending on where you are located:
 
 As user `root` run the script `ipdb-update.sh` with the chosen mirror as the parameter, e.g. ftp.apnic.net:
 
-    # ipdb-update.sh ftp.apnic.net
+    # ipdb-update.sh ftp.ripencc.net
     >>>>
     /usr/local/etc/ipdb/IPRanges/afrinic.md5      100% of   74  B  225 kBps 00m00s
     /usr/local/etc/ipdb/IPRanges/afrinic.dat      100% of  397 kB 1294 kBps 00m01s
@@ -82,7 +101,7 @@ Now, check whether the database is ready by looking up some IPv4 addresses using
     $ ipup 192.168.1.1
     192.168.1.1 not found
 
-### Geo-blocking with ipfw {style="text-align: justify;"}
+### Geo-blocking with ipfw
 
 The `ipup` tool can generate tables of CIDR ranges for selected country codes which can be directly piped into ipfw, and with that the ipfw configuration script may contain something like:
 
@@ -96,8 +115,8 @@ OR, the other way around:
 
     ...
     # deny web access from certain disgraceful regions:
-    /usr/local/bin/v -t TR:SA:RU:GB -n 66 | /sbin/ipfw -q /dev/stdin
-    /sbin/ipfw -q add 70 allow tcp from not table\(66\) to any 80,443 in recv em0 setup
+    /usr/local/bin/v -t TR:SA:RU:GB -n 6 | /sbin/ipfw -q /dev/stdin
+    /sbin/ipfw -q add 70 allow tcp from not table\(6\) to any 80,443 in recv em0 setup
     ...
 
 ### Is Geo-blocking evil?
