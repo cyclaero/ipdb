@@ -12,9 +12,9 @@ On the FreeBSD gateway of your internet service to be hidden from EU citizens, d
 3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic: 
 
     ...
-    &#35; EU-GDPR Geo blocking using an ipfw table
+    EU-GDPR Geo blocking using an ipfw table
     /sbin/ipfw -q table 66 create
-    /usr/local/bin/ipup -t AL:AT:BE:BG:CY:CZ:DE:DK:EE:ES:FI:FR:GB:GR:HR:HU:IE:IT:LT:LU:LV:ME:MK:MT:NL:PL:PT:RO:RS:SE:SI:SK:TR -n 66 -4 | /sbin/ipfw -q /dev/stdin
+    /usr/local/bin/ipup -t AL:AT:BE:BG:CY:CZ:DE:DK:EE:ES:FI:FR:GB:GR:HR:HU:IE:IT:LT:LU:LV:ME:MK:MT:NL:PL:PT:RO:RS:SE:SI:SK:TR -n 66 | /sbin/ipfw -q /dev/stdin
     /sbin/ipfw -q add 66 deny tcp from table\(66\) to any 80,443 in recv $WAN setup
     ...
 
