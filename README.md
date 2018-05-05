@@ -9,8 +9,9 @@ The [EU-GDPR - 88 pages of the lawyers finest, compressed by 9.6 pt EUAlbertina]
 On the FreeBSD gateway of your internet service to be hidden from EU citizens, do the following:
 1. `pkg install ipdbtools`,
 2. `ipdb-update.sh`,
-3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic
-:
+3. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic:
+
+
     ...
     # EU-GDPR Geo blocking using an ipfw table
     /sbin/ipfw -q table 66 create
