@@ -1,4 +1,7 @@
 .DS_Store
+scmrev.xcconfig
+xcuserdata
+*.xcworkspace
 .depend
 ipup
 ipdb
@@ -8,5 +11,3 @@ related
 gh-pages
 *.o
 *.core
-xcuserdata
-*.xcworkspace
