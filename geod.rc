@@ -3,7 +3,7 @@
 # FreeBSD rc-script for auto-starting/stopping the geod daemon
 #
 # Created by Dr. Rolf Jansen on 2016-07-15.
-# Copyright (c) 2016 projectstore.net. All rights reserved.
+# Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 #
 # PROVIDE: geod
 # KEYWORD: shutdown

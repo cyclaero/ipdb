@@ -1,7 +1,7 @@
 # Makefile for FreeBSD using LLVM/clang
 #
 # Created by Dr. Rolf Jansen on 2016-07-15.
-# Copyright (c) 2016. All rights reserved.
+# Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -33,14 +33,20 @@
 CC     ?= clang
 CFLAGS ?= -g0 -O3
 
-.if exists(.svn) || exists(../.svn) || exists(../../.svn) || exists(../../../.svn)
+.if exists(.git)
 .ifmake update
-REVNUM != svn update > /dev/null; svnversion
+REVNUM != git pull origin >/dev/null 2>&1; git rev-list --count HEAD
 .else
-REVNUM != svnversion
+REVNUM != git rev-list --count HEAD
+.endif
+MODCNT != git status -s | wc -l
+.if $(MODCNT) > 0
+MODIED  = M
+.else
+MODIED  =
 .endif
 .else
-REVNUM != cut -d= -f2 svnrev.xcconfig
+REVNUM != cut -d= -f2 scmrev.xcconfig
 .endif
 
 .if $(MACHINE) == "i386" || $(MACHINE) == "amd64" || $(MACHINE) == "x86_64"
@@ -51,12 +57,12 @@ CFLAGS += $(CDEFS) -fsigned-char
 CFLAGS += $(CDEFS)
 .endif
 
-CFLAGS += -DSVNREV=\"$(REVNUM)\" -std=c11 -fstrict-aliasing -fno-common -Wno-parentheses -Wno-empty-body
+CFLAGS += -DSCMREV=\"$(REVNUM)$(MODIED)\" -std=gnu11 -fstrict-aliasing -fno-common -Wno-multichar -Wno-parentheses -Wno-empty-body
 LDFLAGS = -lm
 PREFIX ?= /usr/local
 
-HEADERS = binutils.h store.h
-SOURCES = binutils.c store.c ipup.c ipdb.c
+HEADERS = utils.h uint128t.h store.h
+SOURCES = utils.c uint128t.c store.c ipup.c ipdb.c
 OBJECTS = $(SOURCES:.c=.o)
 
 all: $(HEADERS) $(SOURCES) $(OBJECTS) ipup ipdb
@@ -68,10 +74,10 @@ $(OBJECTS): Makefile
 	$(CC) $(CFLAGS) $< -c -o $@
 
 ipup: $(OBJECTS)
-	$(CC) binutils.o store.o ipup.o $(LDFLAGS) -o $@
+	$(CC) utils.o uint128t.o store.o ipup.o $(LDFLAGS) -o $@
 
 ipdb: $(OBJECTS)
-	$(CC) binutils.o store.o ipdb.o $(LDFLAGS) -o $@
+	$(CC) utils.o uint128t.o store.o ipdb.o $(LDFLAGS) -o $@
 
 clean:
 	rm -rf *.o *.core ipup ipdb

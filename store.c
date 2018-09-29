@@ -1,8 +1,8 @@
 //  store.c
-//  ipdb / ipup / geod
+//  ipdbtools
 //
 //  Created by Dr. Rolf Jansen on 2016-07-10.
-//  Copyright (c) 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
@@ -28,10 +28,20 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
+#include <syslog.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 
-#include "binutils.h"
+#include "utils.h"
+#include "uint128t.h"
 #include "store.h"
 
 
@@ -237,7 +247,7 @@ int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
 
    else // (o == NULL)                    // if the IP4Node is not in the tree
    {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IP4Node), true))
+      if (o = allocate(sizeof(IP4Node), default_align, true))
       {
          o->lo = lo;
          o->hi = hi;
@@ -565,7 +575,7 @@ int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node)
 
    else // (o == NULL)                    // if the IP6Node is not in the tree
    {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(IP6Node), true))
+      if (o = allocate(sizeof(IP6Node), default_align, true))
       {
          o->lo = lo;
          o->hi = hi;
@@ -873,7 +883,7 @@ int addCCNode(uint32_t cc, uint32_t ui, CCNode **node)
 
    else // (o == NULL)                    // if the CCNode is not in the tree
    {                                      // then add it into a new leaf
-      if (o = allocate(sizeof(CCNode), true))
+      if (o = allocate(sizeof(CCNode), default_align, true))
       {
          o->cc = cc;
          o->ui = ui;
@@ -988,7 +998,7 @@ void releaseCCTree(CCNode *node)
 // Table creation and release
 CCNode **createCCTable(void)
 {
-   return allocate(ccTableSize*sizeof(CCNode *), true);
+   return allocate(ccTableSize*sizeof(CCNode *), default_align, true);
 }
 
 void releaseCCTable(CCNode *table[])

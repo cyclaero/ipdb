@@ -1,17 +1,29 @@
 //  uint128test.c
 //
 //  Created by Rolf on 2016-08-15
-//  Copyright © 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
-//  clang -DUInt128_Testing -std=c11 -O3 -mssse3 -Wno-parentheses binutils.c uint128test.c -o uint128test
+//  clang -DUInt128_Testing -std=c11 -O3 ´g0 -mssse3 -Wno-parentheses utils.c uint128test.c -o uint128test
 
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
+#include <syslog.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 
-#include "binutils.h"
+#include "utils.h"
+#include "uint128t.h"
 
 typedef unsigned long long ullong;
 typedef union

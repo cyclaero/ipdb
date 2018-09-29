@@ -3,20 +3,22 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E100189215FC74200D0FBA3 /* uint128t.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E100187215FC74200D0FBA3 /* uint128t.c */; };
+		7E10018A215FC74200D0FBA3 /* uint128t.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E100187215FC74200D0FBA3 /* uint128t.c */; };
+		7E10018B215FC74200D0FBA3 /* uint128t.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E100187215FC74200D0FBA3 /* uint128t.c */; };
+		7E10018C2160265800D0FBA3 /* uint128test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EE0602F1D62A48D00E008A8 /* uint128test.c */; };
 		7E1929491D37DF740010CA93 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 		7E1929501D37DFA90010CA93 /* geod.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E1929451D37DE340010CA93 /* geod.c */; };
 		7E37300F1D3C22E100CF7A4F /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 		7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E37300C1D3C20B000CF7A4F /* ipup.c */; };
-		7ECC37301D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
-		7ECC37311D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
-		7ECC37321D60207100E6948D /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
-		7EE060321D62A4FF00E008A8 /* binutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* binutils.c */; };
-		7EE060331D62A4FF00E008A8 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
-		7EE060341D62A4FF00E008A8 /* geod.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E1929451D37DE340010CA93 /* geod.c */; };
+		7ECC37301D60207100E6948D /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* utils.c */; };
+		7ECC37311D60207100E6948D /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* utils.c */; };
+		7ECC37321D60207100E6948D /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* utils.c */; };
+		7EE060321D62A4FF00E008A8 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 7ECC372F1D60207100E6948D /* utils.c */; };
 		7EEC62121D32BDCD005630F5 /* ipdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62111D32BDCD005630F5 /* ipdb.c */; };
 		7EEC62141D32BDD6005630F5 /* store.c in Sources */ = {isa = PBXBuildFile; fileRef = 7EEC62131D32BDD6005630F5 /* store.c */; };
 /* End PBXBuildFile section */
@@ -61,6 +63,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7E100187215FC74200D0FBA3 /* uint128t.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = uint128t.c; sourceTree = "<group>"; };
+		7E100188215FC74200D0FBA3 /* uint128t.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = uint128t.h; sourceTree = "<group>"; };
 		7E1929451D37DE340010CA93 /* geod.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = geod.c; sourceTree = "<group>"; };
 		7E19294F1D37DF740010CA93 /* geod */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = geod; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E30DB911D36655C007B1C7D /* ipdb-update.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ipdb-update.sh"; sourceTree = "<group>"; };
@@ -72,8 +76,8 @@
 		7E6091FA1DD4FC7D006806A5 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7E7EEBAB209DECA000180BB6 /* related */ = {isa = PBXFileReference; lastKnownFileType = folder; path = related; sourceTree = "<group>"; };
 		7EA9B4951D5925A200BEC2F9 /* ipdbtools.1 */ = {isa = PBXFileReference; explicitFileType = text.man; path = ipdbtools.1; sourceTree = "<group>"; };
-		7ECC372E1D60207100E6948D /* binutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binutils.h; sourceTree = "<group>"; };
-		7ECC372F1D60207100E6948D /* binutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = binutils.c; sourceTree = "<group>"; };
+		7ECC372E1D60207100E6948D /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		7ECC372F1D60207100E6948D /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		7EE0602F1D62A48D00E008A8 /* uint128test.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = uint128test.c; sourceTree = "<group>"; };
 		7EE0603A1D62A4FF00E008A8 /* uint128test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = uint128test; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EEC62071D32BCCD005630F5 /* ipdb */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ipdb; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,7 +85,7 @@
 		7EEC62131D32BDD6005630F5 /* store.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = store.c; sourceTree = "<group>"; };
 		7EEC62151D32BDDB005630F5 /* store.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = store.h; sourceTree = "<group>"; };
 		7EEE068A1D3A63E50084AF67 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; usesTabs = 1; };
-		7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = svnrev.xcconfig; sourceTree = "<group>"; };
+		7EEE068C1D3A694D0084AF67 /* scmrev.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = scmrev.xcconfig; sourceTree = "<group>"; };
 		7EEE068D1D3A944C0084AF67 /* geod.rc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.rc; path = geod.rc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -120,8 +124,10 @@
 		7EEC61FE1D32BCCD005630F5 = {
 			isa = PBXGroup;
 			children = (
-				7ECC372E1D60207100E6948D /* binutils.h */,
-				7ECC372F1D60207100E6948D /* binutils.c */,
+				7ECC372E1D60207100E6948D /* utils.h */,
+				7ECC372F1D60207100E6948D /* utils.c */,
+				7E100188215FC74200D0FBA3 /* uint128t.h */,
+				7E100187215FC74200D0FBA3 /* uint128t.c */,
 				7EEC62151D32BDDB005630F5 /* store.h */,
 				7EEC62131D32BDD6005630F5 /* store.c */,
 				7E37300C1D3C20B000CF7A4F /* ipup.c */,
@@ -134,7 +140,7 @@
 				7EE0602F1D62A48D00E008A8 /* uint128test.c */,
 				7E3730181D3C6DB800CF7A4F /* README.md */,
 				7E6091FA1DD4FC7D006806A5 /* LICENSE */,
-				7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */,
+				7EEE068C1D3A694D0084AF67 /* scmrev.xcconfig */,
 				7E6091F81DD4FC2A006806A5 /* .gitignore */,
 				7E374ECF1D59F6EB0085F3A8 /* gh-pages */,
 				7E7EEBAB209DECA000180BB6 /* related */,
@@ -231,15 +237,15 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0730;
-				ORGANIZATIONNAME = projectworld.net;
+				ORGANIZATIONNAME = obsigna.com;
 				TargetAttributes = {
 					7EEC62061D32BCCD005630F5 = {
 						CreatedOnToolsVersion = 7.3.1;
 					};
 				};
 			};
-			buildConfigurationList = 7EEC62021D32BCCD005630F5 /* Build configuration list for PBXProject "ipdb" */;
-			compatibilityVersion = "Xcode 3.2";
+			buildConfigurationList = 7EEC62021D32BCCD005630F5 /* Build configuration list for PBXProject "ipdbtools" */;
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -263,7 +269,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7ECC37321D60207100E6948D /* binutils.c in Sources */,
+				7ECC37321D60207100E6948D /* utils.c in Sources */,
 				7E1929491D37DF740010CA93 /* store.c in Sources */,
 				7E1929501D37DFA90010CA93 /* geod.c in Sources */,
 			);
@@ -273,8 +279,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7ECC37301D60207100E6948D /* binutils.c in Sources */,
+				7ECC37301D60207100E6948D /* utils.c in Sources */,
 				7E37300F1D3C22E100CF7A4F /* store.c in Sources */,
+				7E100189215FC74200D0FBA3 /* uint128t.c in Sources */,
 				7E3730171D3C22FD00CF7A4F /* ipup.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -283,9 +290,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EE060321D62A4FF00E008A8 /* binutils.c in Sources */,
-				7EE060331D62A4FF00E008A8 /* store.c in Sources */,
-				7EE060341D62A4FF00E008A8 /* geod.c in Sources */,
+				7EE060321D62A4FF00E008A8 /* utils.c in Sources */,
+				7E10018B215FC74200D0FBA3 /* uint128t.c in Sources */,
+				7E10018C2160265800D0FBA3 /* uint128test.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,8 +300,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7ECC37311D60207100E6948D /* binutils.c in Sources */,
+				7ECC37311D60207100E6948D /* utils.c in Sources */,
 				7EEC62141D32BDD6005630F5 /* store.c in Sources */,
+				7E10018A215FC74200D0FBA3 /* uint128t.c in Sources */,
 				7EEC62121D32BDCD005630F5 /* ipdb.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -333,11 +341,6 @@
 		7EE060381D62A4FF00E008A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				OTHER_CFLAGS = (
-					"-DSVNREV=\\\"$(SVNREV)\\\"",
-					"-DUInt128_Testing",
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -345,21 +348,15 @@
 		7EE060391D62A4FF00E008A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				OTHER_CFLAGS = (
-					"-DSVNREV=\\\"$(SVNREV)\\\"",
-					"-DUInt128_Testing",
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
 		7EEC620C1D32BCCD005630F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */;
+			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* scmrev.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -371,7 +368,7 @@
 				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -387,16 +384,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CFLAGS = "-DSVNREV=\\\"$(SVNREV)\\\"";
+				OTHER_CFLAGS = "-DSCMREV=\\\"$(SCMREV)\\\"";
+				WARNING_CFLAGS = "-Wno-multichar";
 			};
 			name = Debug;
 		};
 		7EEC620D1D32BCCD005630F5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* svnrev.xcconfig */;
+			baseConfigurationReference = 7EEE068C1D3A694D0084AF67 /* scmrev.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -408,8 +405,8 @@
 				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				GCC_C_LANGUAGE_STANDARD = c11;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
@@ -420,7 +417,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CFLAGS = "-DSVNREV=\\\"$(SVNREV)\\\"";
+				OTHER_CFLAGS = "-DSCMREV=\\\"$(SCMREV)\\\"";
+				WARNING_CFLAGS = "-Wno-multichar";
 			};
 			name = Release;
 		};
@@ -468,7 +466,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7EEC62021D32BCCD005630F5 /* Build configuration list for PBXProject "ipdb" */ = {
+		7EEC62021D32BCCD005630F5 /* Build configuration list for PBXProject "ipdbtools" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7EEC620C1D32BCCD005630F5 /* Debug */,

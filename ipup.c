@@ -2,7 +2,7 @@
 //  ipup
 //
 //  Created by Dr. Rolf Jansen on 2016-07-17.
-//  Copyright © 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
@@ -28,14 +28,20 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
+#include <syslog.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
-#include "binutils.h"
+#include "utils.h"
+#include "uint128t.h"
 #include "store.h"
 
 
@@ -43,7 +49,7 @@ void usage(const char *executable)
 {
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
-   printf("%s v1.1.2 ("SVNREV"), Copyright © 2016-2018 Dr. Rolf Jansen\n\n", r);
+   printf("%s v1.2b (" SCMREV "), Copyright © 2016-2018 Dr. Rolf Jansen\n\n", r);
    printf("Usage:\n\n");
    printf("1) look up the country code belonging to an IP address given by the last command line argument:\n\n");
    printf("   %s [-r bstfiles] [-h] <IP address>\n", r);
@@ -73,7 +79,7 @@ void usage(const char *executable)
 }
 
 
-CCNode **CCTable  = NULL;
+CCNode **CCTable = NULL;
 
 static inline uint32_t ccv(uint16_t cc, int32_t toff)
 {
@@ -202,10 +208,10 @@ int main(int argc, char *argv[])
       if (ipv4 = ipv4_str2bin(argv[0]))
       {
          *(uint32_t *)&inName[namelen] = *(uint32_t *)".v4";
-         if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
+         if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP4Str ipstr_lo, ipstr_hi;
-            IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, false);
+            IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, default_align, false);
             if (sortedIP4Sets)
             {
                if (fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in))
@@ -233,10 +239,10 @@ int main(int argc, char *argv[])
       else if (gt_u128(ipv6 = ipv6_str2bin(argv[0]), u64_to_u128t(0)))
       {
          *(uint32_t *)&inName[namelen] = *(uint32_t *)".v6";
-         if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
+         if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP6Str ipstr_lo, ipstr_hi;
-            IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, false);
+            IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, default_align, false);
             if (sortedIP6Sets)
             {
                if (fread(sortedIP6Sets, (ssize_t)st.st_size, 1, in))
@@ -290,11 +296,11 @@ int main(int argc, char *argv[])
          if (!only6Flag)
          {
             *(uint32_t *)&inName[namelen] = *(uint32_t *)".v4";
-            if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
+            if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
             {
                CCNode *ccn = NULL;
                IP4Str  ipstr;
-               IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, false);
+               IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, default_align, false);
                if (sortedIP4Sets)
                {
                   if (fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in))
@@ -352,11 +358,11 @@ int main(int argc, char *argv[])
          if (!only4Flag)
          {
             *(uint32_t *)&inName[namelen] = *(uint32_t *)".v6";
-            if (stat(inName, &st) == noerr && st.st_size && (in = fopen(inName, "r")))
+            if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
             {
                CCNode *ccn = NULL;
                IP6Str  ipstr;
-               IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, false);
+               IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, default_align, false);
                if (sortedIP6Sets)
                {
                   if (fread(sortedIP6Sets, (ssize_t)st.st_size, 1, in))

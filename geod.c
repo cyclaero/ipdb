@@ -2,7 +2,7 @@
 //  geod
 //
 //  Created by Dr. Rolf Jansen on 2016-07-14.
-//  Copyright © 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
@@ -26,9 +26,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <math.h>
+#include <time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -40,8 +43,10 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
 
-#include "binutils.h"
+#include "utils.h"
+#include "uint128t.h"
 #include "store.h"
 
 #define DAEMON_NAME "geod"
@@ -53,7 +58,7 @@ void usage(const char *executable)
 {
    const char *r = executable + strvlen(executable);
    while (--r >= executable && *r != '/'); r++;
-   printf("%s v1.0 ("SVNREV"), Copyright © 2016 Dr. Rolf Jansen\n", r);
+   printf("%s v1.0 (" SCMREV "), Copyright © 2016-2018 Dr. Rolf Jansen\n", r);
    printf("Usage:  %s [-a AA:BB:..] [-d DD:EE:..] [-r bstfile] [-p pidfile] [-f] [-n] [-h]\n", r);
    printf(" -a AA:BB:.. allow IPv4 source addresses from the listed countries,\n");
    printf("             i.e, 2 letter capital country codes, separated by colon.\n");

@@ -1,8 +1,8 @@
 //  store.h
-//  ipdb / ipup / geod
+//  ipdbtools
 //
 //  Created by Dr. Rolf Jansen on 2016-07-10.
-//  Copyright (c) 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
@@ -160,7 +160,7 @@ static inline uint32_t ipv4_str2bin(char *str)
 {
    uint32_t bin;
    return (inet_pton(AF_INET, str, &bin) > 0)
-          ? swapInt32(bin)
+          ? SwapInt32(bin)
           : 0;
 }
 
@@ -176,7 +176,7 @@ static inline uint128t ipv6_str2bin(char *str)
 {
    uint64_t bin[2];
    return (inet_pton(AF_INET6, str, &bin) > 0)
-          ? (IP6Desc){swapInt64(bin[b2_1]), swapInt64(bin[b2_0])}.number
+          ? (IP6Desc){SwapInt64(bin[b2_1]), SwapInt64(bin[b2_0])}.number
           : u64_to_u128t(0);
 }
 

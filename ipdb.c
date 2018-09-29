@@ -2,7 +2,7 @@
 //  ipdb
 //
 //  Created by Dr. Rolf Jansen on 2016-07-10.
-//  Copyright © 2016 projectworld.net. All rights reserved.
+//  Copyright © 2016-2018 Dr. Rolf Jansen. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
@@ -28,12 +28,20 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
+#include <syslog.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
-#include "binutils.h"
+#include "utils.h"
+#include "uint128t.h"
 #include "store.h"
 
 
@@ -48,7 +56,7 @@ int readRIRStatisticsFormat_v2(FILE *in, size_t totalsize)
    size_t totalread = 0;
    size_t bytesread, offset = 0;
 
-   char *data = allocate(chunksize+1, false);
+   char *data = allocate(chunksize+1, default_align, false);
    char  ver[4] = {};
    char  reg[8] = {};
 
@@ -184,6 +192,7 @@ int main(int argc, const char *argv[])
       int   namelen = strvlen(argv[1]);
       char *out4Name = strcpy(alloca(namelen+4), argv[1]); *(uint32_t *)&out4Name[namelen] = *(uint32_t *)".v4";
       char *out6Name = strcpy(alloca(namelen+4), argv[1]); *(uint32_t *)&out6Name[namelen] = *(uint32_t *)".v6";
+      char *outAName = strcpy(alloca(namelen+4), argv[1]); *(uint32_t *)&outAName[namelen] = *(uint32_t *)".asn";
       FILE *out4, *out6;
 
       if (out4 = fopen(out4Name, "w"))
@@ -193,10 +202,10 @@ int main(int argc, const char *argv[])
             FILE  *in;
             struct stat st;
 
-            printf("ipdb v1.1.2 ("SVNREV"), Copyright © 2016-2018 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
+            printf("ipdb v1.2b (" SCMREV "), Copyright © 2016-2018 Dr. Rolf Jansen\nProcessing RIR data files ...\n\n");
             for (int inc = 2; inc < argc; inc++)
             {
-               if (stat(argv[inc], &st) == noerr && st.st_size && (in = fopen(argv[inc], "r")))
+               if (stat(argv[inc], &st) == no_error && st.st_size && (in = fopen(argv[inc], "r")))
                {
                   const char *file = strrchr(argv[inc], '/');
                   if (file)
