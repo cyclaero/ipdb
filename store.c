@@ -199,27 +199,27 @@ IP4Node *findIP4Node(uint32_t ip, IP4Node  *node)
 }
 
 
-IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node  *node)
+IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, char *nso, IP4Node  *node)
 {
    if (node)
    {
-      int ofs = (cc == node->cc);
+      int ofs = ((cc) ? cc == node->cc : !strcmp(nso, node->nso));
 
       if (node->lo <= lo && lo-ofs <= node->hi || node->lo <= hi+ofs && hi <= node->hi || lo <= node->lo && node->hi <= hi)
          return node;
 
       else if (lo < node->lo)
-         return findNet4Node(lo, hi, cc, node->L);
+         return findNet4Node(lo, hi, cc, nso, node->L);
 
       else // ([lo|hi] > node->hi)
-         return findNet4Node(lo, hi, cc, node->R);
+         return findNet4Node(lo, hi, cc, nso, node->R);
    }
    else
       return NULL;
 }
 
 
-int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
+int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, char *nso, IP4Node **node)
 {
    IP4Node *o = *node;
 
@@ -228,10 +228,10 @@ int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
       int change;
 
       if (lo < o->lo)
-         change = -addIP4Node(lo, hi, cc, &o->L);
+         change = -addIP4Node(lo, hi, cc, nso, &o->L);
 
       else if (lo > o->lo)
-         change = +addIP4Node(lo, hi, cc, &o->R);
+         change = +addIP4Node(lo, hi, cc, nso, &o->R);
 
       else // (lo == o->lo)               // this case must not happen !!!
          return 0;
@@ -252,6 +252,27 @@ int addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node)
          o->lo = lo;
          o->hi = hi;
          o->cc = cc;
+         if(nso) switch(strvlen(nso))
+         {
+            default: // len < 32
+               strmlcpy(o->nso, nso, 32, NULL);
+               break;
+
+            case 32:
+               memvcpy(o->nso, nso, 32);
+               break;
+
+            case 36:
+            {
+               char *p = nso, *q = o->nso;
+                cpy8(q, p); p += 9, q += 8;
+                cpy4(q, p); p += 5, q += 4;
+                cpy4(q, p); p += 5, q += 4;
+                cpy4(q, p); p += 5, q += 4;
+               cpy12(q, p);
+               break;
+            }
+         }
          *node = o;                       // report back the new node
          return 1;                        // add the weight of 1 leaf onto the balance
       }
@@ -349,8 +370,7 @@ void serializeIP4Tree(FILE *out, IP4Node *node)
       if (node->L)
          serializeIP4Tree(out, node->L);
 
-      IP4Set set = {node->lo, node->hi, node->cc};
-      fwrite(set, sizeof(IP4Set), 1, out);
+      fwrite(node, sizeof(IP4Set), 1, out);
 
       if (node->R)
          serializeIP4Tree(out, node->R);
@@ -527,27 +547,27 @@ IP6Node *findIP6Node(uint128t ip, IP6Node  *node)
 }
 
 
-IP6Node *findNet6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node  *node)
+IP6Node *findNet6Node(uint128t lo, uint128t hi, uint32_t cc, char *nso, IP6Node  *node)
 {
    if (node)
    {
-      uint128t ofs = u64_to_u128t(cc == node->cc);
+      uint128t ofs = u64_to_u128t((cc) ? cc == node->cc : !strcmp(node->nso, nso));
 
       if (le_u128(node->lo, lo) && le_u128(sub_u128(lo,ofs), node->hi) || le_u128(node->lo, add_u128(hi,ofs)) && le_u128(hi, node->hi) || le_u128(lo, node->lo) && le_u128(node->hi, hi))
          return node;
 
       else if (lt_u128(lo, node->lo))
-         return findNet6Node(lo, hi, cc, node->L);
+         return findNet6Node(lo, hi, cc, nso, node->L);
 
       else // (gt_u128([lo|hi], node->hi))
-         return findNet6Node(lo, hi, cc, node->R);
+         return findNet6Node(lo, hi, cc, nso, node->R);
    }
    else
       return NULL;
 }
 
 
-int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node)
+int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, char *nso, IP6Node **node)
 {
    IP6Node *o = *node;
 
@@ -556,10 +576,10 @@ int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node)
       int change;
 
       if (lt_u128(lo, o->lo))
-         change = -addIP6Node(lo, hi, cc, &o->L);
+         change = -addIP6Node(lo, hi, cc, nso, &o->L);
 
       else if (gt_u128(lo, o->lo))
-         change = +addIP6Node(lo, hi, cc, &o->R);
+         change = +addIP6Node(lo, hi, cc, nso, &o->R);
 
       else // (eq_u128(lo, o->lo))               // this case must not happen !!!
          return 0;
@@ -580,6 +600,27 @@ int addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node)
          o->lo = lo;
          o->hi = hi;
          o->cc = cc;
+         if(nso) switch(strvlen(nso))
+         {
+            default: // len < 32
+               strmlcpy(o->nso, nso, 32, NULL);
+               break;
+
+            case 32:
+               memvcpy(o->nso, nso, 32);
+               break;
+
+            case 36:
+            {
+               char *p = nso, *q = o->nso;
+                cpy8(q, p); p += 9, q += 8;
+                cpy4(q, p); p += 5, q += 4;
+                cpy4(q, p); p += 5, q += 4;
+                cpy4(q, p); p += 5, q += 4;
+               cpy12(q, p);
+               break;
+            }
+         }
          *node = o;                       // report back the new node
          return 1;                        // add the weight of 1 leaf onto the balance
       }
@@ -677,8 +718,7 @@ void serializeIP6Tree(FILE *out, IP6Node *node)
       if (node->L)
          serializeIP6Tree(out, node->L);
 
-      IP6Set set = {node->lo, node->hi, node->cc};
-      fwrite(set, sizeof(IP6Set), 1, out);
+      fwrite(node, sizeof(IP6Set), 1, out);
 
       if (node->R)
          serializeIP6Tree(out, node->R);

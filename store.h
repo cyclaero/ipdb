@@ -28,40 +28,46 @@
 
 typedef union
 {
-   uint8_t   byte[4];
-   uint32_t  number;
+   uint8_t  byte[4];
+   uint32_t number;
 } IP4Desc;
 
-typedef uint32_t IP4Set[3];   // [0] -> lo, [1] -> hi, [2] -> cc
+typedef struct
+{
+   uint32_t lo, hi;
+   uint32_t cc;
+   char nso[36];
+} IP4Set;
 
 typedef struct IP4Node
 {
    uint32_t lo, hi;           // IPv4 number range
    uint32_t cc;               // country code
+   char nso[36];              // unique identifier of the network segment owner
 
-   int32_t B;                 // house holding
+   int32_t  B;                // house holding
    struct IP4Node *L, *R;
 } IP4Node;
 
 IP4Node  *findIP4Node(uint32_t ip, IP4Node  *node);
-IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node  *node);
-int        addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, IP4Node **node);
+IP4Node *findNet4Node(uint32_t lo, uint32_t hi, uint32_t cc, char *nso, IP4Node  *node);
+int        addIP4Node(uint32_t lo, uint32_t hi, uint32_t cc, char *nso, IP4Node **node);
 int     removeIP4Node(uint32_t ip, IP4Node **node);
 void serializeIP4Tree(FILE *out, IP4Node *node);
 void   releaseIP4Tree(IP4Node *node);
 
-static inline int bisectionIP4Search(uint32_t ip4, IP4Set *sortedIP4Sets, int count)
+static inline int bisectionIP4Search(uint32_t ip4, IP4Set sortedIP4Sets[], int count)
 {
    uint32_t  u;
    int o, p, q;
    for (p = 0, q = count-1; p <= q;)
    {
       o = (p + q) >> 1;
-      if ((u = sortedIP4Sets[o][0]) <= ip4 && ip4 <= sortedIP4Sets[o][1])
+      if ((u = sortedIP4Sets[o].lo) <= ip4 && ip4 <= sortedIP4Sets[o].hi)
          return o;
       else if (ip4 < u)
          q = o-1;
-      else // (ip4 > sortedIP4Sets[o][1])
+      else // (ip4 > sortedIP4Sets[o].hi)
          p = o+1;
    }
 
@@ -78,36 +84,42 @@ typedef union
    uint128t number;
 } IP6Desc;
 
-typedef uint128t IP6Set[3];  // [0] -> lo, [1] -> hi, [2] -> cc
+typedef struct
+{
+   uint128t lo, hi;
+   uint32_t cc;
+   char nso[36];
+} IP6Set;
 
 typedef struct IP6Node
 {
-   uint128t lo, hi;          // IPv4 number range
-   uint32_t cc;              // country code
+   uint128t lo, hi;           // IPv4 number range
+   uint32_t cc;               // country code
+   char nso[36];              // unique identifier of the network segment owner
 
-   int32_t B;                 // house holding
+   int32_t  B;                // house holding
    struct IP6Node *L, *R;
 } IP6Node;
 
 IP6Node  *findIP6Node(uint128t ip, IP6Node *node);
-IP6Node *findNet6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node  *node);
-int        addIP6Node(uint128t lo, uint128t hi, uint32_t cc, IP6Node **node);
+IP6Node *findNet6Node(uint128t lo, uint128t hi, uint32_t cc, char *nso, IP6Node  *node);
+int        addIP6Node(uint128t lo, uint128t hi, uint32_t cc, char *nso, IP6Node **node);
 int     removeIP6Node(uint128t ip, IP6Node **node);
 void serializeIP6Tree(FILE *out, IP6Node *node);
 void   releaseIP6Tree(IP6Node *node);
 
-static inline int bisectionIP6Search(uint128t ip6, IP6Set *sortedIP6Sets, int count)
+static inline int bisectionIP6Search(uint128t ip6, IP6Set sortedIP6Sets[], int count)
 {
    uint128t u;
    int o, p, q;
    for (p = 0, q = count-1; p <= q;)
    {
       o = (p + q) >> 1;
-      if (le_u128(u = sortedIP6Sets[o][0], ip6)  && le_u128(ip6, sortedIP6Sets[o][1]))
+      if (le_u128(u = sortedIP6Sets[o].lo, ip6) && le_u128(ip6, sortedIP6Sets[o].hi))
          return o;
       else if (lt_u128(ip6, u))
          q = o-1;
-      else // (gt_u128(ip6, sortedIP6Sets[o][1]))
+      else // (gt_u128(ip6, sortedIP6Sets[o].hi))
          p = o+1;
    }
 
