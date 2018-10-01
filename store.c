@@ -49,7 +49,7 @@
 
 static int balanceIP4Node(IP4Node **node)
 {
-   int   change = 0;
+   int change = 0;
    IP4Node *o = *node;
    IP4Node *p, *q;
 
@@ -397,7 +397,7 @@ void releaseIP4Tree(IP4Node *node)
 
 static int balanceIP6Node(IP6Node **node)
 {
-   int   change = 0;
+   int change = 0;
    IP6Node *o = *node;
    IP6Node *p, *q;
 
@@ -745,9 +745,9 @@ void releaseIP6Tree(IP6Node *node)
 
 static int balanceCCNode(CCNode **node)
 {
-   int   change = 0;
-   CCNode *o = *node;
-   CCNode *p, *q;
+   int change = 0;
+   CCNode  *o = *node;
+   CCNode  *p, *q;
 
    if (o->B == -2)
    {
@@ -1088,7 +1088,7 @@ void removeCC(CCNode *table[], uint32_t cc)
 
 static int balanceNSONode(NSONode **node)
 {
-   int      change = 0;
+   int change = 0;
    NSONode *o = *node;
    NSONode *p, *q;
 
