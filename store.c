@@ -895,7 +895,7 @@ CCNode *findCCNode(uint32_t cc, CCNode *node)
 }
 
 
-int addCCNode(uint32_t cc, uint32_t ui, CCNode **node)
+int addCCNode(uint32_t cc, uint32_t val, CCNode **node)
 {
    CCNode *o = *node;
 
@@ -904,13 +904,16 @@ int addCCNode(uint32_t cc, uint32_t ui, CCNode **node)
       int change;
 
       if (cc < o->cc)
-         change = -addCCNode(cc, ui, &o->L);
+         change = -addCCNode(cc, val, &o->L);
 
       else if (cc > o->cc)
-         change = +addCCNode(cc, ui, &o->R);
+         change = +addCCNode(cc, val, &o->R);
 
-      else // (cc == o->cc)               // already in the list, do nothing
+      else // (cc == o->cc)               // already in the tree
+      {
+         o->val = val;                    // update the value
          return 0;
+      }
 
       if (change)
          if (abs(o->B += change) > 1)
@@ -925,8 +928,8 @@ int addCCNode(uint32_t cc, uint32_t ui, CCNode **node)
    {                                      // then add it into a new leaf
       if (o = allocate(sizeof(CCNode), default_align, true))
       {
-         o->cc = cc;
-         o->ui = ui;
+         o->cc  = cc;
+         o->val = val;
          *node = o;                       // report back the new node
          return 1;                        // add the weight of 1 leaf onto the balance
       }
@@ -1064,32 +1067,377 @@ CCNode *findCC(CCNode *table[], uint32_t cc)
    return findCCNode(cc, table[cci(cc)]);
 }
 
-void storeCC(CCNode *table[], char *ccui)
+void storeCC(CCNode *table[], uint32_t cc, uint32_t val)
 {
-   int len = strvlen(ccui = trim(ccui));
-   if (len >= 2)
-   {
-      uint16_t cc;
-      int64_t  ui = 0;
-      cc = *(uint16_t *)uppercase(ccui, 2);
-      if (len > 2)
-      {
-         for (ccui += 2; *ccui && *ccui != '='; ccui++);
-         if (*ccui)
-            ui = strtol(ccui+1, NULL, 10);
-      }
-
-      addCCNode(cc, (0 < ui && ui < 4294967295) ? (uint32_t)ui : 0, &table[cci(cc)]);
-   }
+   addCCNode(cc, val, &table[cci(cc)]);
 }
 
 void removeCC(CCNode *table[], uint32_t cc)
 {
-   CCNode *node;
+   CCNode  *node;
    uint32_t idx = cci(cc);
    if (node = table[idx])
       if (!node->L && !node->R)
          deallocate(VPR(table[idx]), false);
       else
          removeCCNode(cc, &table[idx]);
+}
+
+
+#pragma mark ••• AVL Tree of unique Net Segements Owner ID's •••
+
+static int balanceNSONode(NSONode **node)
+{
+   int      change = 0;
+   NSONode *o = *node;
+   NSONode *p, *q;
+
+   if (o->B == -2)
+   {
+      if (p = o->L)                    // make the static analyzer happy
+         if (p->B == +1)
+         {
+            change = 1;                // double left-right rotation
+            q      = p->R;             // left rotation
+            p->R   = q->L;
+            q->L   = p;
+            o->L   = q->R;             // right rotation
+            q->R   = o;
+            o->B   = +(q->B < 0);
+            p->B   = -(q->B > 0);
+            q->B   = 0;
+            *node  = q;
+         }
+
+         else
+         {
+            change = p->B;             // single right rotation
+            o->L   = p->R;
+            p->R   = o;
+            o->B   = -(++p->B);
+            *node  = p;
+         }
+   }
+
+   else if (o->B == +2)
+   {
+      if (q = o->R)                    // make the static analyzer happy
+         if (q->B == -1)
+         {
+            change = 1;                // double right-left rotation
+            p      = q->L;             // right rotation
+            q->L   = p->R;
+            p->R   = q;
+            o->R   = p->L;             // left rotation
+            p->L   = o;
+            o->B   = -(p->B > 0);
+            q->B   = +(p->B < 0);
+            p->B   = 0;
+            *node  = p;
+         }
+
+         else
+         {
+            change = q->B;             // single left rotation
+            o->R   = q->L;
+            q->L   = o;
+            o->B   = -(--q->B);
+            *node  = q;
+         }
+   }
+
+   return change != 0;
+}
+
+
+static int pickPrevNSONode(NSONode **node, NSONode **exch)
+{                                       // *exch on entry = parent node
+   NSONode *o = *node;                  // *exch on exit  = picked previous value node
+
+   if (o->R)
+   {
+      *exch = o;
+      int change = -pickPrevNSONode(&o->R, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceNSONode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->L)
+   {
+      NSONode *p = o->L;
+      o->L = NULL;
+      (*exch)->R = p;
+      *exch = o;
+      return p->B == 0;
+   }
+
+   else
+   {
+      (*exch)->R = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
+static int pickNextNSONode(NSONode **node, NSONode **exch)
+{                                       // *exch on entry = parent node
+   NSONode *o = *node;                  // *exch on exit  = picked next value node
+
+   if (o->L)
+   {
+      *exch = o;
+      int change = +pickNextNSONode(&o->L, exch);
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceNSONode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+
+   else if (o->R)
+   {
+      NSONode *q = o->R;
+      o->R = NULL;
+      (*exch)->L = q;
+      *exch = o;
+      return q->B == 0;
+   }
+
+   else
+   {
+      (*exch)->L = NULL;
+      *exch = o;
+      return 1;
+   }
+}
+
+
+// CAUTION: The following recursive functions must not be called with nso == NULL.
+//          For performace reasons no extra error cheking is done.
+
+NSONode *findNSONode(const char *nso, NSONode *node)
+{
+   if (node)
+   {
+      int ord = strcmp(nso, node->nso);
+
+      if (ord == 0)
+         return node;
+
+      else if (ord < 0)
+         return findNSONode(nso, node->L);
+
+      else // (ord > 0)
+         return findNSONode(nso, node->R);
+   }
+
+   else
+      return NULL;
+}
+
+int addNSONode(const char *nso, int nsl, uint32_t val, NSONode **node)
+{
+   NSONode *o = *node;
+
+   if (o == NULL)                         // if the nso is not in the tree
+   {                                      // then add it into a new leaf
+      if (o = allocate(sizeof(NSONode), default_align, true))
+         if (o->nso = allocate(nsl+1, default_align, false))
+         {
+            strcpy(o->nso, nso);
+            o->val = val;
+            *node = o;
+            return 1;                     // add the weight of 1 leaf onto the balance
+         }
+         else
+            deallocate(VPR(o), false);
+
+      return 0;                           // Out of Memory situation, nothing changed
+   }
+
+   else
+   {
+      int change;
+      int ord = strcmp(nso, o->nso);
+
+      if (ord == 0)                       // already in the tree
+      {
+         o->val = val;                    // update the value
+         return 0;
+      }
+
+      else if (ord < 0)
+         change = -addNSONode(nso, nsl, val, &o->L);
+
+      else // (ord > 0)
+         change = +addNSONode(nso, nsl, val, &o->R);
+
+      if (change)
+         if (abs(o->B += change) > 1)
+            return 1 - balanceNSONode(node);
+         else
+            return o->B != 0;
+      else
+         return 0;
+   }
+}
+
+int removeNSONode(const char *nso, int nsl, NSONode **node)
+{
+   NSONode *o = *node;
+
+   if (o == NULL)
+      return 0;                              // not found -> recursively do nothing
+
+   else
+   {
+      int change;
+      int ord = strcmp(nso, o->nso);
+
+      if (ord == 0)
+      {
+         int      b = o->B;
+         NSONode *p = o->L;
+         NSONode *q = o->R;
+
+         if (!p || !q)
+         {
+            deallocate_batch(false, VPR((*node)->nso),
+                                    VPR(*node), NULL);
+            *node = (p > q) ? p : q;
+            return 1;                        // remove the weight of 1 leaf from the balance
+         }
+
+         else
+         {
+            if (b == -1)
+            {
+               if (!p->R)
+               {
+                  change = +1;
+                  o      =  p;
+                  o->R   =  q;
+               }
+               else
+               {
+                  change = +pickPrevNSONode(&p, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            else
+            {
+               if (!q->L)
+               {
+                  change = -1;
+                  o      =  q;
+                  o->L   =  p;
+               }
+               else
+               {
+                  change = -pickNextNSONode(&q, &o);
+                  o->L   =  p;
+                  o->R   =  q;
+               }
+            }
+
+            o->B = b;
+            deallocate_batch(false, VPR((*node)->nso),
+                                    VPR(*node), NULL);
+            *node = o;
+         }
+      }
+
+      else if (ord < 0)
+         change = +removeNSONode(nso, nsl, &o->L);
+
+      else // (ord > 0)
+         change = -removeNSONode(nso, nsl, &o->R);
+
+      if (change)
+         if (abs(o->B += change) > 1)
+            return balanceNSONode(node);
+         else
+            return o->B == 0;
+      else
+         return 0;
+   }
+}
+
+void releaseNSOTree(NSONode *node)
+{
+   if (node)
+   {
+      if (node->L)
+         releaseNSOTree(node->L);
+      if (node->R)
+         releaseNSOTree(node->R);
+
+      deallocate_batch(false, VPR(node->nso),
+                              VPR(node), NULL);
+   }
+}
+
+
+#pragma mark ••• Hash Table of unique Net Segements Owner ID's •••
+
+// Table creation and release
+NSONode **createNSOTable(uint n)
+{
+   NSONode **table = allocate((n+2)*sizeof(NSONode *), default_align, true);
+   if (table)
+      *(uint *)table = n;
+   return table;
+}
+
+void releaseNSOTable(NSONode *table[])
+{
+   if (table)
+   {
+      uint i, n = 2 + *(uint *)&table[0];
+      for (i = 2; i < n; i++)
+         releaseNSOTree(table[i]);
+      deallocate(VPR(table), false);
+   }
+}
+
+
+// Storing and retrieving nso's
+NSONode *findNSO(NSONode *table[], const char *nso)
+{
+   if (nso && *nso)
+      return findNSONode(nso, table[mmh3(nso, strvlen(nso)) % *(uint*)&table[0] + 1]);
+   else
+      return NULL;
+}
+
+void storeNSO(NSONode *table[], const char *nso, int nsl, uint32_t val)
+{
+   if (nso && *nso)
+      addNSONode(nso, nsl, val, &table[mmh3(nso, nsl) % *(uint*)&table[0] + 1]);
+}
+
+void removeNSO(NSONode *table[], const char *nso, int nsl)
+{
+   if (nso && *nso)
+   {
+      uint tidx = mmh3(nso, nsl) % *(uint*)&table[0] + 1;
+      NSONode *node = table[tidx];
+      if (node)
+      {
+         if (!node->L && !node->R)
+            deallocate_batch(false, VPR(node->nso), VPR(table[tidx]), NULL);
+         else
+            removeNSONode(nso, nsl, &table[tidx]);
+      }
+   }
 }

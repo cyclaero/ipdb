@@ -132,14 +132,14 @@ static inline int bisectionIP6Search(uint128t ip6, IP6Set sortedIP6Sets[], int c
 typedef struct CCNode
 {
    uint32_t cc;            // country code
-   uint32_t ui;            // user info
+   uint32_t val;           // value
 
-   int32_t  B;             // house holding
+   int32_t        B;       // house holding
    struct CCNode *L, *R;
 } CCNode;
 
 CCNode *findCCNode(uint32_t cc, CCNode  *node);
-int      addCCNode(uint32_t cc, uint32_t ui, CCNode **node);
+int      addCCNode(uint32_t cc, uint32_t val, CCNode **node);
 int   removeCCNode(uint32_t cc, CCNode **node);
 void releaseCCTree(CCNode *node);
 
@@ -158,9 +158,37 @@ CCNode **createCCTable(void);
 void    releaseCCTable(CCNode *table[]);
 
 CCNode *findCC(CCNode *table[], uint32_t cc);
-void   storeCC(CCNode *table[], char *ccui);
+void   storeCC(CCNode *table[], uint32_t cc, uint32_t val);
 void  removeCC(CCNode *table[], uint32_t cc);
 
+
+#pragma mark ••• AVL Tree of unique Net Segements Owner ID's •••
+
+typedef struct NSONode
+{
+   char    *nso;           // net segmenet owner ID is the key
+   uint32_t val;           // value
+
+   int             B;      // house holding
+   struct NSONode *L, *R;
+} NSONode;
+
+// CAUTION: The following recursive functions must not be called with nso == NULL.
+//          For performace reasons no extra error cheking is done.
+NSONode *findNSONode(const char *nso, NSONode  *node);
+int       addNSONode(const char *nso, int nsl, uint32_t val, NSONode **node);
+int    removeNSONode(const char *nso, int nsl, NSONode **node);
+void  releaseNSOTree(NSONode *node);
+
+
+#pragma mark ••• Hash Table of unique Net Segements Owner ID's •••
+NSONode **createNSOTable(uint n);
+void     releaseNSOTable(NSONode *table[]);
+
+// Storing and retrieving nso's
+NSONode *findNSO(NSONode *table[], const char *nso);
+void    storeNSO(NSONode *table[], const char *nso, int nsl, uint32_t val);
+void   removeNSO(NSONode *table[], const char *nso, int nsl);
 
 
 #pragma mark ••• IP number/string utility functions •••

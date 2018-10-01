@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 
       while (*cc)
       {
-         int tl = taglen(cc);
+         int tl = collen(cc);
          if (cc[tl] == ':')
             cc[tl++] = '\0';
          storeCC(CCTable, cc);

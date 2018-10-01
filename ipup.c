@@ -79,7 +79,8 @@ void usage(const char *executable)
 }
 
 
-CCNode **CCTable = NULL;
+CCNode  **CCTable  = NULL;
+NSONode **NSOTable = NULL;
 
 static inline uint32_t ccv(uint16_t cc, int32_t toff)
 {
@@ -90,7 +91,7 @@ static inline uint32_t ccv(uint16_t cc, int32_t toff)
 int main(int argc, char *argv[])
 {
    bool plainFlag = false,
-        ccValFlag = false,
+        valueFlag = false,
         only4Flag = false,
         only6Flag = false;
 
@@ -100,8 +101,8 @@ int main(int argc, char *argv[])
             toff  = 0;
    uint32_t tval  = 0;
 
-   char *ccList   = NULL,
-        *bstfname = "/usr/local/etc/ipdb/IPRanges/ipcc.bst",   // actually 2 files *.v4 and *.v6
+   char *selList  = NULL,
+        *bstname  = "/usr/local/etc/ipdb/IPRanges/ipcc.bst",   // actually 2 files *.v4 and *.v6
         *cmd      = argv[0],
         *lastopt  = "";
 
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
       switch (ch)
       {
          case 't':
-            ccList = optarg;
+            selList = optarg;
             break;
 
          case 'n':
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
             break;
 
          case 'v':
-            if (ccValFlag || (tval = (uint32_t)strtol(optarg, NULL, 10)) == 0 && errno == EINVAL)
+            if (valueFlag || (tval = (uint32_t)strtol(optarg, NULL, 10)) == 0 && errno == EINVAL)
             {
                lastopt = optarg;
                goto arg_err;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
                lastopt = optarg;
                goto arg_err;
             }
-            ccValFlag = true;
+            valueFlag = true;
             break;
 
          case '4':
@@ -166,7 +167,7 @@ int main(int argc, char *argv[])
             return 0;
 
          case 'r':
-            bstfname = optarg;
+            bstname = optarg;
             break;
 
          arg_err:
@@ -182,7 +183,7 @@ int main(int argc, char *argv[])
    argc -= optind;
    argv += optind;
 
-   if (argc != 1 && !ccList)
+   if (argc != 1 && !selList)
    {
       printf("Wrong number of arguments:\n %s, ...\n\n", argv[0]);
       usage(cmd);
@@ -190,24 +191,24 @@ int main(int argc, char *argv[])
    }
 
 
-   int    namelen = strvlen(bstfname);
-   char  *inName  = strcpy(alloca(namelen+4), bstfname);
+   int    namlen = strvlen(bstname);
+   char  *inName = strcpy(alloca(namlen+4), bstname);
    FILE  *in;
    struct stat st;
 
    rc = 1;
 
 //
-// first usage form -- lookup the country code for a given IPv4 or IPv6 address
+// first usage form -- lookup the country code and the unique owner ID of the net segment for a given IPv4 or IPv6 address
 //
-   if (ccList == NULL)
+   if (selList == NULL)
    {
       int      o;
       uint32_t ipv4;
       uint128t ipv6;
       if (ipv4 = ipv4_str2bin(argv[0]))
       {
-         cpy4(inName+namelen, ".v4");
+         cpy4(inName+namlen, ".v4");
          if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP4Str ipstr_lo, ipstr_hi;
@@ -235,7 +236,7 @@ int main(int argc, char *argv[])
          else
             printf("IPv4 database file could not be found.\n");
 
-         cpy4(inName+namelen, ".s4");
+         cpy4(inName+namlen, ".s4");
          if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP4Str ipstr_lo, ipstr_hi;
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
 
       else if (gt_u128(ipv6 = ipv6_str2bin(argv[0]), u64_to_u128t(0)))
       {
-         cpy4(inName+namelen, ".v6");
+         cpy4(inName+namlen, ".v6");
          if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP6Str ipstr_lo, ipstr_hi;
@@ -294,7 +295,7 @@ int main(int argc, char *argv[])
          else
             printf("IPv6 database file could not be found.\n");
 
-         cpy4(inName+namelen, ".s6");
+         cpy4(inName+namlen, ".s6");
          if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
          {
             IP6Str ipstr_lo, ipstr_hi;
@@ -333,19 +334,35 @@ int main(int argc, char *argv[])
 //
 // second usage form -- generate ipfw table construction directives
 //
-   else // (ccList != NULL)
+   else // (selList != NULL)
    {
-      if (CCTable = createCCTable())
+      if ((CCTable  = createCCTable())
+       && (NSOTable = createNSOTable(64)))
       {
          int count = 0;
-         char *ccui = ccList;
-         while (*ccui)
+
+         char *sel = selList;
+         while (*sel)
          {
-            int tl = taglen(ccui);
-            if (ccui[tl] == ':')
-               ccui[tl++] = '\0';
-            storeCC(CCTable, ccui);
-            ccui += tl;
+            int sl = collen(sel);
+            if (sel[sl] == ':')
+               sel[sl++] = '\0';
+            sel = trim(sel);
+
+            uint32_t val = 0;
+            int vl = vnamlen(sel);
+            if (sel[vl] == '=')
+            {
+               sel[vl] = '\0';
+               val = (uint32_t)strtoul(sel+vl+1, NULL, 10);
+            }
+
+            if (vl == 2)
+               storeCC(CCTable, *(uint16_t *)uppercase(sel, 2), val);
+            else
+               storeNSO(NSOTable, sel, vl, val);
+
+            sel += sl;
          }
 
       //
@@ -353,10 +370,11 @@ int main(int argc, char *argv[])
       //
          if (!only6Flag)
          {
-            *(uint32_t *)&inName[namelen] = *(uint32_t *)".v4";
+            cpy4(inName+namlen, ".v4");
             if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
             {
                CCNode *ccn = NULL;
+
                IP4Str  ipstr;
                IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, default_align, false);
                if (sortedIP4Sets)
@@ -366,10 +384,10 @@ int main(int argc, char *argv[])
                      int i, n = (int)(st.st_size/sizeof(IP4Set));
                      for (i = 0; i < n; i++)
                      {
-                        if (!*ccList || (ccn = findCC(CCTable, sortedIP4Sets[i].cc)))
+                        if (!*selList || (ccn = findCC(CCTable, sortedIP4Sets[i].cc)))
                         {
-                           uint32_t ip = sortedIP4Sets[i].lo;
-                           uint32_t ui = (ccn) ? ccn->ui : 0;
+                           uint32_t ip  = sortedIP4Sets[i].lo;
+                           uint32_t val = (ccn) ? ccn->val : 0;
                            int32_t  m;
                            do
                            {
@@ -379,12 +397,68 @@ int main(int argc, char *argv[])
 
                               if (plainFlag)
                                  printf("%s/%d\n", ipv4_bin2str(ip, ipstr), 32 - m);
-                              else if (ui != 0)
-                                 printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, ui);
+                              else if (val != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, val);
                               else if (tval != 0)
                                  printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, tval);
-                              else if (ccValFlag)
+                              else if (ccn && valueFlag)
                                  printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, ccv((uint16_t)sortedIP4Sets[i].cc, toff));
+                              else
+                                 printf("table %d add %s/%d\n",    tnum, ipv4_bin2str(ip, ipstr), 32 - m);
+
+                              count++;
+                           }
+                           while ((ip += (uint32_t)1<<m) < sortedIP4Sets[i].hi);
+                        }
+                     }
+
+                     rc = 0;
+                  }
+                  else
+                     printf("IPv4 database file could not be loaded.\n\n");
+
+                  deallocate(VPR(sortedIP4Sets), false);
+               }
+               else
+                  printf("Not enough memory for loading the IPv4 database.\n\n");
+
+               fclose(in);
+            }
+            else
+               printf("IPv4 database file could not be found.\n\n");
+
+
+            cpy4(inName+namlen, ".s4");
+            if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
+            {
+               NSONode *nsn = NULL;
+
+               IP4Str  ipstr;
+               IP4Set *sortedIP4Sets = allocate((ssize_t)st.st_size, default_align, false);
+               if (sortedIP4Sets)
+               {
+                  if (fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in))
+                  {
+                     int i, n = (int)(st.st_size/sizeof(IP4Set));
+                     for (i = 0; i < n; i++)
+                     {
+                        if (!*selList || (nsn = findNSO(NSOTable, sortedIP4Sets[i].nso)))
+                        {
+                           uint32_t ip  = sortedIP4Sets[i].lo;
+                           uint32_t val = (nsn) ? nsn->val : 0;
+                           int32_t  m;
+                           do
+                           {
+                              m = intlb4_1p(sortedIP4Sets[i].hi - ip);
+                              while (ip - (ip >> m << m))
+                                 m--;
+
+                              if (plainFlag)
+                                 printf("%s/%d\n", ipv4_bin2str(ip, ipstr), 32 - m);
+                              else if (val != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, val);
+                              else if (tval != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv4_bin2str(ip, ipstr), 32 - m, tval);
                               else
                                  printf("table %d add %s/%d\n",    tnum, ipv4_bin2str(ip, ipstr), 32 - m);
 
@@ -415,10 +489,11 @@ int main(int argc, char *argv[])
       //
          if (!only4Flag)
          {
-            *(uint32_t *)&inName[namelen] = *(uint32_t *)".v6";
+            cpy4(inName+namlen, ".v6");
             if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
             {
                CCNode *ccn = NULL;
+
                IP6Str  ipstr;
                IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, default_align, false);
                if (sortedIP6Sets)
@@ -428,10 +503,10 @@ int main(int argc, char *argv[])
                      int i, n = (int)(st.st_size/sizeof(IP6Set));
                      for (i = 0; i < n; i++)
                      {
-                        if (!*ccList || (ccn = findCC(CCTable, *(uint32_t*)&sortedIP6Sets[i].cc)))
+                        if (!*selList || (ccn = findCC(CCTable, sortedIP6Sets[i].cc)))
                         {
                            uint128t ip = sortedIP6Sets[i].lo;
-                           uint32_t ui = (ccn) ? ccn->ui : 0;
+                           uint32_t val = (ccn) ? ccn->val : 0;
                            int32_t  m;
                            do
                            {
@@ -441,12 +516,67 @@ int main(int argc, char *argv[])
 
                               if (plainFlag)
                                  printf("%s/%d\n", ipv6_bin2str(ip, ipstr), 128 - m);
-                              else if (ui != 0)
-                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, ui);
+                              else if (val != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, val);
                               else if (tval != 0)
                                  printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, tval);
-                              else if (ccValFlag)
+                              else if (ccn && valueFlag)
                                  printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, ccv(*(uint16_t*)&sortedIP6Sets[i].cc, toff));
+                              else
+                                 printf("table %d add %s/%d\n",    tnum, ipv6_bin2str(ip, ipstr), 128 - m);
+
+                              count++;
+                           }
+                           while (lt_u128(ip = add_u128(ip, shl_u128(u64_to_u128t(1), m)), sortedIP6Sets[i].hi));
+                        }
+                     }
+
+                     rc = 0;
+                  }
+                  else
+                     printf("IPv6 database file could not be loaded.\n\n");
+
+                  deallocate(VPR(sortedIP6Sets), false);
+               }
+               else
+                  printf("Not enough memory for loading the IPv6 database.\n\n");
+
+               fclose(in);
+            }
+            else
+               printf("IPv6 database file could not be found.\n\n");
+
+            cpy4(inName+namlen, ".s6");
+            if (stat(inName, &st) == no_error && st.st_size && (in = fopen(inName, "r")))
+            {
+               NSONode *nsn = NULL;
+
+               IP6Str  ipstr;
+               IP6Set *sortedIP6Sets = allocate((ssize_t)st.st_size, default_align, false);
+               if (sortedIP6Sets)
+               {
+                  if (fread(sortedIP6Sets, (ssize_t)st.st_size, 1, in))
+                  {
+                     int i, n = (int)(st.st_size/sizeof(IP6Set));
+                     for (i = 0; i < n; i++)
+                     {
+                        if (!*selList || (nsn = findNSO(NSOTable, sortedIP6Sets[i].nso)))
+                        {
+                           uint128t ip = sortedIP6Sets[i].lo;
+                           uint32_t val = (nsn) ? nsn->val : 0;
+                           int32_t  m;
+                           do
+                           {
+                              m = intlb6_1p(sub_u128(sortedIP6Sets[i].hi, ip));
+                              while (gt_u128(sub_u128(ip, shl_u128(shr_u128(ip, m), m)), u64_to_u128t(0)))
+                                 m--;
+
+                              if (plainFlag)
+                                 printf("%s/%d\n", ipv6_bin2str(ip, ipstr), 128 - m);
+                              else if (val != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, val);
+                              else if (tval != 0)
+                                 printf("table %d add %s/%d %u\n", tnum, ipv6_bin2str(ip, ipstr), 128 - m, tval);
                               else
                                  printf("table %d add %s/%d\n",    tnum, ipv6_bin2str(ip, ipstr), 128 - m);
 
@@ -475,6 +605,7 @@ int main(int argc, char *argv[])
          if (!count)
             printf("\n");
 
+         releaseNSOTable(NSOTable);
          releaseCCTable(CCTable);
       }
       else
