@@ -4,7 +4,7 @@ See also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](
 
 ### Google's Blind Spot
 
-Contrary to common believe, it is not sufficient to disallow the Googlebot in a `robots.txt` file in order to prevent Google's bots from indexing a web site. Google deliberately ignores this directive in case our site is linked-to from 3rd party sites. However, this is almost always the case – we are talking about the web, don’t we?. One option is to lockout Google's bots at the firewall:
+Contrary to common believe, it is not sufficient to disallow the Googlebot in a `robots.txt` file in order to prevent Google's bots from indexing a web site. Google deliberately ignores this directive in case our site is linked-to from 3rd party sites. However, this is almost always the case – we are talking about the web, don’t we? One option (among several others) is to lockout Google's bots at the firewall:
 
 1. Install the latest version of the ipdb tools from this site (this is not yet available, via the FreeSBD ports),
 2. `$ host googlebot.com`:  
@@ -71,7 +71,7 @@ Contrary to common believe, it is not sufficient to disallow the Googlebot in a 
     /usr/local/bin/ipup -t 9d99e3f7d38d1b8026f2ebbea4017c9f:58353 | /sbin/ipfw -q /dev/stdin
     /sbin/ipfw -q add 60 deny tcp from table\(0\) to any 80,443 in recv em0 setup
     ...
-  
+   
 
 ### Opting out of the EU's General Data Protection Regulation by Geo Blocking the EU
 
