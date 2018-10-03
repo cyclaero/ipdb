@@ -1,6 +1,75 @@
 See also the man file at: [**Tools for IP based Geo-blocking and Geo-routing**](https://cyclaero.github.io/ipdb/)
 
-## Latest & hotest case study
+## Case studies
+
+### Google's Blind Spot
+
+Contrary to common believe, it is not sufficient to disallow the Googlebot in a `robots.txt` file in order to prevent Google's bots from indexing a web site. Google deliberately ignores this directive in case our site is linked-to from 3rd party sites. However, this is almost always the case – we are talking about the web, don’t we?. One option is to lockout Google's bots at the firewall:
+
+1. Install the latest version of the ipdb tools from this site (this is not yet available, via the FreeSBD ports),
+2. `$ host googlebot.com`:  
+
+[//]: # (list end)
+
+    googlebot.com has address 172.217.29.196
+    googlebot.com has IPv6 address 2800:3f0:4001:807::2004
+
+3. `$ ipup 172.217.29.196`  
+`$ ipup 2800:3f0:4001:807::2004`:
+
+[//]: # (list end)
+
+    172.217.29.196 -> 172.200.0.0 - 172.217.255.255 in US
+          net segment 172.217.0.0 - 172.217.255.255
+             owned by 9d99e3f7d38d1b8026f2ebbea4017c9f
+
+    2800:3f0:4001:807::2004 -> 2800:3f0:0:0:0:0:0:0 - 2800:3f0:ffff:ffff:ffff:ffff:ffff:ffff in AR
+                   net segment 2800:3f0:0:0:0:0:0:0 - 2800:3f0:ffff:ffff:ffff:ffff:ffff:ffff
+                   owned by 58353
+
+4. Use the reported owner ID's for generation of ipfw tables, e.g.: `$ ipup -t 9d99e3f7d38d1b8026f2ebbea4017c9f:58353`
+
+[//]: # (list end)
+
+    table 0 add 64.233.160.0/19
+    table 0 add 66.102.0.0/20
+    table 0 add 66.249.64.0/19
+    table 0 add 70.32.128.0/19
+    table 0 add 72.14.192.0/18
+    table 0 add 74.114.24.0/21
+    table 0 add 74.125.0.0/16
+    table 0 add 108.170.192.0/18
+    table 0 add 108.177.0.0/17
+    table 0 add 142.250.0.0/15
+    table 0 add 172.217.0.0/16
+    table 0 add 172.253.0.0/16
+    table 0 add 173.194.0.0/16
+    table 0 add 192.178.0.0/15
+    table 0 add 199.36.152.0/21
+    table 0 add 207.223.160.0/20
+    table 0 add 208.68.108.0/22
+    table 0 add 208.81.188.0/22
+    table 0 add 209.85.128.0/17
+    table 0 add 216.58.192.0/19
+    table 0 add 216.239.32.0/19
+    table 0 add 2001:4860:0:0:0:0:0:0/32
+    table 0 add 2604:31c0:0:0:0:0:0:0/32
+    table 0 add 2607:f8b0:0:0:0:0:0:0/32
+    table 0 add 2800:3f0:0:0:0:0:0:0/32
+
+5. add the following to your IPFW directives - take care to place this before any other rules allowing any web traffic:
+
+[//]: # (list end)
+
+    ...
+    /sbin/ipfw -q table all destroy
+    ...
+    ...
+    # Google’s blind spot:
+    /sbin/ipfw -q table 0 create
+    /usr/local/bin/ipup -t 9d99e3f7d38d1b8026f2ebbea4017c9f:58353 | /sbin/ipfw -q /dev/stdin
+    /sbin/ipfw -q add 60 deny tcp from table\(0\) to any 80,443 in recv em0 setup
+    ...
 
 ### Opting out of the EU's General Data Protection Regulation by Geo Blocking the EU
 
@@ -14,10 +83,13 @@ On the FreeBSD gateway of your internet service to be hidden from EU citizens, d
 [//]: # (list end)
 
     ...
+    /sbin/ipfw -q table all destroy
+    ...
+    ...
     # EU-GDPR Geo blocking using an ipfw table
     /sbin/ipfw -q table 66 create
     /usr/local/bin/ipup -t AL:AT:BE:BG:CY:CZ:DE:DK:EE:ES:FI:FR:GB:GR:HR:HU:IE:IT:LT:LU:LV:ME:MK:MT:NL:PL:PT:RO:RS:SE:SI:SK:TR -n 66 | /sbin/ipfw -q /dev/stdin
-    /sbin/ipfw -q add 66 deny tcp from table\(66\) to any 80,443 in recv $WAN setup
+    /sbin/ipfw -q add 66 deny tcp from table\(66\) to any 80,443 in recv em0 setup
     ...
 
 
