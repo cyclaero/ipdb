@@ -27,7 +27,7 @@ Contrary to common believe, it is not sufficient to disallow the Googlebot in a 
                    net segment 2800:3f0:0:0:0:0:0:0 - 2800:3f0:ffff:ffff:ffff:ffff:ffff:ffff
                    owned by 58353
 
-4. Use the reported owner ID's for generation of ipfw tables, e.g.:  
+4. Use the reported owner ID's for generating IPFW tables, e.g.:  
  `$ ipup -t 9d99e3f7d38d1b8026f2ebbea4017c9f:58353`
 
 [//]: # (list end)
