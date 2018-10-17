@@ -606,7 +606,7 @@ int int2hex(char *hex, llong i, int m, int width)
    {
       llong l;
       uchar b[sizeof(llong)];
-   } bin = {.l = MapInt64(i)};
+   } bin = {.l = (llong)MapInt64(i)};
 
    uchar c;
    int   j, k;
