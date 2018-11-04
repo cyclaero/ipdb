@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
 
    int    namlen = strvlen(bstname);
-   char  *inName = strcpy(alloca(namlen+4), bstname);
+   char  *inName = strcpy(alloca(OSP(namlen+4)), bstname);
    FILE  *in;
    struct stat st;
 

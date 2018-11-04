@@ -1275,6 +1275,10 @@ enum
 int num2str(char *dst, long double x, int m, int width, int digits, int formsel, char decsep);
 
 
+#pragma mark ••• Oversize Protection for variable length arrays and alloca() •••
+#define OSP(cnt) ((cnt <= 4096) ? cnt : (exit(EXIT_FAILURE), 1))
+
+
 #pragma mark ••• Fencing Memory Allocation Wrappers •••
 // void pointer reference
 #define VPR(p) (void **)&(p)

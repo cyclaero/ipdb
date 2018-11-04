@@ -234,10 +234,10 @@ int main(int argc, const char *argv[])
    if (argc >= 3)
    {
       int   namelen = strvlen(argv[1]);
-      char *outIP4Name = strcpy(alloca(namelen+4), argv[1]); cpy4(outIP4Name+namelen, ".v4");
-      char *outIP6Name = strcpy(alloca(namelen+4), argv[1]); cpy4(outIP6Name+namelen, ".v6");
-      char *outNS4Name = strcpy(alloca(namelen+4), argv[1]); cpy4(outNS4Name+namelen, ".s4");
-      char *outNS6Name = strcpy(alloca(namelen+4), argv[1]); cpy4(outNS6Name+namelen, ".s6");
+      char *outIP4Name = strcpy(alloca(OSP(namelen+4)), argv[1]); cpy4(outIP4Name+namelen, ".v4");
+      char *outIP6Name = strcpy(alloca(OSP(namelen+4)), argv[1]); cpy4(outIP6Name+namelen, ".v6");
+      char *outNS4Name = strcpy(alloca(OSP(namelen+4)), argv[1]); cpy4(outNS4Name+namelen, ".s4");
+      char *outNS6Name = strcpy(alloca(OSP(namelen+4)), argv[1]); cpy4(outNS6Name+namelen, ".s6");
       FILE *outIP4, *outIP6, *outNS4, *outNS6;
 
       if (outIP4 = fopen(outIP4Name, "w"))

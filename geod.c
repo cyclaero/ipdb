@@ -281,16 +281,16 @@ int main(int argc, char *argv[])
          int tl = collen(cc);
          if (cc[tl] == ':')
             cc[tl++] = '\0';
-         storeCC(CCTable, cc);
+         storeCC(CCTable, *(uint16_t *)cc, 0);
          cc += tl;
       }
    }
 
    struct stat st;
    FILE *in;
-   if (stat(bstfname, &st) == noerr && st.st_size && (in = fopen(bstfname, "r")))
+   if (stat(bstfname, &st) == no_error && st.st_size && (in = fopen(bstfname, "r")))
    {
-      sortedIP4Sets = allocate((ssize_t)st.st_size, false);
+      sortedIP4Sets = allocate((ssize_t)st.st_size, false, default_align);
       atexit(releaseStores);
       rc = (int)fread(sortedIP4Sets, (ssize_t)st.st_size, 1, in);
       fclose(in);
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
          // don't filter if no CC list was given or if the source IP cannot be found in the IP ranges sets
          if (CCTable && (o = bisectionIP4Search(htonl(ip->ip_src.s_addr), sortedIP4Sets, n)) >= 0)
          {
-            bool doesMatch = findCC(CCTable, sortedIP4Sets[o][2]) != NULL;
+            bool doesMatch = findCC(CCTable, sortedIP4Sets[o].cc) != NULL;
             if (allowMatch && !doesMatch || !allowMatch && doesMatch)
                continue;
          }

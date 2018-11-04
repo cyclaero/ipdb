@@ -384,7 +384,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CFLAGS = "-DSCMREV=\\\"$(SCMREV)\\\"";
+				OTHER_CFLAGS = (
+					"-DSCMREV=\\\"$(SCMREV)\\\"",
+					"-fstack-protector",
+				);
 				WARNING_CFLAGS = "-Wno-multichar";
 			};
 			name = Debug;
@@ -417,7 +420,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CFLAGS = "-DSCMREV=\\\"$(SCMREV)\\\"";
+				OTHER_CFLAGS = (
+					"-DSCMREV=\\\"$(SCMREV)\\\"",
+					"-fstack-protector",
+				);
 				WARNING_CFLAGS = "-Wno-multichar";
 			};
 			name = Release;

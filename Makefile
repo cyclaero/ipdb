@@ -57,7 +57,8 @@ CFLAGS += $(CDEFS) -fsigned-char
 CFLAGS += $(CDEFS)
 .endif
 
-CFLAGS += -DSCMREV=\"$(REVNUM)$(MODIED)\" -std=gnu11 -fstrict-aliasing -fno-common -Wno-multichar -Wno-parentheses -Wno-empty-body
+CFLAGS += -DSCMREV=\"$(REVNUM)$(MODIED)\" -std=gnu11 -fno-pic -fvisibility=hidden -fstrict-aliasing -fno-common -fstack-protector \
+			 -Wno-multichar -Wno-parentheses -Wno-empty-body
 LDFLAGS = -lm
 PREFIX ?= /usr/local
 
