@@ -68,14 +68,14 @@ int strmlcat(char *dst, int m, int *l, ...)
    va_start(vl, l);
    while (s = va_arg(vl, const char *))
    {
-      k = va_arg(vl, int);
-      if (n < m)
-      {
-         n += strmlcpy(&dst[n], s, m-n, &k);
-         if (l) *l += k;
-      }
-      else
-         if (l) *l += (k) ?: strvlen(s);
+      if (k = va_arg(vl, int))
+         if (n < m)
+         {
+            n += strmlcpy(&dst[n], s, m-n, &k);
+            if (l) *l += k;
+         }
+         else
+            if (l) *l += (k) ?: strvlen(s);
    }
    va_end(vl);
 
