@@ -1240,12 +1240,12 @@ static inline int32_t intlgl(long double x)
 }
 
 
-#define intLen 32             // actually it's 21 incl. '/0', however pad it to a 128 bit boundary
+#define intLen 32             // actually it's 21 incl. '\0', however pad it to a 128 bit boundary
 typedef char intStr[intLen];
 
 int int2str(char *ist, llong i, int m, int width);
 
-#define hexLen 32             // actually it's 17 incl. '/0', however pad it to a 128 bit boundary
+#define hexLen 32             // actually it's 19 incl. '0x' and the trailing '\0', however pad it to a 128 bit boundary
 typedef char hexStr[hexLen];
 
 int int2hex(char *hex, llong i, int m, int width);

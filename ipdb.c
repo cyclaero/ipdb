@@ -122,9 +122,9 @@ boolean readRIRStatisticsFormat_v2(FILE *in, size_t totalsize, int *ip_count, in
                         if ((ipst = ipv4_str2bin(ip))
                          && (ipct = (uint32_t)strtoul(cnt, NULL, 10)))
                         {
+                           iplo = ipst, iphi = iplo + ipct - 1;
+
                            if (!cmp2(cc, "EU"))
-                           {
-                              iplo = ipst, iphi = iplo + ipct - 1;
                               while (node = findNet4Node(iplo, iphi, *(uint16_t*)cc, NULL, IP4Store))
                               {
                                  if (node->lo < iplo)
@@ -136,8 +136,7 @@ boolean readRIRStatisticsFormat_v2(FILE *in, size_t totalsize, int *ip_count, in
                                  removeIP4Node(node->lo, &IP4Store); (*ip_count)--;
                               }
 
-                              addIP4Node(iplo, iphi, *(uint16_t*)cc, NULL, &IP4Store); (*ip_count)++;
-                           }
+                           addIP4Node(iplo, iphi, *(uint16_t*)cc, NULL, &IP4Store); (*ip_count)++;
 
                            ns = cnt + fieldlen(cnt) + 1; // timestamp, f.ex.: 20120605
                            ns += fieldlen(ns) + 1;       // status: assigned, allocated, available, reserved
@@ -177,9 +176,9 @@ boolean readRIRStatisticsFormat_v2(FILE *in, size_t totalsize, int *ip_count, in
                         if (gt_u128(ipst = ipv6_str2bin(ip), u64_to_u128t(0))
                          && (ipfx = 128 - (int32_t)strtoul(pfx, NULL, 10)) >= 0)
                         {
+                           iplo = ipst, iphi = add_u128(ipst, inteb6_m1(ipfx));
+
                            if (!cmp2(cc, "EU"))
-                           {
-                              iplo = ipst, iphi = add_u128(ipst, inteb6_m1(ipfx));
                               while (node = findNet6Node(iplo, iphi, *(uint16_t*)cc, NULL, IP6Store))
                               {
                                  if (lt_u128(node->lo, iplo))
@@ -191,8 +190,7 @@ boolean readRIRStatisticsFormat_v2(FILE *in, size_t totalsize, int *ip_count, in
                                  removeIP6Node(node->lo, &IP6Store); (*ip_count)--;
                               }
 
-                              addIP6Node(iplo, iphi, *(uint16_t*)cc, NULL, &IP6Store); (*ip_count)++;
-                           }
+                           addIP6Node(iplo, iphi, *(uint16_t*)cc, NULL, &IP6Store); (*ip_count)++;
 
                            ns = pfx + fieldlen(pfx) + 1; // timestamp, f.ex.: 20120605
                            ns += fieldlen(ns) + 1;       // status: assigned, allocated, available, reserved

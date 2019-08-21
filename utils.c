@@ -602,6 +602,12 @@ int int2str(char *ist, llong i, int m, int width)
 
 int int2hex(char *hex, llong i, int m, int width)
 {
+   if (m < 3)
+   {
+      *hex = '\0';
+      return 0;
+   }
+
    union
    {
       llong l;
@@ -609,20 +615,39 @@ int int2hex(char *hex, llong i, int m, int width)
    } bin = {.l = (llong)MapInt64(i)};
 
    uchar c;
-   int   j, k;
+   int   o, j, k;
 
    cpy2(hex, "0x");
-   for (j = 0, k = 2; j < sizeof(llong); j++)
+   hex += 2, m -= 2;
+   for (j = 0, k = 0; j < sizeof(llong) && k < m; j++)
    {
-      if ((c = (bin.b[j] >> 4) & 0xF) || k > 2)
+      if ((c = (bin.b[j] >> 4) & 0xF) || k)
          hex[k++] = (c <= 9) ? (c + '0') : (c + 'a' - 10);
 
-      if ((c = bin.b[j] & 0xF) || k > 2)
+      if ((c = bin.b[j] & 0xF) || k)
          hex[k++] = (c <= 9) ? (c + '0') : (c + 'a' - 10);
    }
 
-   hex[k] = '\0';
-   return k;
+   if (width > m-1)
+      width = m-1;
+
+   if ((j = width - k) > 0)
+   {
+      for (o = k; o >= 0; o--)
+         hex[o+j] = hex[o];
+
+      for (o = 0; o < j; o++)
+         hex[o] = '0';
+
+      k += j;
+   }
+
+   if (k > 0)
+      hex[k] = '\0';
+   else
+      cpy2(&hex[k++], "0");
+
+   return k+2;
 }
 
 
