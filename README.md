@@ -190,7 +190,7 @@ OR, the other way around:
 
     ...
     # deny web access from certain disgraceful regions:
-    /usr/local/bin/v -t TR:SA:RU:GB -n 6 | /sbin/ipfw -q /dev/stdin
+    /usr/local/bin/ipup -t TR:SA:RU:GB -n 6 | /sbin/ipfw -q /dev/stdin
     /sbin/ipfw -q add 70 allow tcp from not table\(6\) to any 80,443 in recv em0 setup
     ...
 
